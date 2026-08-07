@@ -102,38 +102,66 @@ python -m build
 
 ./bin/flink run \
   --python your_job.py \
-  --pyFiles dist/flink_etl_udfs-0.2.0-py3-none-any.whl
+  --pyFiles dist/flink_etl_udfs-0.3.0-py3-none-any.whl
 ```
 
 Install third-party dependencies in the worker Python environment as well when a UDF needs them.
 
-## Planned domains
+## Research roadmap domain packs
 
-Recommended next modules:
+Version `0.3.0` expands the library from the generic + OSINT packs into the P0-P3 data types identified in the ETL research. Register only the packs a job needs, or use `register_all_udfs(t_env)` for exploration/testing.
 
-```text
-core/
-├── privacy.py
-├── text.py
-├── identifiers.py
-├── datetime.py
-├── money.py
-├── network.py
-├── url.py
-├── json.py
-├── vietnam/
-│   ├── phone.py
-│   ├── citizen_id.py
-│   ├── tax_id.py
-│   └── address.py
-├── security/
-│   ├── domain.py
-│   ├── hash.py
-│   └── ioc.py
-└── quality/
-    ├── validators.py
-    └── flags.py
+```python
+from flink_etl_udfs.registry import (
+    register_all_udfs,
+    register_common_udfs,
+    register_finance_udfs,
+    register_healthcare_udfs,
+    register_industrial_udfs,
+    register_insurance_udfs,
+    register_scientific_udfs,
+    register_security_standard_udfs,
+    register_supply_chain_udfs,
+    register_transport_geo_udfs,
+    register_vietnam_udfs,
+)
 ```
+
+| Priority / domain | Representative SQL functions | Scope |
+| --- | --- | --- |
+| **P0 common** | `etl_normalize_iso_datetime`, `etl_normalize_date`, `etl_normalize_e164`, `etl_normalize_decimal`, `etl_normalize_currency_code`, `etl_canonicalize_json`, `etl_flatten_json`, `etl_is_valid_json`, `etl_quality_is_present`, `etl_quality_number_in_range`, `etl_stable_record_id` | Cross-domain normalization, data quality and provenance |
+| **P1 Vietnam citizen** | `vn_normalize_citizen_id`, `vn_classify_identity_id`, `vn_normalize_tax_id`, `vn_classify_tax_id`, `vn_normalize_phone`, `vn_normalize_name`, `vn_name_search_key`, `vn_normalize_address` | Structural normalization; authoritative registry validation remains external |
+| **P1 Education / operational** | `vn_normalize_school_code`, `vn_normalize_teacher_code`, `vn_normalize_student_code`, `vn_normalize_academic_year`, `vn_normalize_sms_brandname`, `vn_normalize_bank_account`, `vn_build_entity_blocking_key` | Education identifiers, SMS/log preparation, bank-account shape and entity-resolution blocking |
+| **P2 STIX / CTI** | `cti_normalize_stix_type`, `cti_normalize_stix_id`, `cti_normalize_attack_technique_id` | Scalar identifier normalization; full STIX object/pattern validation belongs in a parser stage |
+| **P2 Healthcare** | `health_normalize_fhir_id`, `health_normalize_fhir_reference`, `health_normalize_hl7_message_type`, `health_normalize_dicom_uid`, `health_normalize_dicom_modality` | FHIR/HL7/DICOM identifiers and metadata |
+| **P2 Finance / ISO 20022** | `finance_normalize_iban`, `finance_normalize_bic`, `finance_normalize_iso20022_message_type` | IBAN mod-97, BIC/SWIFT shape and ISO 20022 message identifiers |
+| **P2 Supply chain / EPCIS** | `supply_normalize_gtin`, `supply_normalize_sscc`, `supply_normalize_epcis_event_type` | GS1 check digits and EPCIS event names |
+| **P2 Industrial / IoT** | `iot_normalize_opcua_node_id`, `iot_normalize_obis_code`, `iot_normalize_telemetry_quality` | OPC UA NodeId, DLMS/COSEM OBIS and telemetry quality |
+| **P2 Transport / GIS** | `gtfs_normalize_id`, `geo_normalize_latitude`, `geo_normalize_longitude`, `geo_normalize_epsg_code` | GTFS identifiers and scalar spatial metadata |
+| **P3 Genomics** | `genomics_normalize_chromosome`, `genomics_normalize_dna_sequence`, `genomics_normalize_vcf_genotype` | Chromosome, IUPAC DNA and VCF genotype scalar metadata |
+| **P3 Climate** | `climate_normalize_cf_standard_name`, `climate_normalize_grib_short_name` | CF/NetCDF and GRIB metadata preparation |
+| **P3 Astronomy** | `astro_normalize_fits_keyword`, `astro_normalize_celestial_frame` | FITS header keyword and celestial frame normalization |
+| **P3 Insurance / ACORD** | `insurance_normalize_acord_version`, `insurance_normalize_policy_number`, `insurance_normalize_coverage_code` | ACORD-oriented metadata; full XML/XSD validation remains external |
+
+### Why some researched formats are not fully parsed inside scalar UDFs
+
+The following data types require file/network/schema-aware parsers and should run before or beside Flink SQL scalar normalization:
+
+- STIX 2.x objects/patterns: `stix2` / OASIS validators.
+- FHIR profiles and terminology: a FHIR validator/server such as HAPI FHIR or an equivalent validated pipeline.
+- HL7 v2 ER7/MLLP: `hl7apy` or another HL7 parser.
+- DICOM files/pixel metadata: `pydicom` or a DICOM-native ingestion service.
+- ISO 20022 XML: schema-aware XML validation/parser.
+- EPCIS JSON-LD/XML: GS1/EPCIS parser and schema validation.
+- OPC UA and DLMS/COSEM protocol reads: protocol clients in source/enrichment operators, never a per-row scalar UDF.
+- GTFS archives: feed-level validation before row ingestion.
+- GeoTIFF/Shapefile/CRS transformation: GDAL/PROJ or a geospatial engine.
+- BAM/CRAM/VCF/BCF: HTSlib/pysam/bcftools.
+- NetCDF/GRIB: xarray/cfgrib/eccodes.
+- FITS/WCS: Astropy.
+- ACORD XML: licensed/authorized schemas plus XML/XSD validation.
+
+These parser stages can emit normalized records into Kafka/Avro/Parquet, after which this library handles deterministic row-level cleanup in Flink.
 
 ## UDF engineering rules
 
