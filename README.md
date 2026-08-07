@@ -4,6 +4,13 @@ Reusable PyFlink UDFs for ETL normalization, masking, fingerprinting, and data-q
 
 The project deliberately separates **pure transformations** from **PyFlink wrappers**. This keeps core logic fast to test, makes behavior reviewable, and avoids requiring a Flink runtime for every unit test.
 
+## Documentation
+
+- [`docs/ETL_RESEARCH.md`](docs/ETL_RESEARCH.md) — research matrix covering domains, data types, normalization strategy, open-source building blocks, implementation status, and parser-vs-UDF boundary.
+- [`docs/FUNCTION_CATALOG.md`](docs/FUNCTION_CATALOG.md) — all registered SQL UDFs with signature, description, and example usage.
+
+All public Python core functions include source-level docstrings. New functions should update the catalog and tests in the same change.
+
 ## Initial UDF catalog
 
 | SQL function | Input | Output | Semantics |
