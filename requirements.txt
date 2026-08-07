@@ -1,5 +1,14 @@
-# Runtime dependencies for flink-etl-udfs on PyFlink workers.
+# Third-party Python dependencies imported by flink-etl-udfs UDF/core code
+# and therefore candidates for Flink --pyRequirements distribution.
 #
-# IMPORTANT: Keep this version aligned with the Apache Flink cluster version.
-# A mismatched PyFlink package can cause serialization, API, or runtime failures.
-apache-flink==2.3.0
+# Current state (v0.3.0): no third-party runtime libraries are imported by
+# the scalar transforms. Core functions use only the Python standard library;
+# PyFlink wrappers import `pyflink`, which is supplied by the matching Flink
+# runtime / Python environment rather than installed per job via --pyRequirements.
+#
+# Add future worker-side dependencies here as soon as source code imports them,
+# for example:
+# phonenumbers==<pinned-version>
+# pydicom==<pinned-version>
+#
+# Keep this file production-only: do not add pytest, ruff, mypy, or build tools.
