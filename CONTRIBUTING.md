@@ -24,6 +24,20 @@ Do not put network/database calls inside scalar UDFs. Prefer lookup sources, asy
 4. Register it in `registry.py` only after its SQL name is considered stable.
 5. Document semantic changes; avoid silently changing canonicalization behavior.
 
+## Python dependency requirements
+
+If a change introduces a new third-party Python import under `src/`, the same change must declare how that package reaches the Flink runtime:
+
+- `requirements.txt` — worker-side third-party libraries used by UDF/core code and suitable for `--pyRequirements`;
+- `requirements-flink.txt` — the pinned `apache-flink` package for custom Python images/virtualenvs; keep it aligned with the cluster version;
+- `requirements-dev.txt` — local test/lint/type-check/build tooling only.
+
+Do not put `apache-flink` in the worker `requirements.txt` simply because wrappers import `pyflink`; a matching Flink distribution/custom runtime should provide PyFlink. Do not put heavy parser dependencies on every TaskManager when parsing happens in a separate ingestion service.
+
+`tests/test_dependencies.py` scans source imports and intentionally fails when an unknown external import has no declared pip-provider mapping. When adding a dependency, update the test mapping and the appropriate requirements file together.
+
+See `docs/DEPLOYMENT.md` for cluster, custom-image, and offline-install patterns.
+
 ## Documentation requirements
 
 Every new public core transform must include a docstring that states:
