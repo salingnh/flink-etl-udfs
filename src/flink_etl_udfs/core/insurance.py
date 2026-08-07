@@ -9,6 +9,7 @@ from flink_etl_udfs.core.common import normalize_null_token_value
 
 
 def normalize_acord_version_value(value: Optional[str]) -> Optional[str]:
+    """Normalize an ACORD version label to a compact numeric version such as ``2.0``."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -19,6 +20,7 @@ def normalize_acord_version_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_policy_number_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a policy identifier to uppercase compact text while validating a conservative character set."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -27,6 +29,7 @@ def normalize_policy_number_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_coverage_code_value(value: Optional[str]) -> Optional[str]:
+    """Normalize an insurance coverage code to uppercase underscore-separated text."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
