@@ -23,3 +23,21 @@ Do not put network/database calls inside scalar UDFs. Prefer lookup sources, asy
 3. Add the thin PyFlink wrapper under `udfs/`.
 4. Register it in `registry.py` only after its SQL name is considered stable.
 5. Document semantic changes; avoid silently changing canonicalization behavior.
+
+## Documentation requirements
+
+Every new public core transform must include a docstring that states:
+
+- what the function normalizes or validates;
+- whether validation is structural, checksum-based, or authoritative-reference based;
+- important lossy behavior or semantic limits;
+- expected invalid-input behavior (`None`/`False`).
+
+Every new registered SQL UDF must also be documented under `docs/functions/` with its SQL name, signature, purpose, and a minimal usage example. Update `docs/FUNCTION_CATALOG.md` when the catalog structure or total coverage changes.
+
+When adding a new domain, data type, standard, or open-source dependency, update the research material under `docs/ETL_RESEARCH.md` and `docs/research/` in the same change.
+
+`tests/test_documentation.py` enforces two documentation contracts:
+
+1. every public core transform has a source docstring;
+2. every SQL UDF registered in `registry.py` appears in the function catalog.
