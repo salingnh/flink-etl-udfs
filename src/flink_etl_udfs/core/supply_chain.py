@@ -19,6 +19,7 @@ def _gs1_check_digit_valid(digits: str) -> bool:
 
 
 def normalize_gtin_value(value: Optional[str]) -> Optional[str]:
+    """Normalize and validate GTIN-8/12/13/14 values using the GS1 check digit."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -29,6 +30,7 @@ def normalize_gtin_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_sscc_value(value: Optional[str]) -> Optional[str]:
+    """Normalize and validate an 18-digit SSCC using the GS1 check digit."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -39,6 +41,7 @@ def normalize_sscc_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_epcis_event_type_value(value: Optional[str]) -> Optional[str]:
+    """Normalize EPCIS event-type aliases to the canonical GS1 EPCIS class name."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
