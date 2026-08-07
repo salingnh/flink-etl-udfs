@@ -49,6 +49,7 @@ def normalize_vn_tax_id_value(value: Optional[str]) -> Optional[str]:
 
 
 def classify_vn_tax_id_value(value: Optional[str]) -> Optional[str]:
+    """Classify a normalized Vietnamese tax ID as an enterprise or dependent-unit identifier."""
     normalized = normalize_vn_tax_id_value(value)
     if normalized is None:
         return None
@@ -97,14 +98,17 @@ def _normalize_domain_code(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_school_code_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a school code to uppercase compact domain-code syntax without validating against a registry."""
     return _normalize_domain_code(value)
 
 
 def normalize_teacher_code_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a teacher code to uppercase compact domain-code syntax without validating against a registry."""
     return _normalize_domain_code(value)
 
 
 def normalize_student_code_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a student code to uppercase compact domain-code syntax without validating against a registry."""
     return _normalize_domain_code(value)
 
 
@@ -125,6 +129,7 @@ def normalize_academic_year_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_sms_brandname_value(value: Optional[str]) -> Optional[str]:
+    """Normalize an SMS sender brand name by removing whitespace and uppercasing."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -133,6 +138,7 @@ def normalize_sms_brandname_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_bank_account_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a bank-account identifier by removing common separators and uppercasing alphanumeric content."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
