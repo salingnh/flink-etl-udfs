@@ -12,11 +12,13 @@ _DICOM_UID_RE = re.compile(r"^(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))*$")
 
 
 def normalize_fhir_id_value(value: Optional[str]) -> Optional[str]:
+    """Validate and preserve a FHIR resource identifier using the FHIR id character/length constraints."""
     candidate = normalize_null_token_value(value)
     return candidate if candidate and _FHIR_ID_RE.fullmatch(candidate) else None
 
 
 def normalize_fhir_reference_value(value: Optional[str]) -> Optional[str]:
+    """Normalize relative/local FHIR references such as ``Patient/123`` or ``#contained-id``."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -43,6 +45,7 @@ def normalize_hl7_message_type_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_dicom_uid_value(value: Optional[str]) -> Optional[str]:
+    """Validate a DICOM UID/OID shape and the 64-character DICOM UID length limit."""
     candidate = normalize_null_token_value(value)
     if candidate is None or len(candidate) > 64:
         return None
@@ -50,6 +53,7 @@ def normalize_dicom_uid_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_dicom_modality_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a DICOM Modality code to uppercase syntax without guessing modality semantics."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
