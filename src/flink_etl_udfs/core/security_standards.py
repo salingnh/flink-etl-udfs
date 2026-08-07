@@ -12,6 +12,7 @@ _STIX_ID_RE = re.compile(r"^([a-z][a-z0-9-]*)--([0-9a-fA-F-]{36})$")
 
 
 def normalize_stix_type_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a STIX object type token to lowercase hyphenated form."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -20,6 +21,7 @@ def normalize_stix_type_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_stix_id_value(value: Optional[str]) -> Optional[str]:
+    """Normalize and validate a STIX identifier of the form ``type--uuid``."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -35,6 +37,7 @@ def normalize_stix_id_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_attack_technique_id_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a MITRE ATT&CK technique/sub-technique identifier such as ``T1059`` or ``T1059.001``."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
