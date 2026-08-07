@@ -11,6 +11,7 @@ _IUPAC_DNA = set("ACGTRYSWKMBDHVN")
 
 
 def normalize_chromosome_value(value: Optional[str]) -> Optional[str]:
+    """Normalize chromosome labels by removing a ``chr`` prefix, mapping mitochondrial ``M`` to ``MT``, and uppercasing."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -23,6 +24,7 @@ def normalize_chromosome_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_dna_sequence_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a DNA sequence to uppercase IUPAC nucleotide symbols; invalid symbols return ``None``."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -33,6 +35,7 @@ def normalize_dna_sequence_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_vcf_genotype_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a VCF genotype token while preserving phased ``|`` versus unphased ``/`` separators."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -43,6 +46,7 @@ def normalize_vcf_genotype_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_cf_standard_name_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a CF-style climate variable name to lowercase underscore-separated identifier text."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -51,6 +55,7 @@ def normalize_cf_standard_name_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_grib_short_name_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a GRIB short-name token to lowercase identifier form without performing parameter-table lookup."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -59,6 +64,7 @@ def normalize_grib_short_name_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_fits_keyword_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a FITS header keyword to uppercase syntax suitable for metadata comparison."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -67,6 +73,7 @@ def normalize_fits_keyword_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_celestial_frame_value(value: Optional[str]) -> Optional[str]:
+    """Normalize common celestial coordinate-frame aliases to a controlled frame name."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
