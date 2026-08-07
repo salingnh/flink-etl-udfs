@@ -11,6 +11,7 @@ _OPCUA_NODE_RE = re.compile(r"^(?:ns=(\d+);)?([isgb])=(.+)$", re.IGNORECASE)
 
 
 def normalize_opcua_node_id_value(value: Optional[str]) -> Optional[str]:
+    """Normalize an OPC UA NodeId string, canonicalizing namespace and identifier-type prefixes."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -56,6 +57,7 @@ def normalize_obis_code_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_telemetry_quality_value(value: Optional[str]) -> Optional[str]:
+    """Map common telemetry quality labels to ``good``, ``uncertain``, ``bad`` or ``offline``."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
