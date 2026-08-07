@@ -6,10 +6,21 @@ from flink_etl_udfs.core.common import (
     normalize_iso_datetime_value,
     quality_number_in_range_value,
 )
-from flink_etl_udfs.core.finance import normalize_bic_value, normalize_iban_value, normalize_iso20022_message_type_value
-from flink_etl_udfs.core.healthcare import normalize_dicom_uid_value, normalize_fhir_reference_value, normalize_hl7_message_type_value
+from flink_etl_udfs.core.finance import (
+    normalize_bic_value,
+    normalize_iban_value,
+    normalize_iso20022_message_type_value,
+)
+from flink_etl_udfs.core.healthcare import (
+    normalize_dicom_uid_value,
+    normalize_fhir_reference_value,
+    normalize_hl7_message_type_value,
+)
 from flink_etl_udfs.core.industrial import normalize_obis_code_value, normalize_opcua_node_id_value
-from flink_etl_udfs.core.insurance import normalize_acord_version_value, normalize_policy_number_value
+from flink_etl_udfs.core.insurance import (
+    normalize_acord_version_value,
+    normalize_policy_number_value,
+)
 from flink_etl_udfs.core.scientific import (
     normalize_cf_standard_name_value,
     normalize_chromosome_value,
@@ -17,9 +28,20 @@ from flink_etl_udfs.core.scientific import (
     normalize_fits_keyword_value,
     normalize_vcf_genotype_value,
 )
-from flink_etl_udfs.core.security_standards import normalize_attack_technique_id_value, normalize_stix_id_value
-from flink_etl_udfs.core.supply_chain import normalize_epcis_event_type_value, normalize_gtin_value, normalize_sscc_value
-from flink_etl_udfs.core.transport_geo import normalize_epsg_code_value, normalize_latitude_value, normalize_longitude_value
+from flink_etl_udfs.core.security_standards import (
+    normalize_attack_technique_id_value,
+    normalize_stix_id_value,
+)
+from flink_etl_udfs.core.supply_chain import (
+    normalize_epcis_event_type_value,
+    normalize_gtin_value,
+    normalize_sscc_value,
+)
+from flink_etl_udfs.core.transport_geo import (
+    normalize_epsg_code_value,
+    normalize_latitude_value,
+    normalize_longitude_value,
+)
 from flink_etl_udfs.core.vietnam import (
     build_entity_blocking_key_value,
     classify_vn_identity_id_value,
