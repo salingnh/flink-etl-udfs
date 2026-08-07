@@ -1,0 +1,8 @@
+# PyFlink runtime/bootstrap dependency for custom Python images or virtualenvs.
+# IMPORTANT: this version MUST match the Apache Flink cluster version.
+#
+# Use this file when building a Python environment that must provide `pyflink`
+# itself (local development, custom Docker images, custom venv archives).
+# Do not normally pass this file as per-job --pyRequirements to an official
+# matching Flink distribution, because that would reinstall PyFlink on workers.
+apache-flink==2.3.0
