@@ -9,6 +9,7 @@ from flink_etl_udfs.core.common import normalize_null_token_value
 
 
 def normalize_gtfs_id_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a GTFS identifier by trimming/collapsing whitespace while rejecting embedded line breaks."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -17,6 +18,7 @@ def normalize_gtfs_id_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_latitude_value(value: Optional[str]) -> Optional[float]:
+    """Parse latitude text as a floating-point value in the inclusive range -90..90."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -28,6 +30,7 @@ def normalize_latitude_value(value: Optional[str]) -> Optional[float]:
 
 
 def normalize_longitude_value(value: Optional[str]) -> Optional[float]:
+    """Parse longitude text as a floating-point value in the inclusive range -180..180."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -39,6 +42,7 @@ def normalize_longitude_value(value: Optional[str]) -> Optional[float]:
 
 
 def normalize_epsg_code_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a numeric CRS identifier to ``EPSG:<code>`` form."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
