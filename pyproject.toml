@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flink-etl-udfs"
+version = "0.1.0"
+description = "Reusable, testable PyFlink UDFs for ETL normalization, masking, fingerprinting, and data quality."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache-2.0"}
+authors = [{name = "SangNguyen"}]
+keywords = ["flink", "pyflink", "etl", "udf", "data-engineering"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+
+[project.optional-dependencies]
+flink = ["apache-flink==2.3.0"]
+phone = ["phonenumbers>=9,<10"]
+test = ["pytest>=8,<9", "pytest-cov>=5,<7"]
+dev = ["ruff>=0.8,<1", "mypy>=1.13,<2"]
+all = [
+  "apache-flink==2.3.0",
+  "phonenumbers>=9,<10",
+  "pytest>=8,<9",
+  "pytest-cov>=5,<7",
+  "ruff>=0.8,<1",
+  "mypy>=1.13,<2",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+packages = ["flink_etl_udfs.core"]
