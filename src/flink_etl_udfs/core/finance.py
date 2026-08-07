@@ -25,6 +25,7 @@ def normalize_iban_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_bic_value(value: Optional[str]) -> Optional[str]:
+    """Normalize an 8- or 11-character BIC/SWIFT code to uppercase; invalid shapes return ``None``."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -33,6 +34,7 @@ def normalize_bic_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_iso20022_message_type_value(value: Optional[str]) -> Optional[str]:
+    """Normalize an ISO 20022 message identifier such as ``pacs.008.001.08`` to lowercase dotted form."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
