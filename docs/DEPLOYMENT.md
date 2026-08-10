@@ -1,141 +1,76 @@
 # Deploying `flink-etl-udfs` to Apache Flink
 
-This document describes how Python dependencies are packaged for the Flink cluster and why the repository uses separate requirements files.
-
-## Dependency audit
-
-At version `0.3.0`, the source tree has the following dependency profile:
+## Dependency profile — 0.5.0
 
 - `flink_etl_udfs.core.*`: Python standard library only.
 - `flink_etl_udfs.udfs.*`: imports `pyflink.table.udf`.
-- `flink_etl_udfs.registry`: imports PyFlink types lazily / for registration.
-- No current scalar UDF imports `phonenumbers`, `pydicom`, `hl7apy`, `xarray`, `astropy`, `rapidfuzz`, or other third-party domain libraries.
-
-This means the library wheel is lightweight. Domain-specific parsers should remain outside the scalar UDF process unless the UDF implementation actually imports them.
+- `flink_etl_udfs.registry`: imports PyFlink types lazily/for registration.
+- Current scalar UDFs do not import domain-heavy packages such as `pydicom`, `hl7apy`, `xarray`, `astropy`, `rapidfuzz` or parser clients.
 
 ## Requirements files
 
-### `requirements.txt`
+- `requirements.txt`: third-party packages that worker-side UDF code actually imports. Hiện không có active runtime package ngoài PyFlink runtime do cluster cung cấp.
+- `requirements-flink.txt`: pin `apache-flink==2.3.0` cho custom Python image/virtualenv cần tự bootstrap PyFlink.
+- `requirements-dev.txt`: pytest, Ruff, Mypy và build tools.
 
-Production third-party dependencies that must be installed in the remote Python UDF worker when using Flink dependency management.
+Không nên đưa `apache-flink` vào per-job `--pyRequirements` nếu Flink distribution đã cung cấp matching PyFlink runtime.
 
-Current version: intentionally contains no active package because all scalar transformations are standard-library-only.
-
-When a new UDF starts importing a third-party package, pin it here, for example:
-
-```text
-phonenumbers==9.0.10
-```
-
-Do not add test/build tools to this file.
-
-### `requirements-flink.txt`
-
-Provides the `pyflink` Python package for environments that must bootstrap PyFlink themselves:
-
-```text
-apache-flink==2.3.0
-```
-
-The package version must match the Flink cluster version. A custom Docker image, virtualenv archive, developer workstation, or standalone Python runtime can install this file.
-
-Do not normally pass this file as per-job `--pyRequirements` to a matching Flink distribution. Flink's Python runtime is part of the execution environment; reinstalling a large `apache-flink` wheel for every job/worker is unnecessary and can create version conflicts.
-
-### `requirements-dev.txt`
-
-Only for local tests, linting, type checking, and wheel builds.
-
-## Recommended deployment: Flink distribution already provides the matching PyFlink runtime
-
-Build the UDF wheel:
+## Build và submit
 
 ```bash
 python -m pip install -r requirements-dev.txt
 python -m build
-```
 
-Submit the job with the library wheel and worker requirements:
-
-```bash
 ./bin/flink run \
   --python your_job.py \
-  --pyFiles dist/flink_etl_udfs-0.3.0-py3-none-any.whl \
+  --pyFiles dist/flink_etl_udfs-0.5.0-py3-none-any.whl \
   --pyRequirements requirements.txt
 ```
 
-`--pyFiles` places the wheel on the Python path of the client and remote Python UDF workers. `--pyRequirements` installs worker-side third-party dependencies defined by `requirements.txt`.
+`--pyFiles` đưa wheel vào Python path của client và remote Python workers. `--pyRequirements` chỉ cài worker-side third-party dependencies khai báo trong `requirements.txt`.
 
-Because `requirements.txt` currently has no active packages, the command is safe today and is already prepared for future UDF dependencies.
-
-## Custom Docker image or Python virtualenv
-
-If your container/venv does not already contain PyFlink, bootstrap both layers explicitly:
+## Custom Docker image / virtualenv
 
 ```bash
 python -m pip install --upgrade pip setuptools
 python -m pip install -r requirements-flink.txt
 python -m pip install -r requirements.txt
-python -m pip install --no-deps dist/flink_etl_udfs-0.3.0-py3-none-any.whl
+python -m pip install --no-deps dist/flink_etl_udfs-0.5.0-py3-none-any.whl
 ```
 
-Verify that PyFlink matches the cluster:
+Kiểm tra version:
 
 ```bash
 python -c "import pyflink; print(pyflink.__version__)"
 ./bin/flink --version
 ```
 
-Both should be on the same Flink release line, currently `2.3.0` for this repository.
+PyFlink và cluster phải cùng release line; repository hiện target Flink `2.3.0`.
 
-## Offline / restricted cluster
-
-Prepare packages on a machine with package-index access using the same operating system, architecture, and Python version as the Flink workers:
+## Offline cluster
 
 ```bash
 mkdir -p wheelhouse
 python -m pip download -r requirements.txt -d wheelhouse
-```
 
-Then provide the requirements file and cache directory to the Flink job. Flink supports a requirements cache for clusters without package-index access.
-
-For a custom Python environment, you can also install directly from the cache:
-
-```bash
 python -m pip install \
   --no-index \
   --find-links wheelhouse \
   -r requirements.txt
 ```
 
-If you also need to bootstrap PyFlink itself in an offline custom image, prepare `requirements-flink.txt` separately because the Apache Flink Python package has many transitive dependencies and must match the cluster release.
+## Pip dependency khác connector JAR
 
-## What belongs in pip requirements vs connector JARs
+- Kafka SQL / Elasticsearch connector: Flink connector JAR/plugin.
+- JDBC driver: Java JAR.
+- Python package được import trực tiếp trong UDF: `requirements.txt`.
+- `flink-etl-udfs`: wheel qua `--pyFiles` hoặc pre-install vào Python environment.
 
-Python requirements do **not** replace Flink connector JARs.
+## Khi thêm dependency mới
 
-Examples:
+1. Pin package vào đúng requirements file.
+2. Add tests cho code path sử dụng dependency.
+3. Cập nhật `tests/test_dependencies.py` để import-to-pip mapping explicit.
+4. Nếu package lớn, parse file, gọi network hoặc cần model/reference data, ưu tiên tách thành parser/enrichment service thay vì cài trên mọi Python worker.
 
-- Kafka SQL connector -> Flink connector JAR / plugin.
-- Elasticsearch connector -> Flink connector JAR.
-- JDBC driver -> Java JAR.
-- `phonenumbers`, `pydicom`, `rapidfuzz` used inside a Python UDF -> `requirements.txt`.
-- `flink-etl-udfs` itself -> wheel via `--pyFiles`, or install the wheel in the custom Python environment.
-
-## Adding a new dependency
-
-When adding a third-party import to `src/`:
-
-1. Pin the pip package in the correct requirements file.
-2. Keep the package version compatible with Python 3.9-3.12 and the target Flink worker platform.
-3. Add tests for the code path using the dependency.
-4. If the dependency is large or performs I/O, reconsider whether it belongs inside a scalar UDF.
-5. Update `tests/test_dependencies.py` so the import-to-pip mapping remains explicit.
-6. For offline deployments, refresh the wheel/package cache.
-
-The dependency-contract test intentionally fails if source code introduces an unknown external import without declaring how it is supplied to the cluster.
-
-## Parser libraries from the research roadmap
-
-The research documents mention libraries such as `pydicom`, `hl7apy`, `stix2`, `xarray`, `cfgrib`, `astropy`, and geospatial/tooling libraries. They are not installed by default because the current implementation only normalizes scalar identifiers/metadata.
-
-If those parsers are introduced into a separate ingestion service, keep their dependencies with that service instead of installing them on every Flink Python worker. Add them to this repository only when runtime code here directly imports them.
+Dependency-contract test sẽ fail nếu source code thêm external import nhưng chưa khai báo cách cung cấp package cho cluster.
