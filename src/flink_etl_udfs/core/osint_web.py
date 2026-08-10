@@ -1,4 +1,4 @@
-"""Pure OSINT web, domain, and URL normalization transformations."""
+"""OSINT web, domain, and URL normalization transformations."""
 
 from __future__ import annotations
 
@@ -21,6 +21,7 @@ _SENSITIVE_QUERY_KEYS = {
 }
 
 
+# Chuẩn hóa DNS name về lowercase IDNA ASCII để join domain ổn định.
 def normalize_domain_value(value: Optional[str]) -> Optional[str]:
     """Normalize a DNS name using IDNA ASCII representation and lowercase form."""
     if value is None:
@@ -45,6 +46,7 @@ def _normalize_netloc(scheme: str, hostname: str, port: Optional[int]) -> str:
     return normalized_host if port is None or default_port else f"{normalized_host}:{port}"
 
 
+# Chuẩn hóa HTTP(S) URL, bỏ credentials, tracking params và fragment.
 def canonicalize_url_value(value: Optional[str]) -> Optional[str]:
     """Canonicalize HTTP(S), remove credentials, tracking parameters, and fragments."""
     if value is None:
@@ -77,16 +79,7 @@ def canonicalize_url_value(value: Optional[str]) -> Optional[str]:
     return urlunsplit((scheme, netloc, path, query, ""))
 
 
-def normalize_profile_url_value(value: Optional[str]) -> Optional[str]:
-    """Canonicalize a public profile URL while dropping query and fragment state."""
-    canonical = canonicalize_url_value(value)
-    if canonical is None:
-        return None
-
-    parts = urlsplit(canonical)
-    return urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
-
-
+# Trích hostname canonical từ HTTP(S) URL.
 def extract_url_host_value(value: Optional[str]) -> Optional[str]:
     """Extract the normalized hostname from an HTTP(S) URL."""
     canonical = canonicalize_url_value(value)
@@ -95,6 +88,7 @@ def extract_url_host_value(value: Optional[str]) -> Optional[str]:
     return urlsplit(canonical).hostname
 
 
+# Xóa userinfo và che các query parameter thường chứa secret trước khi lưu log/evidence.
 def redact_url_secrets_value(value: Optional[str]) -> Optional[str]:
     """Remove URL userinfo and redact values of common secret-bearing query keys."""
     if value is None:
@@ -129,6 +123,5 @@ __all__ = [
     "canonicalize_url_value",
     "extract_url_host_value",
     "normalize_domain_value",
-    "normalize_profile_url_value",
     "redact_url_secrets_value",
 ]
