@@ -2,56 +2,77 @@
 
 ## Design rule
 
-Every reusable transform should be split into two layers:
+Mỗi transform reusable phải tách hai lớp:
 
-1. `flink_etl_udfs.core.*`: pure Python transformation, deterministic when possible, easy to unit-test.
-2. `flink_etl_udfs.udfs.*`: thin PyFlink wrapper declaring Flink input/output types and determinism.
+1. `flink_etl_udfs.core.*`: pure Python transformation, deterministic khi có thể, unit-test độc lập.
+2. `flink_etl_udfs.udfs.*`: thin PyFlink wrapper chỉ khai báo input/output type và determinism.
 
-Do not put network/database calls inside scalar UDFs. Prefer lookup sources, async UDFs, broadcast/state patterns, or preprocessing for I/O-bound enrichment.
+Không đặt network/database/API/file I/O trong scalar UDF. Dùng parser, lookup source, async enrichment, broadcast/reference data hoặc preprocessing cho các tác vụ đó.
 
-## Null and invalid-value policy
+## Curated public API
 
-- Preserve `None` unless the function explicitly has a null-filling contract.
-- Normalizers should not invent values.
-- For invalid values, return `None` when the function contract is `value -> canonical value`; use separate validator/status functions when callers need error reasons.
-- Never log plaintext sensitive values in UDF code.
+Trước khi thêm UDF, phải trả lời được ít nhất một câu hỏi sau bằng **có**:
+
+- Transform có tái sử dụng rõ ràng giữa nhiều dataset/domain không?
+- Transform có bám chuẩn/checksum/code system cụ thể không?
+- Transform có semantics quốc gia/domain thật sự không thể thay bằng generic helper không?
+- Transform có data-quality/provenance semantics đủ rõ để trở thành public API không?
+
+Không tạo UDF mới chỉ để `trim`, `uppercase`, đổi tên vocabulary tùy ý hoặc vì một dataset có tên field riêng. **Không thêm compatibility/legacy alias.** Khi API phải đổi, version theo breaking change và xóa implementation cũ.
+
+## Null và invalid-value policy
+
+- Preserve `None` trừ khi contract nói rõ việc fill null.
+- Normalizer không tự invent giá trị.
+- Với invalid input, trả `None` khi contract là `value -> canonical value`; Boolean quality helper trả `False` theo contract.
+- Không log plaintext sensitive values.
 
 ## Adding a function
 
-1. Add the pure transformation under `core/`.
-2. Add unit tests including null, empty, invalid, Unicode, and boundary cases.
-3. Add the thin PyFlink wrapper under `udfs/`.
-4. Register it in `registry.py` only after its SQL name is considered stable.
-5. Document semantic changes; avoid silently changing canonicalization behavior.
+1. Thêm pure transform dưới `core/`.
+2. Thêm test cho `None`, empty, invalid, Unicode và boundary cases phù hợp.
+3. Thêm thin PyFlink wrapper dưới `udfs/`.
+4. Chỉ register SQL name sau khi tên và semantics đã được review là generic/standard/domain-correct.
+5. Thêm comment mô tả ngay trước function và Python docstring.
+6. Document tên hiển thị tiếng Việt, mức validation, before → after và SQL usage.
+7. Nếu function phụ thuộc reference list thay đổi theo thời gian, không hard-code list: dùng lookup/reference data layer.
 
 ## Python dependency requirements
 
-If a change introduces a new third-party Python import under `src/`, the same change must declare how that package reaches the Flink runtime:
+Nếu thêm third-party import dưới `src/`, cùng change phải khai báo cách package tới Flink runtime:
 
-- `requirements.txt` — worker-side third-party libraries used by UDF/core code and suitable for `--pyRequirements`;
-- `requirements-flink.txt` — the pinned `apache-flink` package for custom Python images/virtualenvs; keep it aligned with the cluster version;
-- `requirements-dev.txt` — local test/lint/type-check/build tooling only.
+- `requirements.txt`: worker-side third-party libraries thực sự được UDF/core import;
+- `requirements-flink.txt`: pinned `apache-flink` cho custom Python image/virtualenv;
+- `requirements-dev.txt`: test/lint/type-check/build tools.
 
-Do not put `apache-flink` in the worker `requirements.txt` simply because wrappers import `pyflink`; a matching Flink distribution/custom runtime should provide PyFlink. Do not put heavy parser dependencies on every TaskManager when parsing happens in a separate ingestion service.
+Không đưa `apache-flink` vào worker `requirements.txt` chỉ vì wrapper import `pyflink`. Không cài parser dependency nặng lên mọi TaskManager nếu parsing chạy ở service/stage khác.
 
-`tests/test_dependencies.py` scans source imports and intentionally fails when an unknown external import has no declared pip-provider mapping. When adding a dependency, update the test mapping and the appropriate requirements file together.
-
-See `docs/DEPLOYMENT.md` for cluster, custom-image, and offline-install patterns.
+`tests/test_dependencies.py` fail khi có external import mới chưa được mapping tới pip provider.
 
 ## Documentation requirements
 
-Every new public core transform must include a docstring that states:
+Public core transform phải có docstring nêu rõ:
 
-- what the function normalizes or validates;
-- whether validation is structural, checksum-based, or authoritative-reference based;
-- important lossy behavior or semantic limits;
-- expected invalid-input behavior (`None`/`False`).
+- function canonicalize/validate gì;
+- mức validation: syntax/checksum/reference-data;
+- lossy behavior hoặc semantic limit quan trọng;
+- hành vi với invalid input.
 
-Every new registered SQL UDF must also be documented under `docs/functions/` with its SQL name, signature, purpose, and a minimal usage example. Update `docs/FUNCTION_CATALOG.md` when the catalog structure or total coverage changes.
+Registered SQL UDF phải có row trong `docs/functions/` gồm:
 
-When adding a new domain, data type, standard, or open-source dependency, update the research material under `docs/ETL_RESEARCH.md` and `docs/research/` in the same change.
+- tên hiển thị tiếng Việt;
+- SQL function;
+- chuẩn/phạm vi;
+- mô tả;
+- ví dụ giá trị trước → sau;
+- `SELECT` usage example.
 
-`tests/test_documentation.py` enforces two documentation contracts:
+Khi thêm domain/data type/standard/dependency mới, cập nhật `docs/ETL_RESEARCH.md` và `docs/research/` nếu research scope thay đổi.
 
-1. every public core transform has a source docstring;
-2. every SQL UDF registered in `registry.py` appears in the function catalog.
+`tests/test_documentation.py` enforce:
+
+1. mọi public core transform có docstring;
+2. mọi registered SQL UDF có trong catalog;
+3. mọi registered SQL UDF có before → after và `SELECT` usage example.
+
+Xem `docs/DEPLOYMENT.md` cho cluster/custom-image/offline dependency patterns.
