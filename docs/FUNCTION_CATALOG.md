@@ -69,6 +69,6 @@ Production job nên đăng ký domain pack tối thiểu cần dùng thay vì `r
 
 ## Coverage
 
-Documented SQL UDFs: **103**.
+Documented SQL UDFs: **104**.
 
 Khi thêm UDF mới, change bắt buộc phải có: core docstring/comment, test valid/invalid/NULL, registry entry, tên hiển thị tiếng Việt, mô tả mức validation, ví dụ input → output và SQL usage.
