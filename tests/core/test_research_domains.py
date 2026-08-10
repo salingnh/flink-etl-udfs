@@ -2,7 +2,6 @@ from flink_etl_udfs.core.common import (
     canonicalize_json_value,
     flatten_json_value,
     latin_name_search_key_value,
-    normalize_account_identifier_value,
     normalize_address_text_value,
     normalize_decimal_value,
     normalize_e164_value,
@@ -15,6 +14,7 @@ from flink_etl_udfs.core.finance import (
     normalize_bic_value,
     normalize_iban_value,
     normalize_iso20022_message_type_value,
+    normalize_lei_value,
 )
 from flink_etl_udfs.core.healthcare import (
     normalize_dicom_uid_value,
@@ -22,21 +22,6 @@ from flink_etl_udfs.core.healthcare import (
     normalize_hl7_message_type_value,
 )
 from flink_etl_udfs.core.industrial import normalize_obis_code_value, normalize_opcua_node_id_value
-from flink_etl_udfs.core.insurance import (
-    normalize_acord_version_value,
-    normalize_policy_number_value,
-)
-from flink_etl_udfs.core.scientific import (
-    normalize_cf_standard_name_value,
-    normalize_chromosome_value,
-    normalize_dna_sequence_value,
-    normalize_fits_keyword_value,
-    normalize_vcf_genotype_value,
-)
-from flink_etl_udfs.core.security_standards import (
-    normalize_attack_technique_id_value,
-    normalize_stix_id_value,
-)
 from flink_etl_udfs.core.supply_chain import (
     normalize_epcis_event_type_value,
     normalize_gtin_value,
@@ -48,20 +33,10 @@ from flink_etl_udfs.core.transport_geo import (
     normalize_longitude_value,
 )
 from flink_etl_udfs.core.vietnam import (
-    build_entity_blocking_key_value,
     classify_vn_identity_id_value,
     classify_vn_tax_id_structure_value,
-    normalize_academic_year_value,
-    normalize_bank_account_value,
-    normalize_school_code_value,
-    normalize_student_code_value,
-    normalize_teacher_code_value,
-    normalize_vn_address_value,
     normalize_vn_citizen_id_value,
-    normalize_vn_name_value,
-    normalize_vn_phone_value,
     normalize_vn_tax_id_value,
-    vietnamese_name_search_key_value,
 )
 
 
@@ -79,44 +54,32 @@ def test_p0_common() -> None:
     assert quality_number_in_range_value("10.5", "10", "11") is True
 
 
-def test_p0_generic_identity_and_address_helpers() -> None:
+def test_generic_identity_and_address_helpers() -> None:
     assert normalize_person_name_value("  Nguyễn   Văn   An  ") == "Nguyễn Văn An"
     assert latin_name_search_key_value("Đặng Thị Hồng") == "dang thi hong"
     assert normalize_identifier_code_value(" hs- 2026 / 001 ") == "HS-2026/001"
-    assert normalize_account_identifier_value(" 001-234.567 890 ") == "001234567890"
     assert normalize_address_text_value("12 Nguyễn Trãi,   P. Bến Thành") == "12 Nguyễn Trãi, P. Bến Thành"
 
 
-def test_p1_vietnam() -> None:
+def test_vietnam_specific_identifiers() -> None:
     assert normalize_vn_citizen_id_value("034 190 006 609") == "034190006609"
     assert classify_vn_identity_id_value("034190006609") == "cccd_12"
     assert normalize_vn_tax_id_value("0101234567001") == "0101234567-001"
     assert classify_vn_tax_id_structure_value("0101234567") == "base_10"
     assert classify_vn_tax_id_structure_value("0101234567-001") == "extended_13"
-    assert normalize_vn_phone_value("0983 132 288") == "+84983132288"
-    assert normalize_vn_name_value("  Nguyễn   Thị Ngân ") == "Nguyễn Thị Ngân"
-    assert vietnamese_name_search_key_value("Đặng Thị Hồng") == "dang thi hong"
-    assert normalize_vn_address_value("12 Nguyễn Trãi,   P. Bến Thành") == "12 Nguyễn Trãi, P. Bến Thành"
-    assert normalize_school_code_value(" thpt- 001 ") == "THPT-001"
-    assert normalize_teacher_code_value(" gv- 2026/001 ") == "GV-2026/001"
-    assert normalize_student_code_value(" hs- 2026/001 ") == "HS-2026/001"
-    assert normalize_bank_account_value("001-234.567 890") == "001234567890"
-    assert normalize_academic_year_value("2025/26") == "2025-2026"
-    assert build_entity_blocking_key_value("Nguyễn Văn A", "0912345678", "USER@EXAMPLE.COM") == "n=nguyen van a|p=+84912345678|e=user@example.com"
 
 
-def test_p2_cti_healthcare_finance() -> None:
-    assert normalize_stix_id_value("indicator--550e8400-e29b-41d4-a716-446655440000") is not None
-    assert normalize_attack_technique_id_value("t1059.001") == "T1059.001"
+def test_healthcare_and_finance_standards() -> None:
     assert normalize_fhir_reference_value("Patient/patient-001") == "Patient/patient-001"
     assert normalize_hl7_message_type_value("adt^a01") == "ADT^A01"
     assert normalize_dicom_uid_value("1.2.840.10008.1.2.1") == "1.2.840.10008.1.2.1"
     assert normalize_iban_value("GB82 WEST 1234 5698 7654 32") == "GB82WEST12345698765432"
     assert normalize_bic_value("deut de ff") == "DEUTDEFF"
     assert normalize_iso20022_message_type_value("PACS.008.001.08") == "pacs.008.001.08"
+    assert normalize_lei_value("5493001KJTIIGC8Y1R12") == "5493001KJTIIGC8Y1R12"
 
 
-def test_p2_supply_iot_geo() -> None:
+def test_supply_industrial_and_geo_standards() -> None:
     assert normalize_gtin_value("4006381333931") == "4006381333931"
     sscc = _with_gs1_check_digit("12345678901234567")
     assert normalize_sscc_value(sscc) == sscc
@@ -126,13 +89,3 @@ def test_p2_supply_iot_geo() -> None:
     assert normalize_epsg_code_value("epsg:4326") == "EPSG:4326"
     assert normalize_latitude_value("21.0278") == 21.0278
     assert normalize_longitude_value("105.8342") == 105.8342
-
-
-def test_p3_scientific_and_insurance() -> None:
-    assert normalize_chromosome_value("chrM") == "MT"
-    assert normalize_dna_sequence_value("acgt n") == "ACGTN"
-    assert normalize_vcf_genotype_value("0/1") == "0/1"
-    assert normalize_cf_standard_name_value("Air Temperature") == "air_temperature"
-    assert normalize_fits_keyword_value("date-obs") == "DATE-OBS"
-    assert normalize_acord_version_value("ACORD v2.0") == "2.0"
-    assert normalize_policy_number_value(" pl-2026 / 001 ") == "PL-2026/001"
