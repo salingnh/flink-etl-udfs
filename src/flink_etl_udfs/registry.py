@@ -121,6 +121,7 @@ def register_vietnam_udfs(table_env: "TableEnvironment") -> None:
             "vn_build_entity_blocking_key": vietnam.build_entity_blocking_key,
             "vn_classify_identity_id": vietnam.classify_vn_identity_id,
             "vn_classify_tax_id": vietnam.classify_vn_tax_id,
+            "vn_classify_tax_id_structure": vietnam.classify_vn_tax_id_structure,
             "vn_normalize_academic_year": vietnam.normalize_academic_year,
             "vn_normalize_address": vietnam.normalize_vn_address,
             "vn_normalize_bank_account": vietnam.normalize_bank_account,
