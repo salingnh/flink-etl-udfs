@@ -1,9 +1,14 @@
 from flink_etl_udfs.core.common import (
     canonicalize_json_value,
     flatten_json_value,
+    latin_name_search_key_value,
+    normalize_account_identifier_value,
+    normalize_address_text_value,
     normalize_decimal_value,
     normalize_e164_value,
+    normalize_identifier_code_value,
     normalize_iso_datetime_value,
+    normalize_person_name_value,
     quality_number_in_range_value,
 )
 from flink_etl_udfs.core.finance import (
@@ -46,6 +51,11 @@ from flink_etl_udfs.core.vietnam import (
     build_entity_blocking_key_value,
     classify_vn_identity_id_value,
     normalize_academic_year_value,
+    normalize_bank_account_value,
+    normalize_school_code_value,
+    normalize_student_code_value,
+    normalize_teacher_code_value,
+    normalize_vn_address_value,
     normalize_vn_citizen_id_value,
     normalize_vn_name_value,
     normalize_vn_phone_value,
@@ -68,6 +78,14 @@ def test_p0_common() -> None:
     assert quality_number_in_range_value("10.5", "10", "11") is True
 
 
+def test_p0_generic_identity_and_address_helpers() -> None:
+    assert normalize_person_name_value("  Nguyễn   Văn   An  ") == "Nguyễn Văn An"
+    assert latin_name_search_key_value("Đặng Thị Hồng") == "dang thi hong"
+    assert normalize_identifier_code_value(" hs- 2026 / 001 ") == "HS-2026/001"
+    assert normalize_account_identifier_value(" 001-234.567 890 ") == "001234567890"
+    assert normalize_address_text_value("12 Nguyễn Trãi,   P. Bến Thành") == "12 Nguyễn Trãi, P. Bến Thành"
+
+
 def test_p1_vietnam() -> None:
     assert normalize_vn_citizen_id_value("034 190 006 609") == "034190006609"
     assert classify_vn_identity_id_value("034190006609") == "cccd_12"
@@ -75,6 +93,11 @@ def test_p1_vietnam() -> None:
     assert normalize_vn_phone_value("0983 132 288") == "+84983132288"
     assert normalize_vn_name_value("  Nguyễn   Thị Ngân ") == "Nguyễn Thị Ngân"
     assert vietnamese_name_search_key_value("Đặng Thị Hồng") == "dang thi hong"
+    assert normalize_vn_address_value("12 Nguyễn Trãi,   P. Bến Thành") == "12 Nguyễn Trãi, P. Bến Thành"
+    assert normalize_school_code_value(" thpt- 001 ") == "THPT-001"
+    assert normalize_teacher_code_value(" gv- 2026/001 ") == "GV-2026/001"
+    assert normalize_student_code_value(" hs- 2026/001 ") == "HS-2026/001"
+    assert normalize_bank_account_value("001-234.567 890") == "001234567890"
     assert normalize_academic_year_value("2025/26") == "2025-2026"
     assert build_entity_blocking_key_value("Nguyễn Văn A", "0912345678", "USER@EXAMPLE.COM") == "n=nguyen van a|p=+84912345678|e=user@example.com"
 
