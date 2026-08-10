@@ -50,6 +50,7 @@ from flink_etl_udfs.core.transport_geo import (
 from flink_etl_udfs.core.vietnam import (
     build_entity_blocking_key_value,
     classify_vn_identity_id_value,
+    classify_vn_tax_id_structure_value,
     normalize_academic_year_value,
     normalize_bank_account_value,
     normalize_school_code_value,
@@ -90,6 +91,8 @@ def test_p1_vietnam() -> None:
     assert normalize_vn_citizen_id_value("034 190 006 609") == "034190006609"
     assert classify_vn_identity_id_value("034190006609") == "cccd_12"
     assert normalize_vn_tax_id_value("0101234567001") == "0101234567-001"
+    assert classify_vn_tax_id_structure_value("0101234567") == "base_10"
+    assert classify_vn_tax_id_structure_value("0101234567-001") == "extended_13"
     assert normalize_vn_phone_value("0983 132 288") == "+84983132288"
     assert normalize_vn_name_value("  Nguyễn   Thị Ngân ") == "Nguyễn Thị Ngân"
     assert vietnamese_name_search_key_value("Đặng Thị Hồng") == "dang thi hong"
