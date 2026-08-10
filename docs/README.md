@@ -1,29 +1,39 @@
-# Documentation
+# Tài liệu
 
-This directory contains the design/research record, deployment guidance, and callable UDF reference for `flink-etl-udfs`.
+Thư mục này chứa research, hướng dẫn deployment và catalog toàn bộ PyFlink SQL UDF của `flink-etl-udfs`.
 
-## Research
+## Research và kiến trúc
 
-- [ETL research overview](ETL_RESEARCH.md)
-- [Cross-domain data/ETL research matrix](research/domain-matrix.md)
+- [Tổng quan ETL research](ETL_RESEARCH.md)
+- [Ma trận lĩnh vực / loại dữ liệu / ETL](research/domain-matrix.md)
 - [OSINT research](research/osint.md)
+- [Rà soát tính generic và hướng migration](GENERICITY_REVIEW.md)
 
 ## Deployment
 
-- [Flink Python dependency and cluster deployment guide](DEPLOYMENT.md)
+- [Hướng dẫn Python dependency và deploy lên Flink cluster](DEPLOYMENT.md)
 
-The repository separates dependency files by purpose:
+Repository tách dependency theo mục đích:
 
-- `requirements.txt` — third-party packages imported by worker-side UDF code and suitable for Flink `--pyRequirements`.
-- `requirements-flink.txt` — pinned `apache-flink` package for custom Python images/virtualenvs that must provide PyFlink themselves.
-- `requirements-dev.txt` — local test, lint, type-check, and build dependencies.
+- `requirements.txt` — package third-party thực sự được worker-side UDF import, phù hợp cho Flink `--pyRequirements`.
+- `requirements-flink.txt` — pin `apache-flink` cho custom Python image/virtualenv cần tự cung cấp PyFlink.
+- `requirements-dev.txt` — test, lint, type-check và build dependency.
 
-## Function reference
+## Danh mục function
 
-- [Function catalog overview](FUNCTION_CATALOG.md)
-- [Default + P0 common functions](functions/default-common.md)
-- [OSINT functions](functions/osint.md)
-- [Vietnam / citizen / education / banking functions](functions/vietnam.md)
-- [Standards and specialized-domain functions](functions/standards.md)
+- [Tổng quan function catalog](FUNCTION_CATALOG.md)
+- [Generic / Default / P0 common](functions/default-common.md)
+- [OSINT](functions/osint.md)
+- [Việt Nam: dân cư, thuế, giáo dục, ngân hàng](functions/vietnam.md)
+- [Chuẩn quốc tế và domain chuyên ngành](functions/standards.md)
 
-The function catalog covers every SQL UDF registered in `src/flink_etl_udfs/registry.py`. Public core Python transforms also carry source-level docstrings.
+Mỗi SQL UDF trong `src/flink_etl_udfs/registry.py` phải có tài liệu gồm:
+
+- tên hiển thị tiếng Việt;
+- tên SQL function và signature;
+- chuẩn/phạm vi validation;
+- mô tả semantics;
+- ví dụ giá trị trước → sau transform;
+- ví dụ SQL sử dụng.
+
+Public core Python transforms đồng thời phải có source-level docstring/comment và unit test.
