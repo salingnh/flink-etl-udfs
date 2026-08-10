@@ -34,11 +34,22 @@ Các tên `vn_*` trên **vẫn được giữ làm compatibility alias**, để 
 | `vn_normalize_citizen_id` | Cấu trúc CMND/CCCD 9/12 chữ số là quy ước Việt Nam. |
 | `vn_classify_identity_id` | Phân loại CMND/CCCD mang semantics Việt Nam. |
 | `vn_normalize_tax_id` | Format MST 10 số / 10 số-3 số là profile Việt Nam. |
-| `vn_classify_tax_id` | Phân biệt mã chính và đơn vị phụ thuộc dựa trên format MST Việt Nam. |
+| `vn_classify_tax_id_structure` | Chỉ phân loại **cấu trúc** `base_10` / `extended_13`, không suy diễn pháp nhân hay trạng thái đăng ký. |
+| `vn_classify_tax_id` | API legacy; giữ output cũ để tương thích nhưng không khuyến nghị cho pipeline mới. |
 | `vn_normalize_phone` | Convenience profile của E.164 với default country code `+84`. |
 | `vn_normalize_academic_year` | Semantics năm học liên tiếp phù hợp education profile, không phải ISO date. |
 | `vn_normalize_sms_brandname` | Chỉ nên dùng trong telecom/Vietnam profile; constraint thực tế còn phụ thuộc operator. |
 | `vn_build_entity_blocking_key` | Dùng search key Latin + phone profile `+84`; không phải generic global entity matcher. |
+
+### Vì sao đổi cách phân loại MST
+
+Tên `enterprise` trong API cũ diễn giải quá nhiều từ một chuỗi 10 chữ số. Cấu trúc MST chỉ đủ để mô tả **hình thức identifier**, không đủ để kết luận loại hình pháp lý, trạng thái hoạt động hoặc chủ thể cụ thể. Vì vậy pipeline mới nên dùng:
+
+```sql
+SELECT vn_classify_tax_id_structure(tax_id);
+```
+
+với output trung tính `base_10` / `extended_13`, rồi join registry thuế có thẩm quyền nếu cần semantics nghiệp vụ sâu hơn.
 
 ## Ưu tiên chuẩn quốc tế
 
