@@ -1,4 +1,4 @@
-"""Financial interchange identifiers: IBAN, BIC/SWIFT and ISO 20022 message types."""
+"""Financial and legal-entity interchange identifiers."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ from typing import Optional
 from flink_etl_udfs.core.common import normalize_null_token_value
 
 
+# Chuẩn hóa và kiểm tra IBAN theo ISO 13616 mod-97.
 def normalize_iban_value(value: Optional[str]) -> Optional[str]:
     """Normalize and validate an IBAN using the ISO 13616 mod-97 check."""
     candidate = normalize_null_token_value(value)
@@ -24,8 +25,9 @@ def normalize_iban_value(value: Optional[str]) -> Optional[str]:
     return iban if remainder == 1 else None
 
 
+# Chuẩn hóa BIC/SWIFT theo cấu trúc ISO 9362.
 def normalize_bic_value(value: Optional[str]) -> Optional[str]:
-    """Normalize an 8- or 11-character BIC/SWIFT code to uppercase; invalid shapes return ``None``."""
+    """Normalize an 8- or 11-character BIC/SWIFT code to uppercase."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -33,8 +35,9 @@ def normalize_bic_value(value: Optional[str]) -> Optional[str]:
     return bic if re.fullmatch(r"[A-Z]{6}[A-Z0-9]{2}(?:[A-Z0-9]{3})?", bic) else None
 
 
+# Chuẩn hóa ISO 20022 message identifier về lowercase dotted form.
 def normalize_iso20022_message_type_value(value: Optional[str]) -> Optional[str]:
-    """Normalize an ISO 20022 message identifier such as ``pacs.008.001.08`` to lowercase dotted form."""
+    """Normalize an ISO 20022 message identifier such as ``pacs.008.001.08``."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -42,4 +45,25 @@ def normalize_iso20022_message_type_value(value: Optional[str]) -> Optional[str]
     return candidate if re.fullmatch(r"[a-z]{4}\.\d{3}\.\d{3}\.\d{2}", candidate) else None
 
 
-__all__ = ["normalize_bic_value", "normalize_iban_value", "normalize_iso20022_message_type_value"]
+# Chuẩn hóa và kiểm tra Legal Entity Identifier theo ISO 17442 mod-97.
+def normalize_lei_value(value: Optional[str]) -> Optional[str]:
+    """Normalize and validate a Legal Entity Identifier using ISO 17442 mod-97 rules."""
+    if value is None:
+        return None
+    candidate = "".join(ch for ch in value.strip().upper() if not ch.isspace())
+    if len(candidate) != 20 or not candidate.isalnum():
+        return None
+    numeric = "".join(str(ord(ch) - 55) if ch.isalpha() else ch for ch in candidate)
+    try:
+        valid = int(numeric) % 97 == 1
+    except ValueError:
+        return None
+    return candidate if valid else None
+
+
+__all__ = [
+    "normalize_bic_value",
+    "normalize_iban_value",
+    "normalize_iso20022_message_type_value",
+    "normalize_lei_value",
+]
