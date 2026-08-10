@@ -4,7 +4,15 @@ from __future__ import annotations
 
 from pyflink.table.udf import udf
 
-from flink_etl_udfs.core import common, finance, healthcare, industrial, supply_chain, transport_geo, vietnam
+from flink_etl_udfs.core import (
+    common,
+    finance,
+    healthcare,
+    industrial,
+    supply_chain,
+    transport_geo,
+    vietnam,
+)
 
 
 def _s(function):
