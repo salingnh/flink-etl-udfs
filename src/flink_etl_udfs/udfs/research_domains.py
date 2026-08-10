@@ -77,6 +77,7 @@ normalize_probability = udf(
 normalize_vn_citizen_id = _s(vietnam.normalize_vn_citizen_id_value)
 classify_vn_identity_id = _s(vietnam.classify_vn_identity_id_value)
 normalize_vn_tax_id = _s(vietnam.normalize_vn_tax_id_value)
+classify_vn_tax_id_structure = _s(vietnam.classify_vn_tax_id_structure_value)
 classify_vn_tax_id = _s(vietnam.classify_vn_tax_id_value)
 normalize_vn_phone = _s(vietnam.normalize_vn_phone_value)
 normalize_vn_name = _s(vietnam.normalize_vn_name_value)
