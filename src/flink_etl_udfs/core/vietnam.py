@@ -38,7 +38,7 @@ def classify_vn_identity_id_value(value: Optional[str]) -> Optional[str]:
     return "cmnd_9" if len(normalized) == 9 else "cccd_12"
 
 
-# Chuẩn hóa mã số thuế Việt Nam về dạng 10 số hoặc 10 số-3 số đơn vị phụ thuộc.
+# Chuẩn hóa mã số thuế Việt Nam về dạng 10 số hoặc 10 số-3 số mở rộng.
 def normalize_vn_tax_id_value(value: Optional[str]) -> Optional[str]:
     """Normalize Vietnamese tax identifiers to ``10digits`` or ``10digits-3digits``.
 
@@ -56,9 +56,27 @@ def normalize_vn_tax_id_value(value: Optional[str]) -> Optional[str]:
     return base if branch is None else f"{base}-{branch}"
 
 
-# Phân loại MST dạng doanh nghiệp/chính và MST đơn vị phụ thuộc theo cấu trúc normalized.
+# Phân loại cấu trúc MST bằng nhãn trung tính, không suy diễn loại hình người nộp thuế.
+def classify_vn_tax_id_structure_value(value: Optional[str]) -> Optional[str]:
+    """Classify Vietnamese tax-ID structure as ``base_10`` or ``extended_13``.
+
+    The labels intentionally describe only the identifier shape. They do not infer
+    taxpayer legal form, activity status, or registry validity.
+    """
+    normalized = normalize_vn_tax_id_value(value)
+    if normalized is None:
+        return None
+    return "base_10" if "-" not in normalized else "extended_13"
+
+
+# API legacy: giữ output cũ để không làm hỏng Flink SQL/job đã triển khai.
 def classify_vn_tax_id_value(value: Optional[str]) -> Optional[str]:
-    """Classify a normalized Vietnamese tax ID as an enterprise or dependent-unit identifier."""
+    """Return the legacy ``enterprise``/``dependent_unit`` tax-ID classification.
+
+    This function is retained for backward compatibility. New pipelines should use
+    :func:`classify_vn_tax_id_structure_value`, whose labels describe only shape and
+    avoid over-interpreting a 10-digit tax identifier as an enterprise.
+    """
     normalized = normalize_vn_tax_id_value(value)
     if normalized is None:
         return None
@@ -161,6 +179,7 @@ def build_entity_blocking_key_value(
 __all__ = [
     "build_entity_blocking_key_value",
     "classify_vn_identity_id_value",
+    "classify_vn_tax_id_structure_value",
     "classify_vn_tax_id_value",
     "normalize_academic_year_value",
     "normalize_bank_account_value",
