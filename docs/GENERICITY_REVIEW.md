@@ -1,118 +1,60 @@
-# Rà soát tính generic của thư viện
+# Rà soát và cleanup tính generic
 
-Mục tiêu của repository là xây dựng thư viện transform dùng lại được giữa nhiều hệ thống, không tạo một UDF riêng chỉ vì tên field hoặc dataset khác nhau.
+Version `0.5.0` thực hiện breaking cleanup: **không giữ compatibility alias**. Function chỉ được giữ khi có giá trị ETL rõ ràng, semantics đủ tổng quát hoặc bám một chuẩn/domain cụ thể.
 
-## Nguyên tắc review
+## Tiêu chí giữ function
 
-Một function chỉ nên mang prefix/domain riêng khi ít nhất một trong các yếu tố sau phụ thuộc domain:
+Một UDF được giữ khi đáp ứng ít nhất một trong các tiêu chí:
 
-- format quốc gia hoặc chuẩn ngành riêng;
-- checksum/validation riêng của domain;
-- vocabulary/code system riêng;
-- semantics không thể diễn giải an toàn ở cross-domain layer.
+- canonicalization có hành vi rõ ràng và tái sử dụng cao;
+- syntax/checksum theo chuẩn phổ biến;
+- quy tắc quốc gia/domain thực sự khác generic layer;
+- data-quality/provenance helper có semantics deterministic;
+- không cần I/O, registry lookup hoặc parser file/network ở từng row.
 
-Nếu function chỉ làm Unicode normalization, whitespace cleanup, uppercase code, remove separator, parse decimal... thì nên nằm ở `etl_*` generic layer.
+## Đã xóa hoàn toàn
 
-## Các function đã được generic hóa
+Các nhóm sau không còn core function, wrapper hay SQL alias legacy:
 
-| Function/profile cũ | Generic function nên ưu tiên | Lý do |
-| --- | --- | --- |
-| `vn_normalize_name` | `etl_normalize_person_name` | Logic thực tế chỉ NFC + whitespace, không phụ thuộc Việt Nam. |
-| `vn_name_search_key` | `etl_latin_name_search_key` | Logic là search/blocking key cho tên dùng Latin script; không nên gắn với một dataset dân cư cụ thể. |
-| `vn_normalize_address` | `etl_normalize_address_text` | Chỉ normalize Unicode/whitespace/dấu phân cách, không lookup mã hành chính Việt Nam. |
-| `vn_normalize_school_code` | `etl_normalize_identifier_code` | Mã trường, mã khách hàng, mã hồ sơ... cùng kiểu cleanup chữ-số. |
-| `vn_normalize_teacher_code` | `etl_normalize_identifier_code` | Không có rule giáo viên riêng trong implementation. |
-| `vn_normalize_student_code` | `etl_normalize_identifier_code` | Không có rule học sinh riêng trong implementation. |
-| `vn_normalize_bank_account` | `etl_normalize_account_identifier` | Chỉ remove separator + uppercase; không phải validator tài khoản ngân hàng Việt Nam. |
+- `vn_normalize_name`, `vn_name_search_key`, `vn_normalize_address`;
+- `vn_normalize_school_code`, `vn_normalize_teacher_code`, `vn_normalize_student_code`;
+- `vn_normalize_bank_account`, `vn_normalize_phone`, `vn_normalize_academic_year`, `vn_normalize_sms_brandname`, `vn_build_entity_blocking_key`;
+- `vn_classify_tax_id` với nhãn `enterprise/dependent_unit`;
+- OSINT vocabulary/heuristic như account classification, platform, entity type, exposure status, verification status, profile URL, confidence, ownership percentage;
+- scientific scalar helpers cho genomics/climate/astronomy;
+- insurance/ACORD scalar helpers;
+- telemetry-quality vocabulary, GTFS ID whitespace cleanup và DICOM modality uppercase helper.
 
-Các tên `vn_*` trên **vẫn được giữ làm compatibility alias**, để job Flink hiện tại không bị break. Code mới nên dùng `etl_*` generic counterpart.
+## Thay bằng generic/standard function
 
-## Các function nên giữ domain-specific
-
-| Function | Lý do giữ riêng |
+| Logic cũ | Dùng function hiện tại |
 | --- | --- |
-| `vn_normalize_citizen_id` | Cấu trúc CMND/CCCD 9/12 chữ số là quy ước Việt Nam. |
-| `vn_classify_identity_id` | Phân loại CMND/CCCD mang semantics Việt Nam. |
-| `vn_normalize_tax_id` | Format MST 10 số / 10 số-3 số là profile Việt Nam. |
-| `vn_classify_tax_id_structure` | Chỉ phân loại **cấu trúc** `base_10` / `extended_13`, không suy diễn pháp nhân hay trạng thái đăng ký. |
-| `vn_classify_tax_id` | API legacy; giữ output cũ để tương thích nhưng không khuyến nghị cho pipeline mới. |
-| `vn_normalize_phone` | Convenience profile của E.164 với default country code `+84`. |
-| `vn_normalize_academic_year` | Semantics năm học liên tiếp phù hợp education profile, không phải ISO date. |
-| `vn_normalize_sms_brandname` | Chỉ nên dùng trong telecom/Vietnam profile; constraint thực tế còn phụ thuộc operator. |
-| `vn_build_entity_blocking_key` | Dùng search key Latin + phone profile `+84`; không phải generic global entity matcher. |
+| Tên người Việt Nam | `etl_normalize_person_name` |
+| Search key tên Latin | `etl_latin_name_search_key` |
+| Địa chỉ text | `etl_normalize_address_text` |
+| Mã trường/học sinh/giáo viên/mã hồ sơ | `etl_normalize_identifier_code` |
+| Điện thoại Việt Nam | `etl_normalize_e164(phone, '+84')` |
+| Confidence score | `etl_normalize_probability` |
+| Tỷ lệ sở hữu | `etl_normalize_percentage` |
+| Observation timestamp | `etl_normalize_iso_datetime` |
+| Domain / URL / ASN / DNS / MIME | `net_*` |
+| Hash / CVE | `security_*` |
+| Git repository/object ID | `code_*` |
+| LEI | `finance_normalize_lei` |
 
-### Vì sao đổi cách phân loại MST
+## Các function Việt Nam còn lại
 
-Tên `enterprise` trong API cũ diễn giải quá nhiều từ một chuỗi 10 chữ số. Cấu trúc MST chỉ đủ để mô tả **hình thức identifier**, không đủ để kết luận loại hình pháp lý, trạng thái hoạt động hoặc chủ thể cụ thể. Vì vậy pipeline mới nên dùng:
+- `vn_normalize_citizen_id`
+- `vn_classify_identity_id`
+- `vn_normalize_tax_id`
+- `vn_classify_tax_id_structure`
 
-```sql
-SELECT vn_classify_tax_id_structure(tax_id);
-```
+Đây là các function có cấu trúc identifier thật sự phụ thuộc quy ước Việt Nam. `vn_classify_tax_id_structure` chỉ trả `base_10` / `extended_13`, không suy diễn loại hình pháp lý.
 
-với output trung tính `base_10` / `extended_13`, rồi join registry thuế có thẩm quyền nếu cần semantics nghiệp vụ sâu hơn.
+## Các lĩnh vực được đưa ra khỏi scalar UDF
 
-## Ưu tiên chuẩn quốc tế
+NetCDF/GRIB, FITS/WCS, BAM/CRAM/VCF/BCF, ACORD XML, GTFS feed validation, DICOM file parsing và các terminology/reference list thay đổi theo thời gian nên dùng parser/validator/reference-data layer chuyên dụng.
 
-### Ngày và thời gian
+## Nguyên tắc tiếp theo
 
-Ưu tiên `etl_normalize_iso_datetime` và `etl_normalize_date` cho dữ liệu trao đổi giữa hệ thống. Không tự đoán timezone khi source không cung cấp offset.
-
-### Điện thoại
-
-Ưu tiên `etl_normalize_e164(phone, default_country_code)` ở generic layer. `vn_normalize_phone` chỉ là convenience wrapper với `+84`.
-
-### Tiền tệ
-
-`etl_normalize_currency_code` chuẩn hóa hình thức 3 chữ cái theo ISO 4217. Vì danh mục currency code có thể được maintenance/update, việc xác minh code có tồn tại nên dùng reference-data table thay vì hard-code vào UDF.
-
-### Tài chính quốc tế
-
-- `finance_normalize_iban`: ISO 13616 + mod-97.
-- `finance_normalize_bic`: ISO 9362 syntax.
-- `finance_normalize_iso20022_message_type`: ISO 20022 message identifier.
-- `osint_normalize_lei`: ISO 17442 + mod-97.
-
-### Supply chain
-
-- `supply_normalize_gtin`: GS1 GTIN-8/12/13/14 + check digit.
-- `supply_normalize_sscc`: GS1 SSCC + check digit.
-- `supply_normalize_epcis_event_type`: GS1 EPCIS event class.
-
-## Những gì scalar UDF không nên làm
-
-Không hard-code các danh mục thay đổi theo thời gian như:
-
-- danh mục tỉnh/huyện/xã;
-- mã trường do một hệ thống quản lý;
-- danh sách ISO 4217 hiện hành;
-- danh sách ngân hàng/BIC đang hoạt động;
-- FHIR ValueSet/SNOMED/LOINC;
-- ASN/RDAP ownership;
-- sanctions/watchlist;
-- danh sách CVE hoặc ATT&CK technique metadata.
-
-Những dữ liệu này nên được version hóa thành reference table/broadcast state/lookup source và join trong pipeline.
-
-## Migration guideline
-
-Ví dụ code cũ:
-
-```sql
-SELECT
-    vn_normalize_school_code(ma_truong),
-    vn_normalize_teacher_code(ma_giao_vien),
-    vn_normalize_student_code(ma_hoc_sinh)
-FROM source_table;
-```
-
-Code mới generic hơn:
-
-```sql
-SELECT
-    etl_normalize_identifier_code(ma_truong),
-    etl_normalize_identifier_code(ma_giao_vien),
-    etl_normalize_identifier_code(ma_hoc_sinh)
-FROM source_table;
-```
-
-Khi sau này ingest `customer_code`, `policy_code`, `case_code` hoặc `asset_code`, vẫn dùng cùng transform thay vì tạo UDF mới theo tên dataset.
+Nếu một function mới chỉ `trim + uppercase` nhưng không có data contract/standard riêng, ưu tiên dùng transform generic hoặc không tạo UDF mới. Nếu giá trị cần xác minh tồn tại trong registry, hãy join reference data thay vì hard-code danh mục vào Python scalar UDF.
