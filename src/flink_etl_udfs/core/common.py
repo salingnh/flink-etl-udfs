@@ -101,8 +101,8 @@ def normalize_percentage_value(value: Optional[str]) -> Optional[str]:
 def normalize_currency_code_value(value: Optional[str]) -> Optional[str]:
     """Normalize a three-letter ISO-4217-shaped currency code to uppercase.
 
-    The function validates the three-letter shape only. Membership in the current
-    ISO 4217 code list should be checked against maintained reference data.
+    Membership in the current ISO 4217 list should be checked against maintained
+    reference data rather than hard-coded into a scalar UDF.
     """
     candidate = normalize_null_token_value(value)
     if candidate is None:
@@ -153,8 +153,8 @@ def normalize_e164_value(value: Optional[str], default_country_code: Optional[st
 def normalize_person_name_value(value: Optional[str]) -> Optional[str]:
     """Normalize a person name using Unicode NFC and whitespace normalization.
 
-    The transform deliberately preserves user-supplied letter case and does not
-    assume a country-specific family-name/given-name order.
+    The transform preserves user-supplied letter case and does not assume a
+    country-specific family-name/given-name order.
     """
     candidate = normalize_null_token_value(value)
     if candidate is None:
@@ -164,7 +164,7 @@ def normalize_person_name_value(value: Optional[str]) -> Optional[str]:
     return normalized or None
 
 
-# Tạo khóa tìm kiếm/blocking cho tên dùng bảng chữ cái Latin; không dùng làm định danh chính thức.
+# Tạo khóa search/blocking cho tên Latin; không dùng làm định danh chính thức.
 def latin_name_search_key_value(value: Optional[str]) -> Optional[str]:
     """Build an accent-insensitive search/blocking key for Latin-script names.
 
@@ -181,12 +181,12 @@ def latin_name_search_key_value(value: Optional[str]) -> Optional[str]:
     return " ".join(tokens) or None
 
 
-# Chuẩn hóa mã định danh nghiệp vụ dạng text mà không gắn với trường/học sinh/khách hàng cụ thể.
+# Chuẩn hóa mã định danh nghiệp vụ dạng text, không gắn với dataset cụ thể.
 def normalize_identifier_code_value(value: Optional[str]) -> Optional[str]:
     """Normalize a generic business identifier to compact uppercase code syntax.
 
     Whitespace is removed and only ``A-Z``, digits, dot, underscore, slash and
-    hyphen are retained as valid syntax. Registry membership remains domain-specific.
+    hyphen are valid. Registry membership remains domain-specific.
     """
     candidate = normalize_null_token_value(value)
     if candidate is None:
@@ -195,28 +195,12 @@ def normalize_identifier_code_value(value: Optional[str]) -> Optional[str]:
     return compact if _GENERIC_CODE_RE.fullmatch(compact) else None
 
 
-# Chuẩn hóa mã tài khoản/tham chiếu nội bộ dạng chữ-số, không thay thế IBAN hoặc validator ngân hàng.
-def normalize_account_identifier_value(value: Optional[str]) -> Optional[str]:
-    """Normalize a generic alphanumeric account/reference identifier.
-
-    Common visual separators are removed and the result is uppercased. This is a
-    syntax cleanup helper, not a country-specific bank-account validator.
-    """
-    candidate = normalize_null_token_value(value)
-    if candidate is None:
-        return None
-    compact = re.sub(r"[\s.-]+", "", candidate)
-    if not compact or not compact.isalnum():
-        return None
-    return compact.upper()
-
-
-# Chuẩn hóa địa chỉ dạng text để giảm khác biệt khoảng trắng/dấu câu trước bước parse hoặc geocode.
+# Chuẩn hóa địa chỉ text trước bước parse/geocode/reference lookup.
 def normalize_address_text_value(value: Optional[str]) -> Optional[str]:
     """Normalize free-text address Unicode, whitespace and common separators.
 
-    The function intentionally does not infer province/district codes, postal
-    codes or geocodes; those belong in authoritative reference-data enrichment.
+    The function does not infer province/district codes, postal codes or geocodes;
+    those belong in authoritative reference-data enrichment.
     """
     candidate = normalize_person_name_value(value)
     if candidate is None:
@@ -226,7 +210,7 @@ def normalize_address_text_value(value: Optional[str]) -> Optional[str]:
     return candidate.strip(" ,;") or None
 
 
-# Chuẩn hóa JSON thành dạng compact với thứ tự key ổn định để hash/deduplicate.
+# Chuẩn hóa JSON thành compact representation với thứ tự key ổn định.
 def canonicalize_json_value(value: Optional[str]) -> Optional[str]:
     """Return canonical compact JSON with sorted object keys."""
     candidate = normalize_null_token_value(value)
@@ -252,7 +236,7 @@ def _flatten_json(obj: Any, prefix: str, output: dict[str, Any]) -> None:
         output[prefix or "$value"] = obj
 
 
-# Làm phẳng JSON lồng nhau thành các path dạng dotted/indexed để đưa vào bảng phẳng.
+# Làm phẳng JSON lồng nhau thành dotted/indexed paths.
 def flatten_json_value(value: Optional[str]) -> Optional[str]:
     """Flatten nested JSON into a canonical JSON object using dotted paths."""
     candidate = normalize_null_token_value(value)
@@ -334,7 +318,6 @@ __all__ = [
     "flatten_json_value",
     "is_valid_json_value",
     "latin_name_search_key_value",
-    "normalize_account_identifier_value",
     "normalize_address_text_value",
     "normalize_currency_code_value",
     "normalize_date_value",

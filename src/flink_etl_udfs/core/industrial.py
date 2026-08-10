@@ -10,6 +10,7 @@ from flink_etl_udfs.core.common import normalize_null_token_value
 _OPCUA_NODE_RE = re.compile(r"^(?:ns=(\d+);)?([isgb])=(.+)$", re.IGNORECASE)
 
 
+# Chuẩn hóa OPC UA NodeId về representation ổn định cho namespace và identifier type.
 def normalize_opcua_node_id_value(value: Optional[str]) -> Optional[str]:
     """Normalize an OPC UA NodeId string, canonicalizing namespace and identifier-type prefixes."""
     candidate = normalize_null_token_value(value)
@@ -31,12 +32,9 @@ def normalize_opcua_node_id_value(value: Optional[str]) -> Optional[str]:
     return f"{prefix}{kind}={identifier}"
 
 
+# Chuẩn hóa textual OBIS A-B:C.D.E*F; semantic catalogue validation nằm ở reference layer.
 def normalize_obis_code_value(value: Optional[str]) -> Optional[str]:
-    """Normalize the common textual OBIS form ``A-B:C.D.E*F``.
-
-    OBIS profiles differ by medium/device, so this validates syntax rather than
-    attempting semantic catalogue validation.
-    """
+    """Normalize the common textual OBIS form ``A-B:C.D.E*F``."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -56,25 +54,4 @@ def normalize_obis_code_value(value: Optional[str]) -> Optional[str]:
     return f"{prefix}{b}:{c}.{d}.{e}{suffix}"
 
 
-def normalize_telemetry_quality_value(value: Optional[str]) -> Optional[str]:
-    """Map common telemetry quality labels to ``good``, ``uncertain``, ``bad`` or ``offline``."""
-    candidate = normalize_null_token_value(value)
-    if candidate is None:
-        return None
-    key = candidate.casefold().replace("_", " ").strip()
-    mapping = {
-        "good": "good",
-        "ok": "good",
-        "uncertain": "uncertain",
-        "bad": "bad",
-        "invalid": "bad",
-        "offline": "offline",
-    }
-    return mapping.get(key)
-
-
-__all__ = [
-    "normalize_obis_code_value",
-    "normalize_opcua_node_id_value",
-    "normalize_telemetry_quality_value",
-]
+__all__ = ["normalize_obis_code_value", "normalize_opcua_node_id_value"]

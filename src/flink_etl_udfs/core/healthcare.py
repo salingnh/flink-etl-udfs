@@ -11,12 +11,14 @@ _FHIR_ID_RE = re.compile(r"^[A-Za-z0-9\-.]{1,64}$")
 _DICOM_UID_RE = re.compile(r"^(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))*$")
 
 
+# Kiểm tra FHIR resource id theo character/length constraints của FHIR.
 def normalize_fhir_id_value(value: Optional[str]) -> Optional[str]:
-    """Validate and preserve a FHIR resource identifier using the FHIR id character/length constraints."""
+    """Validate and preserve a FHIR resource identifier using FHIR id constraints."""
     candidate = normalize_null_token_value(value)
     return candidate if candidate and _FHIR_ID_RE.fullmatch(candidate) else None
 
 
+# Chuẩn hóa local/relative FHIR reference như Patient/123 hoặc #contained-id.
 def normalize_fhir_reference_value(value: Optional[str]) -> Optional[str]:
     """Normalize relative/local FHIR references such as ``Patient/123`` or ``#contained-id``."""
     candidate = normalize_null_token_value(value)
@@ -34,6 +36,7 @@ def normalize_fhir_reference_value(value: Optional[str]) -> Optional[str]:
     return f"{resource_type}/{normalized_id}" if normalized_id else None
 
 
+# Chuẩn hóa HL7 v2 message type như ADT^A01.
 def normalize_hl7_message_type_value(value: Optional[str]) -> Optional[str]:
     """Normalize common HL7 v2 message type strings such as ``ADT^A01``."""
     candidate = normalize_null_token_value(value)
@@ -44,6 +47,7 @@ def normalize_hl7_message_type_value(value: Optional[str]) -> Optional[str]:
     return candidate if re.fullmatch(r"[A-Z0-9]{3}\^[A-Z0-9]{3}(?:\^[A-Z0-9_]+)?", candidate) else None
 
 
+# Kiểm tra DICOM UID/OID syntax và giới hạn 64 ký tự.
 def normalize_dicom_uid_value(value: Optional[str]) -> Optional[str]:
     """Validate a DICOM UID/OID shape and the 64-character DICOM UID length limit."""
     candidate = normalize_null_token_value(value)
@@ -52,17 +56,7 @@ def normalize_dicom_uid_value(value: Optional[str]) -> Optional[str]:
     return candidate if _DICOM_UID_RE.fullmatch(candidate) else None
 
 
-def normalize_dicom_modality_value(value: Optional[str]) -> Optional[str]:
-    """Normalize a DICOM Modality code to uppercase syntax without guessing modality semantics."""
-    candidate = normalize_null_token_value(value)
-    if candidate is None:
-        return None
-    candidate = candidate.upper()
-    return candidate if re.fullmatch(r"[A-Z0-9]{1,16}", candidate) else None
-
-
 __all__ = [
-    "normalize_dicom_modality_value",
     "normalize_dicom_uid_value",
     "normalize_fhir_id_value",
     "normalize_fhir_reference_value",

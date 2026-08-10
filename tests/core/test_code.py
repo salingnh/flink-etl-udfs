@@ -1,4 +1,4 @@
-from flink_etl_udfs.core.osint_code import (
+from flink_etl_udfs.core.code import (
     classify_git_object_hash_value,
     normalize_git_object_id_value,
     normalize_repository_url_value,

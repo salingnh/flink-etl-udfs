@@ -1,39 +1,27 @@
 # Tài liệu
 
-Thư mục này chứa research, hướng dẫn deployment và catalog toàn bộ PyFlink SQL UDF của `flink-etl-udfs`.
+Thư mục này chứa research, deployment guide và catalog của public PyFlink SQL UDF.
 
 ## Research và kiến trúc
 
 - [Tổng quan ETL research](ETL_RESEARCH.md)
 - [Ma trận lĩnh vực / loại dữ liệu / ETL](research/domain-matrix.md)
 - [OSINT research](research/osint.md)
-- [Rà soát tính generic và hướng migration](GENERICITY_REVIEW.md)
+- [Rà soát và cleanup tính generic](GENERICITY_REVIEW.md)
 
 ## Deployment
 
-- [Hướng dẫn Python dependency và deploy lên Flink cluster](DEPLOYMENT.md)
-
-Repository tách dependency theo mục đích:
-
-- `requirements.txt` — package third-party thực sự được worker-side UDF import, phù hợp cho Flink `--pyRequirements`.
-- `requirements-flink.txt` — pin `apache-flink` cho custom Python image/virtualenv cần tự cung cấp PyFlink.
-- `requirements-dev.txt` — test, lint, type-check và build dependency.
+- [Python dependency và deploy lên Flink cluster](DEPLOYMENT.md)
 
 ## Danh mục function
 
 - [Tổng quan function catalog](FUNCTION_CATALOG.md)
 - [Generic / Default / P0 common](functions/default-common.md)
+- [Internet, Security / CTI và Source Code](functions/internet-security-code.md)
 - [OSINT](functions/osint.md)
-- [Việt Nam: dân cư, thuế, giáo dục, ngân hàng](functions/vietnam.md)
+- [Việt Nam: dân cư và thuế](functions/vietnam.md)
 - [Chuẩn quốc tế và domain chuyên ngành](functions/standards.md)
 
-Mỗi SQL UDF trong `src/flink_etl_udfs/registry.py` phải có tài liệu gồm:
+Version `0.5.0` không giữ compatibility alias. Function bị đánh giá là dataset-specific, heuristic yếu, trùng generic transform hoặc phù hợp parser/reference-data layer hơn scalar UDF đã được xóa khỏi codebase.
 
-- tên hiển thị tiếng Việt;
-- tên SQL function và signature;
-- chuẩn/phạm vi validation;
-- mô tả semantics;
-- ví dụ giá trị trước → sau transform;
-- ví dụ SQL sử dụng.
-
-Public core Python transforms đồng thời phải có source-level docstring/comment và unit test.
+Mỗi SQL UDF còn lại phải có tên hiển thị tiếng Việt, phạm vi validation, mô tả semantics, ví dụ trước → sau, SQL usage, core docstring/comment và unit test.
