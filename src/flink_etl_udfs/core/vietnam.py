@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Optional
 
-from flink_etl_udfs.core.common import normalize_e164_value, normalize_null_token_value
+from flink_etl_udfs.core.common import normalize_null_token_value
 
 _VN_CITIZEN_RE = re.compile(r"^(?:\d{9}|\d{12})$")
 _VN_TAX_RE = re.compile(r"^(\d{10})(?:-?(\d{3}))?$")
@@ -57,16 +57,9 @@ def classify_vn_tax_id_structure_value(value: Optional[str]) -> Optional[str]:
     return "base_10" if "-" not in normalized else "extended_13"
 
 
-# Profile Việt Nam của bộ chuẩn hóa số điện thoại E.164, dùng mã quốc gia +84.
-def normalize_vn_phone_value(value: Optional[str]) -> Optional[str]:
-    """Normalize a Vietnamese phone-number shape to E.164 using country code +84."""
-    return normalize_e164_value(value, "+84")
-
-
 __all__ = [
     "classify_vn_identity_id_value",
     "classify_vn_tax_id_structure_value",
     "normalize_vn_citizen_id_value",
-    "normalize_vn_phone_value",
     "normalize_vn_tax_id_value",
 ]
