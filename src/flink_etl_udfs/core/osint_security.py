@@ -1,4 +1,4 @@
-"""Pure OSINT security, IOC, and credential-exposure transformations."""
+"""OSINT security and IOC normalization transformations."""
 
 from __future__ import annotations
 
@@ -8,18 +8,9 @@ from typing import Optional
 _HEX_RE = re.compile(r"^[0-9a-fA-F]+$")
 _CVE_RE = re.compile(r"^CVE[-_ ]?(\d{4})[-_ ]?(\d{4,})$", flags=re.IGNORECASE)
 _HASH_LENGTH_TYPES = {32: "md5", 40: "sha1", 64: "sha256", 128: "sha512"}
-_EXPOSURE_STATUS_MAP = {
-    "active": "open",
-    "closed": "remediated",
-    "ignored": "suppressed",
-    "open": "open",
-    "remediated": "remediated",
-    "resolved": "remediated",
-    "suppressed": "suppressed",
-    "unknown": "unknown",
-}
 
 
+# Chuẩn hóa digest hex phổ biến về lowercase và chỉ nhận độ dài MD5/SHA-1/SHA-256/SHA-512.
 def normalize_hex_hash_value(value: Optional[str]) -> Optional[str]:
     """Normalize a well-known hexadecimal digest while rejecting unknown lengths."""
     if value is None:
@@ -31,6 +22,7 @@ def normalize_hex_hash_value(value: Optional[str]) -> Optional[str]:
     return candidate
 
 
+# Phân loại digest đã chuẩn hóa theo họ MD5/SHA dựa trên độ dài chuẩn.
 def classify_hash_type_value(value: Optional[str]) -> Optional[str]:
     """Classify a normalized hexadecimal digest by length."""
     normalized = normalize_hex_hash_value(value)
@@ -39,6 +31,7 @@ def classify_hash_type_value(value: Optional[str]) -> Optional[str]:
     return _HASH_LENGTH_TYPES[len(normalized)]
 
 
+# Chuẩn hóa CVE identifier về dạng CVE-YYYY-NNNN... để join và deduplicate ổn định.
 def normalize_cve_value(value: Optional[str]) -> Optional[str]:
     """Normalize a CVE identifier to CVE-YYYY-NNNN... form."""
     if value is None:
@@ -51,20 +44,4 @@ def normalize_cve_value(value: Optional[str]) -> Optional[str]:
     return f"CVE-{year}-{number}"
 
 
-def normalize_exposure_status_value(value: Optional[str]) -> Optional[str]:
-    """Normalize credential-exposure remediation status."""
-    if value is None:
-        return None
-
-    candidate = value.strip().lower().replace("-", "_").replace(" ", "_")
-    if not candidate:
-        return None
-    return _EXPOSURE_STATUS_MAP.get(candidate)
-
-
-__all__ = [
-    "classify_hash_type_value",
-    "normalize_cve_value",
-    "normalize_exposure_status_value",
-    "normalize_hex_hash_value",
-]
+__all__ = ["classify_hash_type_value", "normalize_cve_value", "normalize_hex_hash_value"]
