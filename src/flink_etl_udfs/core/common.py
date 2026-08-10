@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import re
+import unicodedata
 from datetime import date, datetime, timezone
 from decimal import Decimal, InvalidOperation
 from typing import Any, Optional
@@ -13,8 +14,10 @@ from typing import Any, Optional
 _NULL_TOKENS = {"", "null", "none", "nil", "n/a", "na", "undefined", "[null]"}
 _CURRENCY_RE = re.compile(r"^[A-Z]{3}$")
 _COUNTRY_CODE_RE = re.compile(r"^\+?[1-9]\d{0,2}$")
+_GENERIC_CODE_RE = re.compile(r"^[A-Z0-9._/-]+$")
 
 
+# Chuẩn hóa giá trị NULL dạng text thường gặp trong dữ liệu nguồn.
 def normalize_null_token_value(value: Optional[str]) -> Optional[str]:
     """Trim a string and map common textual null markers to ``None``."""
     if value is None:
@@ -25,6 +28,7 @@ def normalize_null_token_value(value: Optional[str]) -> Optional[str]:
     return candidate
 
 
+# Chuẩn hóa timestamp ISO 8601 có timezone về UTC để so sánh và join ổn định.
 def normalize_iso_datetime_value(value: Optional[str]) -> Optional[str]:
     """Normalize an ISO-8601 timestamp to UTC with a ``Z`` suffix.
 
@@ -43,6 +47,7 @@ def normalize_iso_datetime_value(value: Optional[str]) -> Optional[str]:
     return parsed.astimezone(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 
+# Chuẩn hóa ngày theo dạng trao đổi dữ liệu ISO 8601 YYYY-MM-DD.
 def normalize_date_value(value: Optional[str]) -> Optional[str]:
     """Normalize an ISO date to ``YYYY-MM-DD``."""
     candidate = normalize_null_token_value(value)
@@ -54,6 +59,7 @@ def normalize_date_value(value: Optional[str]) -> Optional[str]:
         return None
 
 
+# Chuẩn hóa số thập phân bằng Decimal, tránh sai số binary floating-point.
 def normalize_decimal_value(value: Optional[str]) -> Optional[str]:
     """Normalize a decimal number without introducing binary floating-point error."""
     candidate = normalize_null_token_value(value)
@@ -74,6 +80,7 @@ def normalize_decimal_value(value: Optional[str]) -> Optional[str]:
     return normalized
 
 
+# Chuẩn hóa giá trị phần trăm theo miền 0..100 mà không làm tròn bằng float.
 def normalize_percentage_value(value: Optional[str]) -> Optional[str]:
     """Normalize a percentage in the inclusive range 0..100 as exact decimal text."""
     candidate = normalize_null_token_value(value)
@@ -90,8 +97,13 @@ def normalize_percentage_value(value: Optional[str]) -> Optional[str]:
     return normalized
 
 
+# Chuẩn hóa hình thức mã tiền tệ 3 chữ cái theo cấu trúc ISO 4217.
 def normalize_currency_code_value(value: Optional[str]) -> Optional[str]:
-    """Normalize a three-letter currency code shape (for example ``VND``)."""
+    """Normalize a three-letter ISO-4217-shaped currency code to uppercase.
+
+    The function validates the three-letter shape only. Membership in the current
+    ISO 4217 code list should be checked against maintained reference data.
+    """
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
@@ -99,6 +111,7 @@ def normalize_currency_code_value(value: Optional[str]) -> Optional[str]:
     return candidate if _CURRENCY_RE.fullmatch(candidate) else None
 
 
+# Chuẩn hóa số điện thoại về hình thức quốc tế E.164 khi đã biết mã quốc gia mặc định.
 def normalize_e164_value(value: Optional[str], default_country_code: Optional[str]) -> Optional[str]:
     """Perform conservative E.164-shape normalization without carrier lookup.
 
@@ -136,6 +149,84 @@ def normalize_e164_value(value: Optional[str], default_country_code: Optional[st
     return "+" + international
 
 
+# Chuẩn hóa tên người theo Unicode NFC và khoảng trắng, không đoán cách viết hoa.
+def normalize_person_name_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a person name using Unicode NFC and whitespace normalization.
+
+    The transform deliberately preserves user-supplied letter case and does not
+    assume a country-specific family-name/given-name order.
+    """
+    candidate = normalize_null_token_value(value)
+    if candidate is None:
+        return None
+    normalized = unicodedata.normalize("NFC", candidate)
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    return normalized or None
+
+
+# Tạo khóa tìm kiếm/blocking cho tên dùng bảng chữ cái Latin; không dùng làm định danh chính thức.
+def latin_name_search_key_value(value: Optional[str]) -> Optional[str]:
+    """Build an accent-insensitive search/blocking key for Latin-script names.
+
+    This is intended for candidate generation in entity resolution, not as a
+    canonical identity assertion. Non-Latin names require a separate strategy.
+    """
+    normalized = normalize_person_name_value(value)
+    if normalized is None:
+        return None
+    normalized = normalized.replace("Đ", "D").replace("đ", "d")
+    decomposed = unicodedata.normalize("NFD", normalized)
+    asciiish = "".join(ch for ch in decomposed if unicodedata.category(ch) != "Mn")
+    tokens = re.findall(r"[0-9A-Za-z]+", asciiish.casefold())
+    return " ".join(tokens) or None
+
+
+# Chuẩn hóa mã định danh nghiệp vụ dạng text mà không gắn với trường/học sinh/khách hàng cụ thể.
+def normalize_identifier_code_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a generic business identifier to compact uppercase code syntax.
+
+    Whitespace is removed and only ``A-Z``, digits, dot, underscore, slash and
+    hyphen are retained as valid syntax. Registry membership remains domain-specific.
+    """
+    candidate = normalize_null_token_value(value)
+    if candidate is None:
+        return None
+    compact = re.sub(r"\s+", "", candidate).upper()
+    return compact if _GENERIC_CODE_RE.fullmatch(compact) else None
+
+
+# Chuẩn hóa mã tài khoản/tham chiếu nội bộ dạng chữ-số, không thay thế IBAN hoặc validator ngân hàng.
+def normalize_account_identifier_value(value: Optional[str]) -> Optional[str]:
+    """Normalize a generic alphanumeric account/reference identifier.
+
+    Common visual separators are removed and the result is uppercased. This is a
+    syntax cleanup helper, not a country-specific bank-account validator.
+    """
+    candidate = normalize_null_token_value(value)
+    if candidate is None:
+        return None
+    compact = re.sub(r"[\s.-]+", "", candidate)
+    if not compact or not compact.isalnum():
+        return None
+    return compact.upper()
+
+
+# Chuẩn hóa địa chỉ dạng text để giảm khác biệt khoảng trắng/dấu câu trước bước parse hoặc geocode.
+def normalize_address_text_value(value: Optional[str]) -> Optional[str]:
+    """Normalize free-text address Unicode, whitespace and common separators.
+
+    The function intentionally does not infer province/district codes, postal
+    codes or geocodes; those belong in authoritative reference-data enrichment.
+    """
+    candidate = normalize_person_name_value(value)
+    if candidate is None:
+        return None
+    candidate = re.sub(r"\s*,\s*", ", ", candidate)
+    candidate = re.sub(r"\s*;\s*", "; ", candidate)
+    return candidate.strip(" ,;") or None
+
+
+# Chuẩn hóa JSON thành dạng compact với thứ tự key ổn định để hash/deduplicate.
 def canonicalize_json_value(value: Optional[str]) -> Optional[str]:
     """Return canonical compact JSON with sorted object keys."""
     candidate = normalize_null_token_value(value)
@@ -161,6 +252,7 @@ def _flatten_json(obj: Any, prefix: str, output: dict[str, Any]) -> None:
         output[prefix or "$value"] = obj
 
 
+# Làm phẳng JSON lồng nhau thành các path dạng dotted/indexed để đưa vào bảng phẳng.
 def flatten_json_value(value: Optional[str]) -> Optional[str]:
     """Flatten nested JSON into a canonical JSON object using dotted paths."""
     candidate = normalize_null_token_value(value)
@@ -175,6 +267,7 @@ def flatten_json_value(value: Optional[str]) -> Optional[str]:
     return json.dumps(flattened, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
+# Kiểm tra payload text có parse được thành JSON hay không.
 def is_valid_json_value(value: Optional[str]) -> bool:
     """Return whether a non-null string is valid JSON."""
     candidate = normalize_null_token_value(value)
@@ -187,11 +280,13 @@ def is_valid_json_value(value: Optional[str]) -> bool:
     return True
 
 
+# Kiểm tra trường dữ liệu có giá trị thực thay vì NULL/blank/null-token.
 def quality_is_present_value(value: Optional[str]) -> bool:
     """Return true when a value is not null/blank/common null token."""
     return normalize_null_token_value(value) is not None
 
 
+# Kiểm tra giá trị số có nằm trong khoảng min/max khai báo hay không.
 def quality_number_in_range_value(
     value: Optional[str], minimum: Optional[str], maximum: Optional[str]
 ) -> bool:
@@ -211,6 +306,7 @@ def quality_number_in_range_value(
     return True
 
 
+# Tạo record ID ổn định từ nguồn và natural key để deduplicate/idempotent load.
 def stable_record_id_value(source: Optional[str], natural_key: Optional[str]) -> Optional[str]:
     """Build a deterministic record identifier from provenance and a natural key."""
     source_norm = normalize_null_token_value(source)
@@ -221,6 +317,7 @@ def stable_record_id_value(source: Optional[str], natural_key: Optional[str]) ->
     return hashlib.sha256(payload).hexdigest()
 
 
+# Chuẩn hóa score xác suất về miền 0..1 và loại NaN/Infinity/out-of-range.
 def normalize_probability_value(value: Optional[str]) -> Optional[float]:
     """Normalize a finite probability in the inclusive range 0..1."""
     candidate = normalize_decimal_value(value)
@@ -236,13 +333,18 @@ __all__ = [
     "canonicalize_json_value",
     "flatten_json_value",
     "is_valid_json_value",
+    "latin_name_search_key_value",
+    "normalize_account_identifier_value",
+    "normalize_address_text_value",
     "normalize_currency_code_value",
     "normalize_date_value",
     "normalize_decimal_value",
     "normalize_e164_value",
+    "normalize_identifier_code_value",
     "normalize_iso_datetime_value",
     "normalize_null_token_value",
     "normalize_percentage_value",
+    "normalize_person_name_value",
     "normalize_probability_value",
     "quality_is_present_value",
     "quality_number_in_range_value",

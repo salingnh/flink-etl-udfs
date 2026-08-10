@@ -1,87 +1,121 @@
 # flink-etl-udfs
 
-Reusable PyFlink UDFs for ETL normalization, masking, fingerprinting, and data-quality preparation.
+Thư viện **PyFlink UDF tái sử dụng cho ETL**: chuẩn hóa dữ liệu, masking, fingerprinting, data quality và canonicalization theo các chuẩn phổ biến.
 
-The project deliberately separates **pure transformations** from **PyFlink wrappers**. This keeps core logic fast to test, makes behavior reviewable, and avoids requiring a Flink runtime for every unit test.
+Thiết kế của project ưu tiên:
+
+```text
+Generic cross-domain transform
+        ↓
+Domain / country profile khi thực sự cần
+        ↓
+Thin PyFlink UDF wrapper
+        ↓
+Flink SQL registry
+```
+
+Không tạo một UDF mới chỉ vì dataset có tên cột khác nhau. Ví dụ `ma_hoc_sinh`, `ma_giao_vien`, `customer_code`, `case_code` và `asset_code` có cùng data contract thì nên dùng chung `etl_normalize_identifier_code`.
 
 ## Documentation
 
-- [`docs/ETL_RESEARCH.md`](docs/ETL_RESEARCH.md) — research matrix covering domains, data types, normalization strategy, open-source building blocks, implementation status, and parser-vs-UDF boundary.
-- [`docs/FUNCTION_CATALOG.md`](docs/FUNCTION_CATALOG.md) — all registered SQL UDFs with signature, description, and example usage.
+- [`docs/FUNCTION_CATALOG.md`](docs/FUNCTION_CATALOG.md) — danh mục toàn bộ SQL UDF, tên hiển thị tiếng Việt, phạm vi validation, input → output và SQL example.
+- [`docs/GENERICITY_REVIEW.md`](docs/GENERICITY_REVIEW.md) — rà soát function nào nên generic, function nào phải giữ domain-specific và hướng migration.
+- [`docs/ETL_RESEARCH.md`](docs/ETL_RESEARCH.md) — research ETL theo lĩnh vực và ranh giới parser-vs-UDF.
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — dependency và cách deploy Python UDF lên Flink cluster.
 
-All public Python core functions include source-level docstrings. New functions should update the catalog and tests in the same change.
+## Version 0.4.0 — generic-first API
 
-## Initial UDF catalog
+Các P0 function generic mới:
 
-| SQL function | Input | Output | Semantics |
-|---|---|---|---|
-| `sha256_fingerprint` | STRING | STRING | Deterministic SHA-256 fingerprint; preserves NULL |
-| `mask_text` | STRING | STRING | Keeps first/last character, masks the middle |
-| `mask_email` | STRING | STRING | Masks email local-part while preserving domain |
-| `trim_text` | STRING | STRING | Trims leading/trailing whitespace |
-| `normalize_whitespace` | STRING | STRING | Collapses whitespace runs to one ASCII space |
-| `normalize_unicode_nfc` | STRING | STRING | Unicode NFC normalization |
-| `null_if_blank` | STRING | STRING | Converts blank strings to NULL |
-| `normalize_email` | STRING | STRING | Trims; lowercases domain only |
-| `digits_only` | STRING | STRING | Retains ASCII digits only |
-| `normalize_ip` | STRING | STRING | Canonical IPv4/IPv6 representation; invalid -> NULL |
-| `normalize_cidr` | STRING | STRING | Canonical CIDR; clears host bits; invalid -> NULL |
+| SQL function | Mục đích |
+| --- | --- |
+| `etl_normalize_person_name` | Unicode NFC + whitespace cho tên người, không giả định quốc gia |
+| `etl_latin_name_search_key` | Search/blocking key không dấu cho tên Latin-script |
+| `etl_normalize_identifier_code` | Chuẩn hóa mã nghiệp vụ dùng chung giữa nhiều dataset |
+| `etl_normalize_account_identifier` | Cleanup mã account/reference chữ-số; không phải IBAN validator |
+| `etl_normalize_address_text` | Tiền xử lý địa chỉ free-text trước parser/geocoder/reference lookup |
+
+Các API `vn_normalize_name`, `vn_normalize_address`, `vn_normalize_school_code`, `vn_normalize_teacher_code`, `vn_normalize_student_code` và `vn_normalize_bank_account` vẫn tồn tại để backward compatibility nhưng code mới nên ưu tiên generic counterpart.
+
+`vn_classify_tax_id` cũng được giữ cho job cũ. Pipeline mới nên dùng `vn_classify_tax_id_structure`, trả nhãn trung tính `base_10` / `extended_13` thay vì suy diễn loại hình pháp lý chỉ từ cấu trúc MST.
+
+## Chuẩn được ưu tiên
+
+Thư viện ưu tiên canonical form và chuẩn trao đổi dữ liệu phổ biến: Unicode NFC, ISO 8601, ITU-T E.164, ISO 4217, ISO 13616/IBAN, ISO 9362/BIC, ISO 17442/LEI, ISO 20022, GS1 GTIN/SSCC/EPCIS, STIX/MITRE ATT&CK, FHIR/HL7/DICOM, OPC UA, DLMS/COSEM, GTFS và EPSG.
+
+Một scalar UDF chỉ nên thực hiện canonicalization, syntax validation hoặc checksum khi phù hợp. Danh mục thay đổi theo thời gian — ví dụ mã hành chính, ISO currency list, BIC directory, FHIR ValueSet, EPSG registry, CVE/ATT&CK metadata — nên nằm ở reference-data/enrichment layer thay vì hard-code vào UDF.
 
 ## Install
 
-Core-only development:
+Development:
 
 ```bash
-python -m pip install -e '.[test,dev]'
+python -m pip install -r requirements-dev.txt
+python -m pip install -e . --no-deps
 pytest
 ```
 
-With PyFlink 2.3.0:
+Custom Python environment có PyFlink 2.3.0:
 
 ```bash
-python -m pip install -e '.[flink]'
+python -m pip install -r requirements-flink.txt
+python -m pip install -r requirements.txt
+python -m pip install . --no-deps
 ```
 
-Apache Flink 2.3.0 is the stable target selected for the initial repository. Python UDF execution in current Flink documentation supports Python 3.9-3.12.
+## Register UDF
 
-## Register all stable UDFs
+Chỉ đăng ký pack mà job cần:
 
 ```python
 from pyflink.table import EnvironmentSettings, TableEnvironment
-from flink_etl_udfs.registry import register_default_udfs
+from flink_etl_udfs.registry import register_common_udfs, register_vietnam_udfs
 
 settings = EnvironmentSettings.in_streaming_mode()
 t_env = TableEnvironment.create(settings)
-register_default_udfs(t_env)
+
+register_common_udfs(t_env)
+register_vietnam_udfs(t_env)
 ```
 
-Then use them from SQL:
+Ví dụ dữ liệu dân cư / thuế nhưng vẫn dùng generic transform khi có thể:
 
 ```sql
 SELECT
-  mask_text(phone),
-  sha256_fingerprint(customer_id),
-  normalize_email(email),
-  normalize_ip(source_ip)
-FROM source_table;
+    etl_normalize_person_name(full_name)                         AS full_name_norm,
+    etl_normalize_e164(phone, '+84')                             AS phone_e164,
+    etl_normalize_address_text(address)                          AS address_norm,
+    vn_normalize_citizen_id(citizen_id)                          AS citizen_id_norm,
+    vn_normalize_tax_id(tax_id)                                  AS tax_id_norm,
+    vn_classify_tax_id_structure(tax_id)                         AS tax_id_structure,
+    etl_normalize_identifier_code(source_record_code)            AS record_code_norm
+FROM citizen_tax_source;
 ```
 
-## Why pure functions + wrappers?
+Ví dụ input/output tương ứng:
 
-Avoid this pattern for every transform:
-
-```python
-@udf(...)
-def normalize(...):
-    # all business logic hidden inside Flink runtime wrapper
+```text
+"  Nguyễn   Văn An "        → "Nguyễn Văn An"
+"0912 345 678"              → "+84912345678"
+"12 Nguyễn Trãi,   Hà Nội"  → "12 Nguyễn Trãi, Hà Nội"
+"034 190 006 609"           → "034190006609"
+"0101234567001"             → "0101234567-001"
+"0101234567-001"            → "extended_13"
+" hs- 2026 / 001 "          → "HS-2026/001"
 ```
 
-Prefer:
+## Pure function trước, PyFlink wrapper sau
+
+Business logic nằm ở `src/flink_etl_udfs/core/`:
 
 ```python
 def normalize_value(value):
     ...
+```
 
+PyFlink wrapper chỉ khai báo type/determinism:
+
+```python
 normalize = udf(
     normalize_value,
     input_types=["STRING"],
@@ -90,143 +124,44 @@ normalize = udf(
 )
 ```
 
-Benefits:
+Cách này giúp cùng transform có thể tái sử dụng trong PyFlink, DuckDB/Python ingestion, Kafka producer, batch repair hoặc data-quality pipeline.
 
-- Core behavior is testable without starting PyFlink.
-- The same transformation can later be reused in DuckDB ingestion, Kafka producers, batch repair jobs, or data-quality tooling.
-- Flink-specific concerns remain thin and explicit.
-- Versioning semantic behavior becomes easier.
+## Deploy lên Flink cluster
 
-## Packaging for a Flink cluster
-
-PyFlink supports attaching Python source, wheels, ZIP files, or directories with `--pyFiles`. A wheel built from this repository can therefore be distributed with the job or included in the Python environment used by the Flink workers.
-
-Example:
+Build wheel:
 
 ```bash
-python -m pip install build
 python -m build
+```
 
+Submit ví dụ:
+
+```bash
 ./bin/flink run \
   --python your_job.py \
-  --pyFiles dist/flink_etl_udfs-0.3.0-py3-none-any.whl
+  --pyFiles dist/flink_etl_udfs-0.4.0-py3-none-any.whl \
+  --pyRequirements requirements.txt
 ```
 
-Install third-party dependencies in the worker Python environment as well when a UDF needs them.
+`requirements.txt` chỉ chứa third-party package thực sự cần trên Python worker. `apache-flink` được tách sang `requirements-flink.txt` để tránh vô tình cài lại PyFlink cho từng worker/job.
 
-## Research roadmap domain packs
+## Parser / enrichment không nên nhét vào scalar UDF
 
-Version `0.3.0` expands the library from the generic + OSINT packs into the P0-P3 data types identified in the ETL research. Register only the packs a job needs, or use `register_all_udfs(t_env)` for exploration/testing.
+Các format hoặc tác vụ cần file/network/schema-aware processing nên chạy trước hoặc song song với Flink SQL, ví dụ STIX validator, FHIR profile validator, HL7 parser, DICOM parser, ISO 20022 XML/XSD, EPCIS parser, OPC UA/DLMS client, GTFS feed validator, GDAL/PROJ, HTSlib/pysam, xarray/cfgrib, Astropy hoặc ACORD XML validator.
 
-```python
-from flink_etl_udfs.registry import (
-    register_all_udfs,
-    register_common_udfs,
-    register_finance_udfs,
-    register_healthcare_udfs,
-    register_industrial_udfs,
-    register_insurance_udfs,
-    register_scientific_udfs,
-    register_security_standard_udfs,
-    register_supply_chain_udfs,
-    register_transport_geo_udfs,
-    register_vietnam_udfs,
-)
-```
+Sau parser/enrichment, record canonical có thể được đẩy vào Kafka/Avro/Parquet rồi dùng thư viện này cho row-level deterministic normalization.
 
-| Priority / domain | Representative SQL functions | Scope |
-| --- | --- | --- |
-| **P0 common** | `etl_normalize_iso_datetime`, `etl_normalize_date`, `etl_normalize_e164`, `etl_normalize_decimal`, `etl_normalize_currency_code`, `etl_canonicalize_json`, `etl_flatten_json`, `etl_is_valid_json`, `etl_quality_is_present`, `etl_quality_number_in_range`, `etl_stable_record_id` | Cross-domain normalization, data quality and provenance |
-| **P1 Vietnam citizen** | `vn_normalize_citizen_id`, `vn_classify_identity_id`, `vn_normalize_tax_id`, `vn_classify_tax_id`, `vn_normalize_phone`, `vn_normalize_name`, `vn_name_search_key`, `vn_normalize_address` | Structural normalization; authoritative registry validation remains external |
-| **P1 Education / operational** | `vn_normalize_school_code`, `vn_normalize_teacher_code`, `vn_normalize_student_code`, `vn_normalize_academic_year`, `vn_normalize_sms_brandname`, `vn_normalize_bank_account`, `vn_build_entity_blocking_key` | Education identifiers, SMS/log preparation, bank-account shape and entity-resolution blocking |
-| **P2 STIX / CTI** | `cti_normalize_stix_type`, `cti_normalize_stix_id`, `cti_normalize_attack_technique_id` | Scalar identifier normalization; full STIX object/pattern validation belongs in a parser stage |
-| **P2 Healthcare** | `health_normalize_fhir_id`, `health_normalize_fhir_reference`, `health_normalize_hl7_message_type`, `health_normalize_dicom_uid`, `health_normalize_dicom_modality` | FHIR/HL7/DICOM identifiers and metadata |
-| **P2 Finance / ISO 20022** | `finance_normalize_iban`, `finance_normalize_bic`, `finance_normalize_iso20022_message_type` | IBAN mod-97, BIC/SWIFT shape and ISO 20022 message identifiers |
-| **P2 Supply chain / EPCIS** | `supply_normalize_gtin`, `supply_normalize_sscc`, `supply_normalize_epcis_event_type` | GS1 check digits and EPCIS event names |
-| **P2 Industrial / IoT** | `iot_normalize_opcua_node_id`, `iot_normalize_obis_code`, `iot_normalize_telemetry_quality` | OPC UA NodeId, DLMS/COSEM OBIS and telemetry quality |
-| **P2 Transport / GIS** | `gtfs_normalize_id`, `geo_normalize_latitude`, `geo_normalize_longitude`, `geo_normalize_epsg_code` | GTFS identifiers and scalar spatial metadata |
-| **P3 Genomics** | `genomics_normalize_chromosome`, `genomics_normalize_dna_sequence`, `genomics_normalize_vcf_genotype` | Chromosome, IUPAC DNA and VCF genotype scalar metadata |
-| **P3 Climate** | `climate_normalize_cf_standard_name`, `climate_normalize_grib_short_name` | CF/NetCDF and GRIB metadata preparation |
-| **P3 Astronomy** | `astro_normalize_fits_keyword`, `astro_normalize_celestial_frame` | FITS header keyword and celestial frame normalization |
-| **P3 Insurance / ACORD** | `insurance_normalize_acord_version`, `insurance_normalize_policy_number`, `insurance_normalize_coverage_code` | ACORD-oriented metadata; full XML/XSD validation remains external |
+## Engineering rules
 
-### Why some researched formats are not fully parsed inside scalar UDFs
-
-The following data types require file/network/schema-aware parsers and should run before or beside Flink SQL scalar normalization:
-
-- STIX 2.x objects/patterns: `stix2` / OASIS validators.
-- FHIR profiles and terminology: a FHIR validator/server such as HAPI FHIR or an equivalent validated pipeline.
-- HL7 v2 ER7/MLLP: `hl7apy` or another HL7 parser.
-- DICOM files/pixel metadata: `pydicom` or a DICOM-native ingestion service.
-- ISO 20022 XML: schema-aware XML validation/parser.
-- EPCIS JSON-LD/XML: GS1/EPCIS parser and schema validation.
-- OPC UA and DLMS/COSEM protocol reads: protocol clients in source/enrichment operators, never a per-row scalar UDF.
-- GTFS archives: feed-level validation before row ingestion.
-- GeoTIFF/Shapefile/CRS transformation: GDAL/PROJ or a geospatial engine.
-- BAM/CRAM/VCF/BCF: HTSlib/pysam/bcftools.
-- NetCDF/GRIB: xarray/cfgrib/eccodes.
-- FITS/WCS: Astropy.
-- ACORD XML: licensed/authorized schemas plus XML/XSD validation.
-
-These parser stages can emit normalized records into Kafka/Avro/Parquet, after which this library handles deterministic row-level cleanup in Flink.
-
-## UDF engineering rules
-
-- Preserve `NULL` by default.
-- Mark a UDF deterministic only when repeated calls with the same arguments always produce the same result.
-- Keep network/database/API calls out of normal scalar UDFs.
-- Prefer `DECIMAL` semantics for money; do not introduce floating-point rounding into financial normalization.
-- Keep raw and canonical values separate when normalization can be lossy.
-- Avoid logging plaintext PII.
-- Put country/domain-specific rules in separate modules instead of making generic functions guess.
+- Preserve `NULL` theo mặc định.
+- Invalid/unsupported row nên trả `NULL` hoặc quality flag thay vì làm fail toàn job nếu semantics cho phép.
+- Không gọi network/database/API từ scalar UDF.
+- Dùng Decimal semantics cho tiền, thuế, phí.
+- Giữ raw value và canonical value riêng nếu transform có thể lossy.
+- Không log plaintext PII.
+- Search/blocking key không phải canonical identity.
+- Country/domain rule chỉ nằm trong module riêng khi thật sự phụ thuộc country/domain.
 
 ## License
 
 Apache-2.0.
-
-## OSINT domain pack
-
-The OSINT pack implements deterministic transforms for public-source observations while preserving the distinction between **observation**, **entity**, and **evidence**. It intentionally avoids claiming that a normalized username, email, phone, or search key proves identity ownership.
-
-Register the pack separately from the common UDFs:
-
-```python
-from flink_etl_udfs.registry import register_osint_udfs
-
-register_osint_udfs(t_env)
-```
-
-Example SQL:
-
-```sql
-SELECT
-    osint_normalize_username(username) AS username_norm,
-    osint_normalize_profile_url(profile_url) AS profile_url_norm,
-    osint_normalize_domain(domain) AS domain_norm,
-    osint_content_sha256(raw_evidence) AS evidence_hash,
-    osint_normalize_observed_at_utc(observed_at) AS observed_at_utc,
-    osint_normalize_confidence(confidence) AS confidence_norm,
-    osint_normalize_verification_status(verification_status) AS verification_status_norm
-FROM osint_source;
-```
-
-### OSINT function groups
-
-| Group | Functions | Purpose |
-| --- | --- | --- |
-| Identity/account discovery | `osint_normalize_username`, `osint_normalize_platform`, `osint_normalize_name_search_key`, `osint_classify_account_identifier` | Normalize account handles and generate conservative search/blocking keys. |
-| Web/profile evidence | `osint_canonicalize_url`, `osint_normalize_profile_url`, `osint_normalize_domain`, `osint_extract_url_host`, `osint_redact_url_secrets` | Canonicalize public URLs/domains and prevent accidental retention of URL credentials or secret query values. |
-| Evidence/provenance | `osint_content_sha256`, `osint_build_observation_id`, `osint_normalize_observed_at_utc` | Build deterministic evidence hashes and observation identifiers with explicit timezone semantics. |
-| Confidence/verification | `osint_normalize_confidence`, `osint_normalize_verification_status` | Validate confidence values and controlled verification states without inferring truth. |
-| Security/IOC | `osint_normalize_hex_hash`, `osint_classify_hash_type`, `osint_normalize_cve` | Normalize common IOC digest and CVE representations. |
-| Credential exposure | `osint_normalize_exposure_status` | Normalize remediation states for authorized credential-exposure datasets. |
-
-The pack is intended for authorized ETL and analysis of public or legitimately obtained data. Complex collectors, identity attribution, sanctions matching, geolocation inference, and credential acquisition are deliberately outside the scalar-normalization layer.
-
-Additional P1/P2 normalization functions:
-
-- Internet infrastructure: `osint_normalize_asn`, `osint_normalize_dns_record_type`, `osint_normalize_mime_type`.
-- Company/compliance graph: `osint_normalize_lei`, `osint_normalize_ownership_percentage`, `osint_normalize_entity_type`.
-- Public source-code intelligence: `osint_normalize_repository_url`, `osint_normalize_git_object_id`, `osint_classify_git_object_hash`.
-
-Network I/O and heavyweight enrichment are intentionally outside scalar UDFs. RDAP/DNS lookups, web crawling, EXIF parsing, sanctions/entity matching, geocoding, archive retrieval, and credential acquisition should run in dedicated enrichment stages with caching, rate-limit handling, provenance, and explicit access policy.

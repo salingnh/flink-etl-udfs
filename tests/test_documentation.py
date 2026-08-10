@@ -26,6 +26,13 @@ def _registered_sql_names() -> set[str]:
     return names
 
 
+def _function_doc_lines() -> list[str]:
+    lines: list[str] = []
+    for path in sorted((ROOT / "docs" / "functions").glob("*.md")):
+        lines.extend(path.read_text(encoding="utf-8").splitlines())
+    return lines
+
+
 def test_every_public_core_function_has_docstring() -> None:
     missing: list[str] = []
     for path in sorted((SRC / "core").glob("*.py")):
@@ -46,3 +53,20 @@ def test_function_catalog_mentions_every_registered_sql_udf() -> None:
     catalog = "\n".join(catalog_parts)
     missing = sorted(name for name in _registered_sql_names() if f"`{name}`" not in catalog)
     assert not missing, f"registered UDFs missing from function catalog: {missing}"
+
+
+def test_every_registered_udf_has_before_after_and_sql_usage_example() -> None:
+    """Keep user-facing docs actionable as new UDFs are added."""
+    lines = _function_doc_lines()
+    incomplete: list[str] = []
+
+    for name in sorted(_registered_sql_names()):
+        candidate_rows = [line for line in lines if f"`{name}`" in line and line.startswith("|")]
+        documented = any("→" in row and "SELECT" in row for row in candidate_rows)
+        if not documented:
+            incomplete.append(name)
+
+    assert not incomplete, (
+        "registered UDFs need a table row with before→after and SELECT usage examples: "
+        f"{incomplete}"
+    )
