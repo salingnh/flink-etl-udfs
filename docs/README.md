@@ -19,9 +19,10 @@ Thư mục này chứa research, deployment guide và catalog của public PyFli
 - [Generic / Default / P0 common](functions/default-common.md)
 - [Internet, Security / CTI và Source Code](functions/internet-security-code.md)
 - [OSINT](functions/osint.md)
-- [Việt Nam: dân cư và thuế](functions/vietnam.md)
+- [External enrichment / REST lookup](functions/enrichment.md)
+- [Việt Nam: dân cư, thuế và số di động](functions/vietnam.md)
 - [Chuẩn quốc tế và domain chuyên ngành](functions/standards.md)
 
-Version `0.5.0` không giữ compatibility alias. Function bị đánh giá là dataset-specific, heuristic yếu, trùng generic transform hoặc phù hợp parser/reference-data layer hơn scalar UDF đã được xóa khỏi codebase.
+Version `0.5.0` không giữ compatibility alias. Version `0.6.0` bổ sung Vietnam mobile migration normalization và async REST enrichment mà không khôi phục các alias đã xóa.
 
-Mỗi SQL UDF còn lại phải có tên hiển thị tiếng Việt, phạm vi validation, mô tả semantics, ví dụ trước → sau, SQL usage, core docstring/comment và unit test.
+Mỗi SQL UDF còn lại phải có tên hiển thị tiếng Việt, phạm vi validation, mô tả semantics, ví dụ trước → sau, SQL usage, core/client docstring/comment và unit test hoặc mocked-I/O test.
