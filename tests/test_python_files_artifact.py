@@ -64,15 +64,16 @@ sys.modules["pyflink.table.udf"] = udf_module
 sys.path.insert(0, sys.argv[1])
 
 enrichment = importlib.import_module("flink_etl_udfs.udfs.enrichment")
-phone = importlib.import_module("flink_etl_udfs.udfs.vietnam")
+vietnam = importlib.import_module("flink_etl_udfs.udfs.vietnam")
 
 assert enrichment.extract_profile_url["function"].__module__ == "flink_etl_udfs.enrichment.profile"
 assert enrichment.extract_profile_url["function"].__name__ == "extract_profile_url_sync"
 assert enrichment.extract_profile_url["deterministic"] is False
 
-assert phone.normalize_vn_mobile_phone["function"].__module__ == "flink_etl_udfs.core.vietnam"
-assert phone.normalize_vn_mobile_phone["function"].__name__ == "normalize_vn_mobile_phone_value"
-assert phone.normalize_vn_mobile_phone["deterministic"] is True
+assert vietnam.normalize_vn_mobile_phone["function"].__module__ == "flink_etl_udfs.udfs.vietnam"
+assert vietnam.normalize_vn_mobile_phone["function"].__name__ == "_normalize_vn_mobile_phone"
+assert vietnam.normalize_vn_mobile_phone["deterministic"] is True
+assert "flink_etl_udfs.core.vietnam" not in sys.modules
 '''
 
     subprocess.run(
