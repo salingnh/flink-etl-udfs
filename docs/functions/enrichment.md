@@ -1,12 +1,33 @@
 # External enrichment / REST lookup
 
-Đăng ký bằng `register_enrichment_udfs(t_env)`.
+Đăng ký bằng `register_enrichment_udfs(t_env)` hoặc trực tiếp từ SQL bằng fully-qualified Python entrypoint.
 
-Nhóm `enrich_*` dành cho transform có I/O ra hệ thống ngoài. Khác với scalar UDF deterministic, các hàm này là asynchronous/nondeterministic và cần cấu hình timeout/retry/concurrency phù hợp trên Flink cluster.
+Nhóm `enrich_*` dành cho transform có I/O ra hệ thống ngoài. `enrich_extract_profile_url` hiện dùng **synchronous general scalar UDF** (`udf(...)`) để tương thích ổn định với Flink SQL Gateway 2.2.x. Hàm vẫn được khai báo `deterministic=False` vì kết quả phụ thuộc dịch vụ ngoài.
 
 | Tên hiển thị | SQL function | Phạm vi | Mô tả | Giá trị trước → sau | Ví dụ SQL |
 | --- | --- | --- | --- | --- | --- |
-| Trích thông tin URL profile | `enrich_extract_profile_url` | Async REST enrichment | Nhận một URL profile HTTP(S), gọi `ExtractSource` với `parse_only=false`, `parse_display_name=false`, rồi trả phần tử đầu tiên trong `result` dưới dạng compact JSON. URL rỗng/sai trả `NULL`; lỗi transport/service raise exception để Flink có thể áp dụng retry/timeout thay vì âm thầm biến outage thành missing data. | `https://facebook.com/sangnv` → `{"actor_id":"100001614198876","actor_username":"sangnv",...,"platform":"facebook"}` | `SELECT enrich_extract_profile_url(profile_url) FROM profile_source;` |
+| Trích thông tin URL profile | `enrich_extract_profile_url` | Sync REST enrichment | Nhận một URL profile HTTP(S), gọi `ExtractSource` với `parse_only=false`, `parse_display_name=false`, rồi trả phần tử đầu tiên trong `result` dưới dạng compact JSON. URL rỗng/sai trả `NULL`; lỗi transport/service raise exception. | `https://facebook.com/sangnv` → `{"actor_id":"100001614198876","actor_username":"sangnv",...,"platform":"facebook"}` | `SELECT enrich_extract_profile_url(profile_url) FROM profile_source;` |
+
+## Python entrypoint
+
+Artifact phải làm cho package `flink_etl_udfs` import được trong Python worker. Entry point SQL là:
+
+```text
+flink_etl_udfs.udfs.enrichment.extract_profile_url
+```
+
+Object trên được tạo trực tiếp ở module load bằng:
+
+```python
+extract_profile_url = udf(
+    extract_profile_url_sync,
+    input_types=["STRING"],
+    result_type="STRING",
+    deterministic=False,
+)
+```
+
+Không dùng coroutine/factory trung gian cho entrypoint này.
 
 ## API contract mặc định
 
@@ -51,7 +72,7 @@ UDF chỉ trả object đầu tiên trong `result`, ví dụ:
 
 ## Cấu hình cluster
 
-Có thể override endpoint mà không cần build lại wheel:
+Có thể override endpoint mà không cần build lại artifact:
 
 ```bash
 export FLINK_ETL_PROFILE_EXTRACT_ENDPOINT='http://profile-service:31263/api/scrap-command/v1/Scrap/ExtractSource'
@@ -63,19 +84,25 @@ Các biến môi trường phải có mặt trong Python worker/TaskManager envi
 ## SQL usage
 
 ```sql
+SET 'python.files' = 's3://fusion_center/transform-library/flink_etl_udfs.zip';
+
+CREATE TEMPORARY SYSTEM FUNCTION ENRICH_EXTRACT_PROFILE_URL
+AS 'flink_etl_udfs.udfs.enrichment.extract_profile_url'
+LANGUAGE PYTHON;
+
 SELECT
     profile_url,
-    enrich_extract_profile_url(profile_url) AS profile_source_json
+    ENRICH_EXTRACT_PROFILE_URL(profile_url) AS profile_source_json
 FROM profile_source;
 ```
 
-Nếu cần lấy từng field từ JSON output, có thể dùng JSON functions của Flink SQL ở bước tiếp theo, ví dụ:
+Nếu cần lấy từng field từ JSON output, có thể dùng JSON functions của Flink SQL ở bước tiếp theo:
 
 ```sql
 WITH enriched AS (
     SELECT
         profile_url,
-        enrich_extract_profile_url(profile_url) AS profile_source_json
+        ENRICH_EXTRACT_PROFILE_URL(profile_url) AS profile_source_json
     FROM profile_source
 )
 SELECT
@@ -87,4 +114,4 @@ SELECT
 FROM enriched;
 ```
 
-`enrich_extract_profile_url` được khai báo `deterministic=False`. Không dùng function này trong khóa ID deterministic hoặc giả định cùng URL luôn trả cùng một kết quả theo thời gian.
+Do đây là synchronous network call, throughput của operator phụ thuộc latency của API. Khi API đã ổn định và runtime được chuẩn hóa, có thể tách enrichment sang lookup/async operator riêng ở bước sau.
