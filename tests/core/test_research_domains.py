@@ -36,6 +36,7 @@ from flink_etl_udfs.core.vietnam import (
     classify_vn_identity_id_value,
     classify_vn_tax_id_structure_value,
     normalize_vn_citizen_id_value,
+    normalize_vn_mobile_phone_value,
     normalize_vn_tax_id_value,
 )
 
@@ -67,6 +68,26 @@ def test_vietnam_specific_identifiers() -> None:
     assert normalize_vn_tax_id_value("0101234567001") == "0101234567-001"
     assert classify_vn_tax_id_structure_value("0101234567") == "base_10"
     assert classify_vn_tax_id_structure_value("0101234567-001") == "extended_13"
+
+
+def test_vietnam_mobile_phone_normalization() -> None:
+    # Current 10-digit national and international representations.
+    assert normalize_vn_mobile_phone_value("0912 345 678") == "0912345678"
+    assert normalize_vn_mobile_phone_value("+84 912 345 678") == "0912345678"
+    assert normalize_vn_mobile_phone_value("0084 912 345 678") == "0912345678"
+
+    # 2018 network-code migrations: Viettel, VinaPhone, MobiFone, Vietnamobile, Gmobile.
+    assert normalize_vn_mobile_phone_value("0169 123 4567") == "0391234567"
+    assert normalize_vn_mobile_phone_value("0124 123 4567") == "0841234567"
+    assert normalize_vn_mobile_phone_value("0120 123 4567") == "0701234567"
+    assert normalize_vn_mobile_phone_value("0188 123 4567") == "0581234567"
+    assert normalize_vn_mobile_phone_value("0199 123 4567") == "0591234567"
+    assert normalize_vn_mobile_phone_value("+84 169 123 4567") == "0391234567"
+
+    # Do not infer unsupported/ambiguous fixed-line or malformed numbers.
+    assert normalize_vn_mobile_phone_value("024 3825 0000") is None
+    assert normalize_vn_mobile_phone_value("0111 123 4567") is None
+    assert normalize_vn_mobile_phone_value("123456789") is None
 
 
 def test_healthcare_and_finance_standards() -> None:
