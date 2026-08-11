@@ -105,7 +105,7 @@ def register_code_udfs(table_env: "TableEnvironment") -> None:
 
 
 def register_osint_udfs(table_env: "TableEnvironment") -> None:
-    """Register transforms whose semantics are specifically OSINT observations."""
+    """Register deterministic transforms whose semantics are specifically OSINT observations."""
     from flink_etl_udfs.udfs import osint
 
     _register(
@@ -117,8 +117,20 @@ def register_osint_udfs(table_env: "TableEnvironment") -> None:
     )
 
 
+def register_enrichment_udfs(table_env: "TableEnvironment") -> None:
+    """Register asynchronous external enrichment UDFs such as profile URL extraction."""
+    from flink_etl_udfs.udfs import enrichment
+
+    _register(
+        table_env,
+        {
+            "enrich_extract_profile_url": enrichment.extract_profile_url,
+        },
+    )
+
+
 def register_vietnam_udfs(table_env: "TableEnvironment") -> None:
-    """Register Vietnam-specific citizen and tax identifier transforms."""
+    """Register Vietnam-specific citizen, tax, and historical mobile-number transforms."""
     from flink_etl_udfs.udfs import research_domains as vietnam
 
     _register(
@@ -127,6 +139,7 @@ def register_vietnam_udfs(table_env: "TableEnvironment") -> None:
             "vn_classify_identity_id": vietnam.classify_vn_identity_id,
             "vn_classify_tax_id_structure": vietnam.classify_vn_tax_id_structure,
             "vn_normalize_citizen_id": vietnam.normalize_vn_citizen_id,
+            "vn_normalize_mobile_phone": vietnam.normalize_vn_mobile_phone,
             "vn_normalize_tax_id": vietnam.normalize_vn_tax_id,
         },
     )
@@ -221,12 +234,13 @@ def register_geospatial_udfs(table_env: "TableEnvironment") -> None:
 
 
 def register_all_udfs(table_env: "TableEnvironment") -> None:
-    """Register every currently shipped curated scalar UDF pack."""
+    """Register every currently shipped curated scalar/async-scalar UDF pack."""
     register_default_udfs(table_env)
     register_common_udfs(table_env)
     register_internet_udfs(table_env)
     register_code_udfs(table_env)
     register_osint_udfs(table_env)
+    register_enrichment_udfs(table_env)
     register_vietnam_udfs(table_env)
     register_security_udfs(table_env)
     register_healthcare_udfs(table_env)
@@ -241,6 +255,7 @@ __all__ = [
     "register_code_udfs",
     "register_common_udfs",
     "register_default_udfs",
+    "register_enrichment_udfs",
     "register_finance_udfs",
     "register_geospatial_udfs",
     "register_healthcare_udfs",

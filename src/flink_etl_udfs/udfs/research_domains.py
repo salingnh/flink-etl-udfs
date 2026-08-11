@@ -69,9 +69,10 @@ normalize_probability = udf(
     deterministic=True,
 )
 
-# Vietnam-specific: chỉ giữ cấu trúc định danh công dân và mã số thuế.
+# Vietnam-specific citizen, tax and historical mobile-number rules.
 normalize_vn_citizen_id = _s(vietnam.normalize_vn_citizen_id_value)
 classify_vn_identity_id = _s(vietnam.classify_vn_identity_id_value)
+normalize_vn_mobile_phone = _s(vietnam.normalize_vn_mobile_phone_value)
 normalize_vn_tax_id = _s(vietnam.normalize_vn_tax_id_value)
 classify_vn_tax_id_structure = _s(vietnam.classify_vn_tax_id_structure_value)
 

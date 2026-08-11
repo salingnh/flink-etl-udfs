@@ -13,12 +13,14 @@ SRC = ROOT / "src" / "flink_etl_udfs"
 # fallback covering the standard-library imports used by this project.
 _FALLBACK_STDLIB = {
     "ast",
+    "asyncio",
     "datetime",
     "decimal",
     "hashlib",
     "ipaddress",
     "json",
     "math",
+    "os",
     "pathlib",
     "re",
     "sys",
