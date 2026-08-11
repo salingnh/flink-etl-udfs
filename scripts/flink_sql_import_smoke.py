@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 from pyflink.table import EnvironmentSettings, TableEnvironment
@@ -17,8 +18,13 @@ def main() -> None:
     if not artifact.exists():
         raise SystemExit(f"artifact does not exist: {artifact}")
 
+    # PyFlink's Java gateway calls back into this Python client process when SQL
+    # resolves a LANGUAGE PYTHON function. SQL Client/Gateway prepares this client
+    # PYTHONPATH from python.files/--pyFiles; this smoke test models that explicitly.
+    sys.path.insert(0, str(artifact))
+
     table_env = TableEnvironment.create(EnvironmentSettings.in_batch_mode())
-    table_env.get_config().set("python.files", artifact.as_uri())
+    table_env.add_python_file(str(artifact))
 
     table_env.execute_sql(
         """
