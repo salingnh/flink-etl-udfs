@@ -11,7 +11,6 @@ from flink_etl_udfs.core import (
     industrial,
     supply_chain,
     transport_geo,
-    vietnam,
 )
 
 
@@ -68,13 +67,6 @@ normalize_probability = udf(
     result_type="DOUBLE",
     deterministic=True,
 )
-
-# Vietnam-specific citizen, tax and historical mobile-number rules.
-normalize_vn_citizen_id = _s(vietnam.normalize_vn_citizen_id_value)
-classify_vn_identity_id = _s(vietnam.classify_vn_identity_id_value)
-normalize_vn_mobile_phone = _s(vietnam.normalize_vn_mobile_phone_value)
-normalize_vn_tax_id = _s(vietnam.normalize_vn_tax_id_value)
-classify_vn_tax_id_structure = _s(vietnam.classify_vn_tax_id_structure_value)
 
 # Healthcare standards.
 normalize_fhir_id = _s(healthcare.normalize_fhir_id_value)
