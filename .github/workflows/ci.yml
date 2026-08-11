@@ -23,8 +23,27 @@ jobs:
       - name: Dependency contract
         run: pytest -q tests/test_dependencies.py
       - name: Ruff
-        run: ruff check src tests
+        run: ruff check src tests scripts
       - name: Mypy core
         run: mypy src/flink_etl_udfs/core
       - name: Tests
         run: pytest --cov=flink_etl_udfs.core --cov-report=term-missing
+
+  flink-sql-import-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install PyFlink 2.2.1
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-flink.txt
+      - name: Build python.files ZIP
+        run: python scripts/build_python_files_zip.py
+      - name: Import and execute SQL UDF from ZIP
+        working-directory: /tmp
+        run: |
+          python "$GITHUB_WORKSPACE/scripts/flink_sql_import_smoke.py" \
+            "$GITHUB_WORKSPACE/dist/flink_etl_udfs.zip"

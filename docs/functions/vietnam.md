@@ -4,6 +4,14 @@
 
 Pack `vn_*` chỉ chứa quy tắc thật sự phụ thuộc Việt Nam: cấu trúc CMND/CCCD, mã số thuế và lịch sử chuyển đổi mã mạng di động. Tên người, địa chỉ và các cleanup chung vẫn dùng `etl_*` generic functions.
 
+Các UDF Việt Nam được giữ self-contained trong module:
+
+```text
+flink_etl_udfs.udfs.vietnam
+```
+
+Mục tiêu là để SQL Gateway load một function Việt Nam mà không phải import toàn bộ `research_domains` và các domain không liên quan.
+
 | Tên hiển thị | SQL function | Phạm vi | Mô tả | Giá trị trước → sau | Ví dụ SQL |
 | --- | --- | --- | --- | --- | --- |
 | Phân loại CMND / CCCD | `vn_classify_identity_id` | Việt Nam, structural | Phân loại ID 9 chữ số thành `cmnd_9`, 12 chữ số thành `cccd_12`; không xác minh giấy tờ có hiệu lực. | `034190006609` → `cccd_12` | `SELECT vn_classify_identity_id(identity_no);` |
@@ -11,6 +19,16 @@ Pack `vn_*` chỉ chứa quy tắc thật sự phụ thuộc Việt Nam: cấu t
 | Chuẩn hóa CMND / CCCD | `vn_normalize_citizen_id` | Việt Nam, structural | Chỉ giữ ASCII digits và chấp nhận 9/12 chữ số; giữ leading zero. | `034 190 006 609` → `034190006609` | `SELECT vn_normalize_citizen_id(citizen_id);` |
 | Chuẩn hóa số di động Việt Nam | `vn_normalize_mobile_phone` | Việt Nam, 2018 network-code migration | Chuẩn hóa `0...`, `84...`, `+84...`, `0084...` về số quốc gia 10 chữ số. Nếu input dùng đầu số 11 số cũ thì đổi sang mã mạng mới; chỉ kiểm tra structural mobile shape, không xác minh thuê bao đang active/nhà mạng hiện tại sau chuyển mạng giữ số. | `0169 123 4567` → `0391234567`; `+84 912 345 678` → `0912345678` | `SELECT vn_normalize_mobile_phone(phone);` |
 | Chuẩn hóa mã số thuế | `vn_normalize_tax_id` | Việt Nam, structural | Chuẩn hóa về `10digits` hoặc `10digits-3digits`; registry validity phải lookup nguồn thuế có thẩm quyền. | `0101234567001` → `0101234567-001` | `SELECT vn_normalize_tax_id(tax_id);` |
+
+## SQL Gateway entrypoint
+
+```sql
+SET 'python.files' = 's3://fusion_center/transform-library/flink_etl_udfs.zip';
+
+CREATE TEMPORARY SYSTEM FUNCTION VN_NORMALIZE_MOBILE_PHONE
+AS 'flink_etl_udfs.udfs.vietnam.normalize_vn_mobile_phone'
+LANGUAGE PYTHON;
+```
 
 ## Mapping đầu số 11 số cũ → 10 số
 

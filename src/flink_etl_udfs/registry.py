@@ -118,7 +118,7 @@ def register_osint_udfs(table_env: "TableEnvironment") -> None:
 
 
 def register_enrichment_udfs(table_env: "TableEnvironment") -> None:
-    """Register asynchronous external enrichment UDFs such as profile URL extraction."""
+    """Register nondeterministic external enrichment UDFs such as profile URL extraction."""
     from flink_etl_udfs.udfs import enrichment
 
     _register(
@@ -130,8 +130,8 @@ def register_enrichment_udfs(table_env: "TableEnvironment") -> None:
 
 
 def register_vietnam_udfs(table_env: "TableEnvironment") -> None:
-    """Register Vietnam-specific citizen, tax, and historical mobile-number transforms."""
-    from flink_etl_udfs.udfs import research_domains as vietnam
+    """Register self-contained Vietnam citizen, tax, and mobile-number UDFs."""
+    from flink_etl_udfs.udfs import vietnam
 
     _register(
         table_env,
@@ -234,7 +234,7 @@ def register_geospatial_udfs(table_env: "TableEnvironment") -> None:
 
 
 def register_all_udfs(table_env: "TableEnvironment") -> None:
-    """Register every currently shipped curated scalar/async-scalar UDF pack."""
+    """Register every currently shipped curated scalar UDF pack."""
     register_default_udfs(table_env)
     register_common_udfs(table_env)
     register_internet_udfs(table_env)

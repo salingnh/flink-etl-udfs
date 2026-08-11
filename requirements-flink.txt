@@ -5,4 +5,4 @@
 # itself (local development, custom Docker images, custom venv archives).
 # Do not normally pass this file as per-job --pyRequirements to an official
 # matching Flink distribution, because that would reinstall PyFlink on workers.
-apache-flink==2.3.0
+apache-flink==2.2.1

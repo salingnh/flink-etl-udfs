@@ -32,8 +32,16 @@ def test_profile_extract_entrypoint_is_direct_sync_udf_object() -> None:
     assert assignment.value.args[0].id == "extract_profile_url_sync"
 
 
-def test_vietnam_phone_entrypoint_remains_direct_scalar_udf_object() -> None:
-    tree = _module_tree("udfs/research_domains.py")
+def test_vietnam_phone_entrypoint_is_self_contained_scalar_udf_object() -> None:
+    tree = _module_tree("udfs/vietnam.py")
+
+    imported_modules = {
+        node.module
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+    assert "flink_etl_udfs.core.vietnam" not in imported_modules
+    assert "flink_etl_udfs.core" not in imported_modules
 
     assignment = next(
         node
@@ -46,8 +54,8 @@ def test_vietnam_phone_entrypoint_remains_direct_scalar_udf_object() -> None:
     )
     assert isinstance(assignment.value, ast.Call)
     assert isinstance(assignment.value.func, ast.Name)
-    assert assignment.value.func.id == "_s"
+    assert assignment.value.func.id == "_string_udf"
     assert assignment.value.args
     argument = assignment.value.args[0]
-    assert isinstance(argument, ast.Attribute)
-    assert argument.attr == "normalize_vn_mobile_phone_value"
+    assert isinstance(argument, ast.Name)
+    assert argument.id == "_normalize_vn_mobile_phone"
