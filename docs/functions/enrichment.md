@@ -2,11 +2,11 @@
 
 Đăng ký bằng `register_enrichment_udfs(t_env)`.
 
-Nhóm `enrich_*` dành cho transform có I/O ra hệ thống ngoài. Khác với scalar UDF deterministic, các hàm này là asynchronous/nondeterministic và cần cấu hình timeout/retry/concurrency phù hợp trên Flink cluster.
+Nhóm `enrich_*` dành cho transform có I/O ra hệ thống ngoài. Khác với scalar UDF deterministic, các hàm này là nondeterministic, phải có timeout rõ ràng, và chỉ nên bật khi Python worker/TaskManager route được tới service.
 
 | Tên hiển thị | SQL function | Phạm vi | Mô tả | Giá trị trước → sau | Ví dụ SQL |
 | --- | --- | --- | --- | --- | --- |
-| Trích thông tin URL profile | `enrich_extract_profile_url` | Async REST enrichment | Nhận một URL profile HTTP(S), gọi `ExtractSource` với `parse_only=false`, `parse_display_name=false`, rồi trả phần tử đầu tiên trong `result` dưới dạng compact JSON. URL rỗng/sai trả `NULL`; lỗi transport/service raise exception để Flink có thể áp dụng retry/timeout thay vì âm thầm biến outage thành missing data. | `https://facebook.com/sangnv` → `{"actor_id":"100001614198876","actor_username":"sangnv",...,"platform":"facebook"}` | `SELECT enrich_extract_profile_url(profile_url) FROM profile_source;` |
+| Trích thông tin URL profile | `enrich_extract_profile_url` | Synchronous REST enrichment | Nhận một URL profile HTTP(S), gọi `ExtractSource` với `parse_only=false`, `parse_display_name=false`, rồi trả phần tử đầu tiên trong `result` dưới dạng compact JSON. URL rỗng/sai trả `NULL`; lỗi transport/service raise exception thay vì âm thầm biến outage thành missing data. Wrapper là scalar UDF đồng bộ để tương thích Flink 2.2.1 SQL Gateway. | `https://facebook.com/sangnv` → `{"actor_id":"100001614198876","actor_username":"sangnv",...,"platform":"facebook"}` | `SELECT enrich_extract_profile_url(profile_url) FROM profile_source;` |
 
 ## API contract mặc định
 

@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-import asyncio
+import importlib
+import inspect
 import json
+import sys
+import types
 
 import pytest
 
@@ -119,8 +122,48 @@ def test_extract_profile_url_raises_on_service_failure(monkeypatch) -> None:
         )
 
 
-def test_async_extract_profile_url_uses_non_blocking_wrapper(monkeypatch) -> None:
+def test_extract_profile_url_value_uses_sync_client(monkeypatch) -> None:
     expected = '{"platform":"facebook"}'
     monkeypatch.setattr(profile, "extract_profile_url_sync", lambda value: expected)
 
-    assert asyncio.run(profile.extract_profile_url_value("https://facebook.com/sangnv")) == expected
+    result = profile.extract_profile_url_value("https://facebook.com/sangnv")
+
+    assert result == expected
+    assert not inspect.isawaitable(result)
+
+
+def test_enrichment_udf_wraps_synchronous_profile_callable(monkeypatch) -> None:
+    calls: dict[str, object] = {}
+
+    def fake_udf(function, input_types, result_type, deterministic):
+        calls["function"] = function
+        calls["input_types"] = input_types
+        calls["result_type"] = result_type
+        calls["deterministic"] = deterministic
+        return {"wrapped": function}
+
+    pyflink_module = types.ModuleType("pyflink")
+    table_module = types.ModuleType("pyflink.table")
+    udf_module = types.ModuleType("pyflink.table.udf")
+    udf_module.udf = fake_udf
+    table_module.udf = udf_module
+    pyflink_module.table = table_module
+
+    monkeypatch.setitem(sys.modules, "pyflink", pyflink_module)
+    monkeypatch.setitem(sys.modules, "pyflink.table", table_module)
+    monkeypatch.setitem(sys.modules, "pyflink.table.udf", udf_module)
+    sys.modules.pop("flink_etl_udfs.udfs.enrichment", None)
+
+    try:
+        module = importlib.import_module("flink_etl_udfs.udfs.enrichment")
+
+        assert module.extract_profile_url == {"wrapped": profile.extract_profile_url_value}
+        assert calls == {
+            "function": profile.extract_profile_url_value,
+            "input_types": ["STRING"],
+            "result_type": "STRING",
+            "deterministic": False,
+        }
+        assert not inspect.iscoroutinefunction(calls["function"])
+    finally:
+        sys.modules.pop("flink_etl_udfs.udfs.enrichment", None)

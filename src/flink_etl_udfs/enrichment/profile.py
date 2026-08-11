@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import os
 from typing import Any, Optional
@@ -60,7 +59,7 @@ def _profile_extract_timeout_seconds() -> float:
     return timeout
 
 
-# Gọi đồng bộ API ExtractSource; hàm này được chạy trong thread bởi async wrapper phía dưới.
+# Gọi đồng bộ API ExtractSource.
 def extract_profile_url_sync(
     profile_url: Optional[str],
     *,
@@ -71,7 +70,7 @@ def extract_profile_url_sync(
 
     Invalid/blank profile URLs return ``None`` without making a request. Transport errors,
     non-success service responses, and malformed response payloads raise ``ProfileExtractError``
-    so the surrounding Flink async runtime can apply timeout/retry policy instead of silently
+    so the surrounding Flink runtime surfaces errors instead of silently
     turning infrastructure failures into missing data.
     """
     normalized_url = _normalize_profile_url(profile_url)
@@ -140,10 +139,9 @@ def extract_profile_url_sync(
     return json.dumps(results[0], ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
-# Async entrypoint dùng asyncio.to_thread để không block tuần tự Python async UDF khi HTTP client là stdlib sync.
-async def extract_profile_url_value(profile_url: Optional[str]) -> Optional[str]:
-    """Asynchronously extract normalized profile metadata for one HTTP(S) profile URL."""
-    return await asyncio.to_thread(extract_profile_url_sync, profile_url)
+def extract_profile_url_value(profile_url: Optional[str]) -> Optional[str]:
+    """Synchronously extract normalized profile metadata for one HTTP(S) profile URL."""
+    return extract_profile_url_sync(profile_url)
 
 
 __all__ = [

@@ -13,7 +13,6 @@ SRC = ROOT / "src" / "flink_etl_udfs"
 # fallback covering the standard-library imports used by this project.
 _FALLBACK_STDLIB = {
     "ast",
-    "asyncio",
     "datetime",
     "decimal",
     "hashlib",
@@ -32,7 +31,7 @@ _FALLBACK_STDLIB = {
 
 # Import name -> pip package/file that provides it.
 _EXTERNAL_IMPORTS = {
-    "pyflink": ("requirements-flink.txt", "apache-flink==2.3.0"),
+    "pyflink": ("requirements-flink.txt", "apache-flink==2.2.1"),
 }
 
 

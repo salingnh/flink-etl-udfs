@@ -1,6 +1,6 @@
 # flink-etl-udfs
 
-Curated **PyFlink UDF library for ETL normalization and controlled async enrichment**. Project ưu tiên generic transforms và chuẩn phổ biến, không tạo UDF chỉ vì dataset có tên field khác nhau.
+Curated **PyFlink UDF library for ETL normalization and controlled enrichment**. Project ưu tiên generic transforms và chuẩn phổ biến, không tạo UDF chỉ vì dataset có tên field khác nhau.
 
 ```text
 Generic transform / standard
@@ -13,17 +13,19 @@ Flink SQL registry
 
 External REST/API
         ↓
-Async enrichment client
+Synchronous enrichment client
         ↓
-Async PyFlink UDF (nondeterministic)
+PyFlink scalar UDF (nondeterministic)
 ```
 
-## Version 0.6.0
+## Version 0.6.1
 
-`0.6.0` có **69 public SQL UDF** và bổ sung hai capability:
+`0.6.1` có **69 public SQL UDF** và ưu tiên hai capability:
 
 - `vn_normalize_mobile_phone`: chuẩn hóa số di động Việt Nam về dạng quốc gia 10 chữ số và chuyển các đầu số 11 số cũ của đợt đổi mã mạng năm 2018 sang đầu số mới.
-- `enrich_extract_profile_url`: async REST enrichment cho URL profile, gọi service `ExtractSource` và trả metadata profile dưới dạng JSON.
+- `enrich_extract_profile_url`: synchronous REST enrichment cho URL profile, gọi service `ExtractSource` và trả metadata profile dưới dạng JSON; wrapper dùng scalar UDF để tương thích Flink 2.2.1 SQL Gateway.
+
+`0.6.0` bổ sung Vietnam mobile migration normalization và profile enrichment ban đầu.
 
 `0.5.0` trước đó là breaking cleanup, giảm public SQL surface từ 104 xuống 67 UDF và loại toàn bộ compatibility alias.
 
@@ -64,7 +66,7 @@ Các prefix SQL chính:
 | `security_*` / `cti_*` | Hash, CVE, STIX, MITRE ATT&CK |
 | `code_*` | Repository URL và Git object ID |
 | `osint_*` | Deterministic observation/account-handle semantics |
-| `enrich_*` | Async external REST/API enrichment |
+| `enrich_*` | Controlled external REST/API enrichment |
 | `vn_*` | CMND/CCCD, MST và quy tắc số di động đặc thù Việt Nam |
 | `finance_*` | IBAN, BIC, ISO 20022, LEI |
 | `health_*` | FHIR, HL7 v2, DICOM UID |
@@ -133,7 +135,7 @@ python -m pip install -e . --no-deps
 pytest
 ```
 
-Custom Python environment có PyFlink 2.3.0:
+Custom Python environment có PyFlink 2.2.1:
 
 ```bash
 python -m pip install -r requirements-flink.txt
@@ -148,14 +150,14 @@ python -m build
 
 ./bin/flink run \
   --python your_job.py \
-  --pyFiles dist/flink_etl_udfs-0.6.0-py3-none-any.whl \
+  --pyFiles dist/flink_etl_udfs-0.6.1-py3-none-any.whl \
   --pyRequirements requirements.txt
 ```
 
 ## Engineering rules
 
 - Preserve `NULL` theo mặc định.
-- Không gọi network/database/API từ **synchronous scalar UDF**. External I/O phải đi qua async enrichment/lookup với timeout, retry và concurrency control.
+- Network/database/API trong scalar UDF phải có timeout rõ ràng, được khai báo `deterministic=False`, và chỉ dùng cho lookup/enrichment có latency/capacity đã kiểm soát. Với tải lớn, ưu tiên Async I/O/lookup service bên ngoài job SQL.
 - Dùng Decimal semantics cho tiền, thuế và phí.
 - Search/blocking key không phải canonical identity.
 - Chỉ tạo country/domain UDF khi semantics thực sự khác generic layer.

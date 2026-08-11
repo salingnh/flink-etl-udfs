@@ -1,4 +1,4 @@
-"""PyFlink asynchronous UDF wrappers for external enrichment services."""
+"""PyFlink UDF wrappers for external enrichment services."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ def _build_extract_profile_url_udf():
     )
 
 
-# REST enrichment là nondeterministic và phải chạy dưới async scalar UDF của Flink.
+# REST enrichment is nondeterministic and uses a synchronous scalar UDF for Flink 2.2.x SQL.
 extract_profile_url = _build_extract_profile_url_udf()
 
 
