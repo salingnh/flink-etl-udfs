@@ -1,6 +1,6 @@
 # Danh mục hàm ETL / PyFlink UDF
 
-Repository dùng kiến trúc `pure Python core transform → thin PyFlink wrapper → SQL registry name` cho transform deterministic, và tách riêng `async enrichment client → async PyFlink UDF` cho external I/O. Thiết kế ưu tiên **generic/standard-first** thay vì tạo UDF theo tên dataset.
+Repository dùng kiến trúc `pure Python core transform → thin PyFlink wrapper → SQL registry name` cho transform deterministic, và tách riêng `enrichment client → PyFlink UDF` cho external I/O. Thiết kế ưu tiên **generic/standard-first** thay vì tạo UDF theo tên dataset.
 
 ## Quy ước đặt tên
 
@@ -9,11 +9,11 @@ Repository dùng kiến trúc `pure Python core transform → thin PyFlink wrapp
 - `security_*`: hash/CVE; `cti_*`: STIX/MITRE ATT&CK.
 - `code_*`: repository URL và Git object ID.
 - `osint_*`: semantics deterministic của OSINT observation/account handle.
-- `enrich_*`: external async enrichment; có network I/O và không deterministic.
+- `enrich_*`: external enrichment; có network I/O và không deterministic.
 - `vn_*`: quy tắc thật sự đặc thù Việt Nam như CMND/CCCD, MST và lịch sử đổi đầu số di động.
 - `finance_*`, `health_*`, `supply_*`, `iot_*`, `geo_*`: chuẩn/domain chuyên ngành rõ ràng.
 
-Không có compatibility alias trong `0.6.0`. Các tên legacy/dataset-specific đã bị xóa thay vì giữ wrapper chuyển tiếp.
+Không có compatibility alias trong `0.6.x`. Các tên legacy/dataset-specific đã bị xóa thay vì giữ wrapper chuyển tiếp.
 
 ## Mức validation
 
@@ -21,7 +21,7 @@ Không có compatibility alias trong `0.6.0`. Các tên legacy/dataset-specific 
 2. **Syntax validation**: kiểm tra hình thức, không xác minh registry.
 3. **Checksum validation**: kiểm tra mod/check digit khi implementation hỗ trợ.
 4. **Reference-data validation**: phải join/lookup nguồn versioned có thẩm quyền, không hard-code vào scalar UDF.
-5. **External enrichment**: gọi service/API bên ngoài; phải khai báo nondeterministic và có timeout/retry/concurrency policy.
+5. **External enrichment**: gọi service/API bên ngoài; phải khai báo nondeterministic, có timeout rõ ràng, và chạy trong môi trường đã kiểm soát route/capacity.
 
 ## Chuẩn được ưu tiên
 
