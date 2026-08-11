@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import os
 from typing import Any, Optional
@@ -60,7 +59,7 @@ def _profile_extract_timeout_seconds() -> float:
     return timeout
 
 
-# Gọi đồng bộ API ExtractSource; hàm này được chạy trong thread bởi async wrapper phía dưới.
+# Gọi đồng bộ API ExtractSource. PyFlink scalar UDF wrapper gọi trực tiếp hàm này.
 def extract_profile_url_sync(
     profile_url: Optional[str],
     *,
@@ -69,10 +68,10 @@ def extract_profile_url_sync(
 ) -> Optional[str]:
     """Call the profile-extraction API and return the first result object as compact JSON.
 
-    Invalid/blank profile URLs return ``None`` without making a request. Transport errors,
-    non-success service responses, and malformed response payloads raise ``ProfileExtractError``
-    so the surrounding Flink async runtime can apply timeout/retry policy instead of silently
-    turning infrastructure failures into missing data.
+    Invalid or blank profile URLs return ``None`` without making a request. Transport errors,
+    non-success service responses, and malformed response payloads raise ``ProfileExtractError``.
+    The function is intentionally synchronous so it can be wrapped directly by PyFlink's
+    general scalar ``udf(...)`` implementation, including Flink SQL Gateway 2.2.x runtimes.
     """
     normalized_url = _normalize_profile_url(profile_url)
     if normalized_url is None:
@@ -140,17 +139,10 @@ def extract_profile_url_sync(
     return json.dumps(results[0], ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
-# Async entrypoint dùng asyncio.to_thread để không block tuần tự Python async UDF khi HTTP client là stdlib sync.
-async def extract_profile_url_value(profile_url: Optional[str]) -> Optional[str]:
-    """Asynchronously extract normalized profile metadata for one HTTP(S) profile URL."""
-    return await asyncio.to_thread(extract_profile_url_sync, profile_url)
-
-
 __all__ = [
     "DEFAULT_PROFILE_EXTRACT_ENDPOINT",
     "PROFILE_EXTRACT_ENDPOINT_ENV",
     "PROFILE_EXTRACT_TIMEOUT_ENV",
     "ProfileExtractError",
     "extract_profile_url_sync",
-    "extract_profile_url_value",
 ]

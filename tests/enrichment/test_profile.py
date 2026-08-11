@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import json
 
 import pytest
@@ -119,8 +118,6 @@ def test_extract_profile_url_raises_on_service_failure(monkeypatch) -> None:
         )
 
 
-def test_async_extract_profile_url_uses_non_blocking_wrapper(monkeypatch) -> None:
-    expected = '{"platform":"facebook"}'
-    monkeypatch.setattr(profile, "extract_profile_url_sync", lambda value: expected)
-
-    assert asyncio.run(profile.extract_profile_url_value("https://facebook.com/sangnv")) == expected
+def test_extract_profile_url_sync_is_plain_function() -> None:
+    assert callable(profile.extract_profile_url_sync)
+    assert profile.extract_profile_url_sync.__name__ == "extract_profile_url_sync"
