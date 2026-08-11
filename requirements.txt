@@ -1,10 +1,11 @@
-# Third-party Python dependencies imported by flink-etl-udfs UDF/core code
+# Third-party Python dependencies imported by flink-etl-udfs worker-side code
 # and therefore candidates for Flink --pyRequirements distribution.
 #
-# Current state (v0.3.0): no third-party runtime libraries are imported by
-# the scalar transforms. Core functions use only the Python standard library;
-# PyFlink wrappers import `pyflink`, which is supplied by the matching Flink
-# runtime / Python environment rather than installed per job via --pyRequirements.
+# Current state (v0.6.0): no third-party runtime libraries are required.
+# Deterministic scalar transforms use the Python standard library. The asynchronous
+# profile-enrichment client uses asyncio + urllib from the standard library.
+# PyFlink wrappers import `pyflink`, which is supplied by the matching Flink runtime /
+# Python environment rather than installed per job via --pyRequirements.
 #
 # Add future worker-side dependencies here as soon as source code imports them,
 # for example:
