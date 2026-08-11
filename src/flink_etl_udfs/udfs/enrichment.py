@@ -1,7 +1,6 @@
 """PyFlink scalar UDF wrappers for external enrichment services."""
 
 from pyflink.table.udf import udf
-
 from flink_etl_udfs.enrichment.profile import extract_profile_url_sync
 
 
