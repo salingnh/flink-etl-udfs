@@ -32,7 +32,7 @@ _FALLBACK_STDLIB = {
 
 # Import name -> pip package/file that provides it.
 _EXTERNAL_IMPORTS = {
-    "pyflink": ("requirements-flink.txt", "apache-flink==2.3.0"),
+    "pyflink": ("requirements-flink.txt", "apache-flink==2.2.1"),
 }
 
 
