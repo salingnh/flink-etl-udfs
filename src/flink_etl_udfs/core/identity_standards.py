@@ -40,7 +40,6 @@ def _compact_upper_code(value: Optional[str]) -> Optional[str]:
     return compact if _GENERIC_CODE_RE.fullmatch(compact) else None
 
 
-# ICAO Doc 9303: build a stable ETL key from issuing State/organization and document number.
 def build_icao9303_document_id_value(
     issuer_country: Optional[str], document_number: Optional[str]
 ) -> Optional[str]:
@@ -58,7 +57,6 @@ def build_icao9303_document_id_value(
     return f"{issuer}:{document}"
 
 
-# ISO/IEC 18013-1: namespace a driving-licence number by country and issuing authority.
 def build_iso18013_driving_licence_id_value(
     issuer_country: Optional[str], issuer: Optional[str], licence_number: Optional[str]
 ) -> Optional[str]:
@@ -71,7 +69,6 @@ def build_iso18013_driving_licence_id_value(
     return f"{country}:{issuer_code}:{licence}"
 
 
-# ISO/IEC 18013-5: create an issuer-scoped mDL ETL identifier.
 def build_iso18013_mdl_id_value(
     issuer: Optional[str], document_identifier: Optional[str]
 ) -> Optional[str]:
@@ -83,7 +80,6 @@ def build_iso18013_mdl_id_value(
     return f"mdl:{issuer_value}:{document_value}"
 
 
-# ISO/IEC 23220: create an issuer/namespace-scoped mobile eID/mdoc ETL identifier.
 def build_iso23220_eid_id_value(
     issuer: Optional[str], namespace: Optional[str], document_id: Optional[str]
 ) -> Optional[str]:
@@ -96,7 +92,6 @@ def build_iso23220_eid_id_value(
     return f"eid:{issuer_value}:{namespace_value}:{document_value}"
 
 
-# ISO 3166-1: convert alpha-2/alpha-3 country codes to canonical alpha-3.
 def normalize_iso3166_alpha3_value(value: Optional[str]) -> Optional[str]:
     """Normalize ISO 3166-1 alpha-2 or alpha-3 code to an assigned alpha-3 code."""
     candidate = normalize_null_token_value(value)
@@ -104,9 +99,7 @@ def normalize_iso3166_alpha3_value(value: Optional[str]) -> Optional[str]:
         return None
     candidate = candidate.upper()
 
-    # Import lazily so unrelated UDF entrypoints remain importable if optional
-    # reference-data dependencies are packaged separately by an operator.
-    import pycountry  # type: ignore[import-untyped]
+    import pycountry
 
     if len(candidate) == 2:
         country = pycountry.countries.get(alpha_2=candidate)
@@ -117,7 +110,6 @@ def normalize_iso3166_alpha3_value(value: Optional[str]) -> Optional[str]:
     return str(country.alpha_3) if country is not None else None
 
 
-# OpenID Connect Core: iss + sub is the stable issuer-scoped subject key.
 def build_oidc_subject_key_value(issuer: Optional[str], subject_id: Optional[str]) -> Optional[str]:
     """Build an issuer-scoped OpenID Connect subject key from ``iss`` and ``sub``."""
     issuer_value = normalize_null_token_value(issuer)
@@ -130,7 +122,6 @@ def build_oidc_subject_key_value(issuer: Optional[str], subject_id: Optional[str
     return f"oidc:{quote(issuer_value, safe='-._~')}:{quote(subject_value, safe='-._~')}"
 
 
-# W3C ActivityStreams 2.0: Object id is an absolute IRI.
 def normalize_activitystreams_id_value(value: Optional[str]) -> Optional[str]:
     """Trim and structurally validate an absolute ActivityStreams object IRI."""
     candidate = normalize_null_token_value(value)
@@ -142,7 +133,6 @@ def normalize_activitystreams_id_value(value: Optional[str]) -> Optional[str]:
     return candidate
 
 
-# RFC 3986: conservative absolute-URI normalization without deleting query/fragment data.
 def normalize_rfc3986_uri_value(value: Optional[str]) -> Optional[str]:
     """Normalize an absolute RFC 3986 URI conservatively."""
     candidate = normalize_null_token_value(value)
@@ -179,7 +169,6 @@ def normalize_rfc3986_uri_value(value: Optional[str]) -> Optional[str]:
     )
 
 
-# ISO 26324: normalize DOI name from raw name, doi: prefix or doi.org resolver URL.
 def normalize_iso26324_doi_value(value: Optional[str]) -> Optional[str]:
     """Normalize an ISO 26324 DOI name without resolving it over the network."""
     candidate = normalize_null_token_value(value)
@@ -196,7 +185,6 @@ def normalize_iso26324_doi_value(value: Optional[str]) -> Optional[str]:
     return candidate if _DOI_RE.fullmatch(candidate) else None
 
 
-# ISO 3297: normalize ISSN and validate its modulo-11 check digit.
 def normalize_iso3297_issn_value(value: Optional[str]) -> Optional[str]:
     """Normalize and checksum-validate an ISSN according to ISO 3297."""
     candidate = normalize_null_token_value(value)
@@ -226,7 +214,6 @@ def _isbn13_check_digit(body: str) -> str:
     return str((10 - total % 10) % 10)
 
 
-# ISO 2108: normalize ISBN-10/ISBN-13 to canonical ISBN-13.
 def normalize_iso2108_isbn13_value(value: Optional[str]) -> Optional[str]:
     """Normalize an ISBN-10 or ISBN-13 to checksum-valid canonical ISBN-13."""
     candidate = normalize_null_token_value(value)
@@ -244,7 +231,6 @@ def normalize_iso2108_isbn13_value(value: Optional[str]) -> Optional[str]:
     return None
 
 
-# W3C DID Core: normalize the DID scheme/method while preserving method-specific id case.
 def normalize_w3c_did_value(value: Optional[str]) -> Optional[str]:
     """Normalize a generic W3C DID without applying method-specific rewrite rules."""
     candidate = normalize_null_token_value(value)
@@ -259,7 +245,6 @@ def normalize_w3c_did_value(value: Optional[str]) -> Optional[str]:
     return f"did:{method.lower()}:{method_specific_id}"
 
 
-# RFC 9562: canonical textual UUID/GUID representation.
 def normalize_rfc9562_uuid_value(value: Optional[str]) -> Optional[str]:
     """Normalize an RFC 9562 UUID/GUID string to lowercase canonical text."""
     candidate = normalize_null_token_value(value)
@@ -271,7 +256,6 @@ def normalize_rfc9562_uuid_value(value: Optional[str]) -> Optional[str]:
         return None
 
 
-# RFC 8141: normalize generic URN scheme/NID and percent-escape hex case.
 def normalize_rfc8141_urn_value(value: Optional[str]) -> Optional[str]:
     """Normalize a generic RFC 8141 URN without namespace-specific equivalence rules."""
     candidate = normalize_null_token_value(value)
