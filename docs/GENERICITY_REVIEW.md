@@ -1,60 +1,52 @@
-# Rà soát và cleanup tính generic
+# Rà soát genericity và standard-first cleanup
 
-Version `0.5.0` thực hiện breaking cleanup: **không giữ compatibility alias**. Function chỉ được giữ khi có giá trị ETL rõ ràng, semantics đủ tổng quát hoặc bám một chuẩn/domain cụ thể.
+Version `0.7.0` tiếp tục nguyên tắc breaking cleanup: **không giữ compatibility alias**.
 
-## Tiêu chí giữ function
+## Quy tắc giữ function
 
-Một UDF được giữ khi đáp ứng ít nhất một trong các tiêu chí:
+Một public UDF chỉ nên tồn tại khi có ít nhất một giá trị rõ ràng:
 
-- canonicalization có hành vi rõ ràng và tái sử dụng cao;
-- syntax/checksum theo chuẩn phổ biến;
-- quy tắc quốc gia/domain thực sự khác generic layer;
-- data-quality/provenance helper có semantics deterministic;
-- không cần I/O, registry lookup hoặc parser file/network ở từng row.
+- canonicalization tái sử dụng cao;
+- syntax/checksum/reference-data normalization theo chuẩn công khai;
+- quy tắc quốc gia thực sự khác generic/international layer;
+- provenance/masking/enrichment có semantics cụ thể và hữu ích.
 
-## Đã xóa hoàn toàn
+Nếu logic chỉ là `trim`, `upper`, `lower`, collapse whitespace hoặc range check đơn giản, ưu tiên SQL built-in/internal helper thay vì public UDF riêng.
 
-Các nhóm sau không còn core function, wrapper hay SQL alias legacy:
+## Standard-first naming
 
-- `vn_normalize_name`, `vn_name_search_key`, `vn_normalize_address`;
-- `vn_normalize_school_code`, `vn_normalize_teacher_code`, `vn_normalize_student_code`;
-- `vn_normalize_bank_account`, `vn_normalize_phone`, `vn_normalize_academic_year`, `vn_normalize_sms_brandname`, `vn_build_entity_blocking_key`;
-- `vn_classify_tax_id` với nhãn `enterprise/dependent_unit`;
-- OSINT vocabulary/heuristic như account classification, platform, entity type, exposure status, verification status, profile URL, confidence, ownership percentage;
-- scientific scalar helpers cho genomics/climate/astronomy;
-- insurance/ACORD scalar helpers;
-- telemetry-quality vocabulary, GTFS ID whitespace cleanup và DICOM modality uppercase helper.
+Khi function gắn trực tiếp với một chuẩn, public name phải bắt đầu bằng namespace của chuẩn:
 
-## Thay bằng generic/standard function
+```text
+iso8601_normalize_datetime_utc
+iso13616_normalize_iban
+iso17442_normalize_lei
+iso2108_normalize_isbn13
+rfc9562_normalize_uuid
+w3c_did_normalize
+stix21_normalize_id
+gs1_normalize_gtin
+```
 
-| Logic cũ | Dùng function hiện tại |
-| --- | --- |
-| Tên người Việt Nam | `etl_normalize_person_name` |
-| Search key tên Latin | `etl_latin_name_search_key` |
-| Địa chỉ text | `etl_normalize_address_text` |
-| Mã trường/học sinh/giáo viên/mã hồ sơ | `etl_normalize_identifier_code` |
-| Điện thoại Việt Nam | `etl_normalize_e164(phone, '+84')` |
-| Confidence score | `etl_normalize_probability` |
-| Tỷ lệ sở hữu | `etl_normalize_percentage` |
-| Observation timestamp | `etl_normalize_iso_datetime` |
-| Domain / URL / ASN / DNS / MIME | `net_*` |
-| Hash / CVE | `security_*` |
-| Git repository/object ID | `code_*` |
-| LEI | `finance_normalize_lei` |
+Không dùng domain prefix như `finance_*`, `publication_*`, `health_*`, `security_*` nếu chuẩn đã cung cấp namespace chính xác hơn.
 
-## Các function Việt Nam còn lại
+## Cleanup 0.7.0
 
-- `vn_normalize_citizen_id`
-- `vn_classify_identity_id`
-- `vn_normalize_tax_id`
-- `vn_classify_tax_id_structure`
+Đã loại khỏi public SQL surface các wrapper quá mỏng hoặc quá hẹp:
 
-Đây là các function có cấu trúc identifier thật sự phụ thuộc quy ước Việt Nam. `vn_classify_tax_id_structure` chỉ trả `base_10` / `extended_13`, không suy diễn loại hình pháp lý.
+- `digits_only`, `normalize_unicode_nfc`, `normalize_whitespace`, `null_if_blank`, `trim_text`;
+- `etl_normalize_percentage`, `etl_normalize_probability`, `etl_quality_is_present`, `etl_quality_number_in_range`;
+- ASN/DNS-record-type/MIME wrapper;
+- Git object hash normalize/classify wrapper;
+- OSINT username cleanup;
+- latitude/longitude range wrapper.
 
-## Các lĩnh vực được đưa ra khỏi scalar UDF
+Các implementation core có thể vẫn tồn tại nội bộ cho test/reuse nhưng không còn là public SQL contract.
 
-NetCDF/GRIB, FITS/WCS, BAM/CRAM/VCF/BCF, ACORD XML, GTFS feed validation, DICOM file parsing và các terminology/reference list thay đổi theo thời gian nên dùng parser/validator/reference-data layer chuyên dụng.
+## Country-specific layer
 
-## Nguyên tắc tiếp theo
+Giữ `vn_*` cho những semantics thật sự đặc thù Việt Nam: CMND/CCCD, cấu trúc MST và migration đầu số di động 11→10. Generic E.164 sử dụng public name `itu_e164_normalize_phone`.
 
-Nếu một function mới chỉ `trim + uppercase` nhưng không có data contract/standard riêng, ưu tiên dùng transform generic hoặc không tạo UDF mới. Nếu giá trị cần xác minh tồn tại trong registry, hãy join reference data thay vì hard-code danh mục vào Python scalar UDF.
+## Reference data
+
+Function như `iso3166_normalize_alpha3` phải kiểm tra/convert bằng reference data được duy trì, không được giả lập ISO compliance bằng regex. Lookup registry online hoặc danh mục thay đổi nhanh không nên hard-code vào từng scalar transform.
