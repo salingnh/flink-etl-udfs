@@ -32,6 +32,7 @@ _FALLBACK_STDLIB = {
 
 # Import name -> pip package/file that provides it.
 _EXTERNAL_IMPORTS = {
+    "pycountry": ("requirements.txt", "pycountry==24.6.1"),
     "pyflink": ("requirements-flink.txt", "apache-flink==2.2.1"),
 }
 
