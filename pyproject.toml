@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flink-etl-udfs"
-version = "0.6.1"
-description = "Curated PyFlink UDFs for deterministic ETL normalization, standards, privacy, data quality, and external enrichment."
+version = "0.7.0"
+description = "Curated PyFlink UDFs with standard-first naming for deterministic ETL normalization and controlled enrichment."
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "Apache-2.0"}
 authors = [{name = "SangNguyen"}]
-keywords = ["flink", "pyflink", "etl", "udf", "data-engineering", "data-quality"]
+keywords = ["flink", "pyflink", "etl", "udf", "data-engineering", "data-quality", "iso", "rfc"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: Apache Software License",
@@ -20,6 +20,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
 ]
+dependencies = ["pycountry==24.6.1"]
 
 [project.optional-dependencies]
 flink = ["apache-flink==2.2.1"]
@@ -47,7 +48,7 @@ target-version = "py39"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 # Keep Python 3.9-compatible annotations and avoid style-only churn in declaration-heavy UDF modules.
-ignore = ["E501", "UP012", "UP035", "UP037", "UP045"]
+ignore = ["E501", "UP006", "UP012", "UP035", "UP037", "UP045"]
 
 [tool.mypy]
 python_version = "3.9"

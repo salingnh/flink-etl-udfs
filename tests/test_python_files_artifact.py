@@ -30,6 +30,8 @@ def test_python_files_zip_has_importable_package_root(tmp_path: Path) -> None:
     assert "flink_etl_udfs/__init__.py" in names
     assert "flink_etl_udfs/udfs/enrichment.py" in names
     assert "flink_etl_udfs/udfs/vietnam.py" in names
+    assert "flink_etl_udfs/udfs/standards.py" in names
+    assert "flink_etl_udfs/public_api.py" in names
     assert not any(name.startswith("src/") for name in names)
 
 
@@ -65,6 +67,8 @@ sys.path.insert(0, sys.argv[1])
 
 enrichment = importlib.import_module("flink_etl_udfs.udfs.enrichment")
 vietnam = importlib.import_module("flink_etl_udfs.udfs.vietnam")
+standards = importlib.import_module("flink_etl_udfs.udfs.standards")
+public_api = importlib.import_module("flink_etl_udfs.public_api")
 
 assert enrichment.extract_profile_url["function"].__module__ == "flink_etl_udfs.enrichment.profile"
 assert enrichment.extract_profile_url["function"].__name__ == "extract_profile_url_sync"
@@ -74,6 +78,13 @@ assert vietnam.normalize_vn_mobile_phone["function"].__module__ == "flink_etl_ud
 assert vietnam.normalize_vn_mobile_phone["function"].__name__ == "_normalize_vn_mobile_phone"
 assert vietnam.normalize_vn_mobile_phone["deterministic"] is True
 assert "flink_etl_udfs.core.vietnam" not in sys.modules
+
+assert standards.iso2108_normalize_isbn13["function"].__name__ == "normalize_iso2108_isbn13_value"
+assert standards.rfc9562_normalize_uuid["function"].__name__ == "normalize_rfc9562_uuid_value"
+assert standards.iso3166_normalize_alpha3["function"].__name__ == "normalize_iso3166_alpha3_value"
+assert public_api.PUBLIC_FUNCTIONS["iso2108_normalize_isbn13"]["entrypoint"] == (
+    "flink_etl_udfs.udfs.standards.iso2108_normalize_isbn13"
+)
 '''
 
     subprocess.run(

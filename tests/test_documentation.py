@@ -1,36 +1,14 @@
-"""Documentation-contract tests for public transforms and registered SQL UDFs."""
+"""Documentation and naming-contract tests for the curated SQL-facing UDF API."""
 
 from __future__ import annotations
 
 import ast
 from pathlib import Path
 
+from flink_etl_udfs.public_api import PUBLIC_FUNCTIONS
+
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src" / "flink_etl_udfs"
-
-
-def _registered_sql_names() -> set[str]:
-    tree = ast.parse((SRC / "registry.py").read_text(encoding="utf-8"))
-    names: set[str] = set()
-    for node in tree.body:
-        if not isinstance(node, ast.FunctionDef):
-            continue
-        if not node.name.startswith("register_") or node.name == "register_all_udfs":
-            continue
-        for child in ast.walk(node):
-            if not isinstance(child, ast.Dict):
-                continue
-            for key in child.keys:
-                if isinstance(key, ast.Constant) and isinstance(key.value, str):
-                    names.add(key.value)
-    return names
-
-
-def _function_doc_lines() -> list[str]:
-    lines: list[str] = []
-    for path in sorted((ROOT / "docs" / "functions").glob("*.md")):
-        lines.extend(path.read_text(encoding="utf-8").splitlines())
-    return lines
 
 
 def test_every_public_core_function_has_docstring() -> None:
@@ -45,28 +23,59 @@ def test_every_public_core_function_has_docstring() -> None:
     assert not missing, f"public core functions missing docstrings: {missing}"
 
 
-def test_function_catalog_mentions_every_registered_sql_udf() -> None:
-    catalog_parts = [
-        (ROOT / "docs" / "FUNCTION_CATALOG.md").read_text(encoding="utf-8"),
-        *(path.read_text(encoding="utf-8") for path in sorted((ROOT / "docs" / "functions").glob("*.md"))),
-    ]
-    catalog = "\n".join(catalog_parts)
-    missing = sorted(name for name in _registered_sql_names() if f"`{name}`" not in catalog)
-    assert not missing, f"registered UDFs missing from function catalog: {missing}"
+def test_public_api_has_unique_standard_first_metadata() -> None:
+    assert PUBLIC_FUNCTIONS
+    entrypoints = [metadata["entrypoint"] for metadata in PUBLIC_FUNCTIONS.values()]
+    assert len(entrypoints) == len(set(entrypoints)), "public entrypoints must not be duplicated"
+
+    for func_key, metadata in PUBLIC_FUNCTIONS.items():
+        assert func_key == func_key.lower()
+        assert metadata["name"].strip()
+        assert metadata["entrypoint"].startswith("flink_etl_udfs.udfs.")
+        standard = metadata["standard"]
+        if standard is not None:
+            standard_prefix = standard.casefold().split()[0].replace("/", "_").replace("-", "")
+            if standard_prefix == "itu_t":
+                assert func_key.startswith("itu_")
+            elif standard_prefix in {"hl7", "w3c", "mitre", "openid", "icao", "dlms", "opc", "gs1"}:
+                # These standards use readable namespace prefixes rather than a raw token transform.
+                assert func_key.split("_", 1)[0] in {
+                    "hl7v2",
+                    "fhir",
+                    "w3c",
+                    "mitre",
+                    "oidc",
+                    "icao9303",
+                    "dlms",
+                    "opcua",
+                    "gs1",
+                    "stix21",
+                }
+            elif standard.startswith("ISO"):
+                assert func_key.startswith("iso")
+            elif standard.startswith("RFC"):
+                assert func_key.startswith("rfc")
+            elif standard.startswith("STIX"):
+                assert func_key.startswith("stix21_")
+            elif standard == "CVE":
+                assert func_key.startswith("cve_")
+            elif standard == "DICOM":
+                assert func_key.startswith("dicom_")
+            elif standard == "EPSG":
+                assert func_key.startswith("epsg_")
 
 
-def test_every_registered_udf_has_before_after_and_sql_usage_example() -> None:
-    """Keep user-facing docs actionable as new UDFs are added."""
-    lines = _function_doc_lines()
-    incomplete: list[str] = []
+def test_function_catalog_mentions_every_public_sql_udf() -> None:
+    catalog = (ROOT / "docs" / "FUNCTION_CATALOG.md").read_text(encoding="utf-8")
+    missing = sorted(name for name in PUBLIC_FUNCTIONS if f"`{name}`" not in catalog)
+    assert not missing, f"public UDFs missing from function catalog: {missing}"
 
-    for name in sorted(_registered_sql_names()):
-        candidate_rows = [line for line in lines if f"`{name}`" in line and line.startswith("|")]
-        documented = any("→" in row and "SELECT" in row for row in candidate_rows)
-        if not documented:
-            incomplete.append(name)
 
-    assert not incomplete, (
-        "registered UDFs need a table row with before→after and SELECT usage examples: "
-        f"{incomplete}"
+def test_function_catalog_uses_standard_first_display_names() -> None:
+    catalog = (ROOT / "docs" / "FUNCTION_CATALOG.md").read_text(encoding="utf-8")
+    missing = sorted(
+        func_key
+        for func_key, metadata in PUBLIC_FUNCTIONS.items()
+        if metadata["name"] not in catalog
     )
+    assert not missing, f"public display names missing from catalog: {missing}"

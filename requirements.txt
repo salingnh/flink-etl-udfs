@@ -1,11 +1,10 @@
 # Third-party Python dependencies imported by flink-etl-udfs worker-side code
 # and therefore candidates for Flink --pyRequirements distribution.
 #
-# Current state (v0.6.1): no third-party runtime libraries are required.
-# Deterministic scalar transforms and the profile-enrichment HTTP client use only
-# the Python standard library. PyFlink UDF wrapper modules import `pyflink`, which
-# is supplied by the matching Flink runtime / Python environment rather than
-# installed per job via --pyRequirements.
-#
-# Add future worker-side dependencies here as soon as source code imports them.
-# Keep this file production-only: do not add pytest, ruff, mypy, or build tools.
+# pycountry 24.6.1 is intentionally pinned because it supports Python >=3.8,
+# including this project's Python 3.9 baseline. Newer pycountry 26.x requires
+# Python >=3.10.
+pycountry==24.6.1
+
+# PyFlink itself is supplied by the matching Flink runtime / Python environment
+# and must not be reinstalled per job through this file.

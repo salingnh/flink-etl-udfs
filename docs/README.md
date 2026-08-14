@@ -13,16 +13,9 @@ Thư mục này chứa research, deployment guide và catalog của public PyFli
 
 - [Python dependency và deploy lên Flink cluster](DEPLOYMENT.md)
 
-## Danh mục function
+## Public function catalog
 
-- [Tổng quan function catalog](FUNCTION_CATALOG.md)
-- [Generic / Default / P0 common](functions/default-common.md)
-- [Internet, Security / CTI và Source Code](functions/internet-security-code.md)
-- [OSINT](functions/osint.md)
-- [External enrichment / REST lookup](functions/enrichment.md)
-- [Việt Nam: dân cư, thuế và số di động](functions/vietnam.md)
-- [Chuẩn quốc tế và domain chuyên ngành](functions/standards.md)
+- [Danh mục 66 public UDF và standard-first naming](FUNCTION_CATALOG.md)
+- `src/flink_etl_udfs/public_api.py` là machine-readable source of truth cho SQL name, display name và Python entrypoint.
 
-Version `0.5.0` không giữ compatibility alias. Version `0.6.0` bổ sung Vietnam mobile migration normalization và REST enrichment ban đầu. Version `0.6.1` chỉnh profile enrichment thành scalar UDF đồng bộ tương thích Flink 2.2.1 SQL Gateway mà không khôi phục các alias đã xóa.
-
-Mỗi SQL UDF còn lại phải có tên hiển thị tiếng Việt, phạm vi validation, mô tả semantics, ví dụ trước → sau, SQL usage, core/client docstring/comment và unit test hoặc mocked-I/O test.
+Version `0.7.0` là breaking cleanup: loại `registry.py`, không giữ compatibility alias, đổi các function gắn với chuẩn sang tên `<standard>_<operation>_<subject>` và bổ sung nhóm ICAO/ISO/RFC/W3C/OIDC từ identity/identifier catalog.

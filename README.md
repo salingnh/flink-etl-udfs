@@ -1,137 +1,113 @@
 # flink-etl-udfs
 
-Curated **PyFlink UDF library for ETL normalization and controlled enrichment**. Project ưu tiên generic transforms và chuẩn phổ biến, không tạo UDF chỉ vì dataset có tên field khác nhau.
+Curated PyFlink UDF library for deterministic ETL normalization and controlled enrichment.
+
+## Version 0.7.0 — standard-first public API
+
+Public SQL names now follow:
 
 ```text
-Generic transform / standard
-        ↓
-Country/domain function khi thật sự cần
-        ↓
-Thin PyFlink UDF wrapper
-        ↓
-Flink SQL registry
-
-External REST/API
-        ↓
-Synchronous enrichment client
-        ↓
-PyFlink scalar UDF (nondeterministic)
+<standard>_<operation>_<subject>
 ```
 
-## Version 0.6.1
+Examples:
 
-`0.6.1` có **69 public SQL UDF** và ưu tiên hai capability:
+```text
+iso8601_normalize_datetime_utc
+iso13616_normalize_iban
+iso2108_normalize_isbn13
+iso3166_normalize_alpha3
+rfc3986_normalize_uri
+rfc9562_normalize_uuid
+w3c_did_normalize
+stix21_normalize_id
+gs1_normalize_gtin
+```
 
-- `vn_normalize_mobile_phone`: chuẩn hóa số di động Việt Nam về dạng quốc gia 10 chữ số và chuyển các đầu số 11 số cũ của đợt đổi mã mạng năm 2018 sang đầu số mới.
-- `enrich_extract_profile_url`: synchronous REST enrichment cho URL profile, gọi service `ExtractSource` và trả metadata profile dưới dạng JSON; wrapper dùng scalar UDF để tương thích Flink 2.2.1 SQL Gateway.
+When no single external standard owns the semantics, the name uses a precise generic namespace such as `etl_*`, `url_*`, `dns_*`, `ip_*`, `hash_*`, `osint_*` or `vn_*`.
 
-`0.6.0` bổ sung Vietnam mobile migration normalization và profile enrichment ban đầu. `0.5.0` trước đó là breaking cleanup, giảm public SQL surface từ 104 xuống 67 UDF và loại toàn bộ compatibility alias.
+`0.7.0` is intentionally breaking: legacy SQL names and `registry.py` were removed instead of keeping aliases.
 
-## Documentation
+## Public API
 
-- [`docs/FUNCTION_CATALOG.md`](docs/FUNCTION_CATALOG.md) — toàn bộ 69 SQL UDF với tên hiển thị tiếng Việt, phạm vi validation, trước → sau và SQL example.
-- [`docs/GENERICITY_REVIEW.md`](docs/GENERICITY_REVIEW.md) — tiêu chí giữ/xóa function trong cleanup `0.5.0`.
-- [`docs/ETL_RESEARCH.md`](docs/ETL_RESEARCH.md) — research ETL theo lĩnh vực và parser-vs-UDF boundary.
-- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — dependency và cách deploy Python UDF lên Flink cluster.
-
-## Domain packs hiện tại
+The source of truth for SQL name, display name and Python entrypoint is:
 
 ```python
-from flink_etl_udfs.registry import (
-    register_all_udfs,
-    register_code_udfs,
-    register_common_udfs,
-    register_default_udfs,
-    register_enrichment_udfs,
-    register_finance_udfs,
-    register_geospatial_udfs,
-    register_healthcare_udfs,
-    register_industrial_udfs,
-    register_internet_udfs,
-    register_osint_udfs,
-    register_security_udfs,
-    register_supply_chain_udfs,
-    register_vietnam_udfs,
-)
+from flink_etl_udfs.public_api import PUBLIC_FUNCTIONS
 ```
 
-Các prefix SQL chính:
+See [`docs/FUNCTION_CATALOG.md`](docs/FUNCTION_CATALOG.md) for the complete **66-function** public surface.
 
-| Prefix | Phạm vi |
-| --- | --- |
-| `etl_*` | Generic normalization, JSON, time, decimal, data quality, provenance |
-| `net_*` | Domain, URL, DNS, ASN, MIME |
-| `security_*` / `cti_*` | Hash, CVE, STIX, MITRE ATT&CK |
-| `code_*` | Repository URL và Git object ID |
-| `osint_*` | Deterministic observation/account-handle semantics |
-| `enrich_*` | Controlled external REST/API enrichment |
-| `vn_*` | CMND/CCCD, MST và quy tắc số di động đặc thù Việt Nam |
-| `finance_*` | IBAN, BIC, ISO 20022, LEI |
-| `health_*` | FHIR, HL7 v2, DICOM UID |
-| `supply_*` | GS1 GTIN, SSCC, EPCIS |
-| `iot_*` | OPC UA NodeId, DLMS/COSEM OBIS |
-| `geo_*` | Latitude, longitude, EPSG code |
+## New standards added from the identity/identifier catalog
 
-## Ví dụ dân cư / thuế
+- ICAO Doc 9303 travel-document key
+- ISO/IEC 18013-1 driving-licence key
+- ISO/IEC 18013-5 mDL key
+- ISO/IEC 23220 mobile eID/mdoc key
+- ISO 3166-1 alpha-2/alpha-3 → alpha-3 normalization
+- OpenID Connect `iss + sub` subject key
+- W3C ActivityStreams 2.0 object IRI
+- RFC 3986 URI normalization
+- ISO 26324 DOI
+- ISO 3297 ISSN
+- ISO 2108 ISBN-13
+- W3C DID Core
+- RFC 9562 UUID
+- RFC 8141 URN
 
-```sql
-SELECT
-    etl_normalize_person_name(full_name)              AS full_name_norm,
-    vn_normalize_mobile_phone(phone)                  AS phone_vn,
-    etl_normalize_e164(vn_normalize_mobile_phone(phone), '+84') AS phone_e164,
-    etl_normalize_address_text(address)               AS address_norm,
-    vn_normalize_citizen_id(citizen_id)               AS citizen_id_norm,
-    vn_normalize_tax_id(tax_id)                       AS tax_id_norm,
-    vn_classify_tax_id_structure(tax_id)              AS tax_id_structure
-FROM citizen_tax_source;
+Existing domain-prefixed standard functions were renamed to their standards, for example `finance_normalize_iban → iso13616_normalize_iban` and `security_normalize_cve → cve_normalize_id`.
+
+## SQL Gateway deployment
+
+Build a self-contained `python.files` ZIP. The normal CLI build vendors `requirements.txt` reference-data dependencies into the archive:
+
+```bash
+python scripts/build_python_files_zip.py
 ```
 
-```text
-"  Nguyễn   Văn An "        → "Nguyễn Văn An"
-"0169 123 4567"             → "0391234567"
-"+84 912 345 678"           → "0912345678"
-"12 Nguyễn Trãi,   Hà Nội"  → "12 Nguyễn Trãi, Hà Nội"
-"034 190 006 609"           → "034190006609"
-"0101234567001"             → "0101234567-001"
-```
-
-## Ví dụ profile enrichment
-
-Đăng ký trực tiếp trong SQL Gateway bằng fully-qualified Python object path:
+Upload `dist/flink_etl_udfs.zip`, then register only the UDFs required by the SQL session:
 
 ```sql
 SET 'python.files' = 's3://fusion_center/transform-library/flink_etl_udfs.zip';
 
-CREATE TEMPORARY SYSTEM FUNCTION ENRICH_EXTRACT_PROFILE_URL
-AS 'flink_etl_udfs.udfs.enrichment.extract_profile_url'
+CREATE TEMPORARY SYSTEM FUNCTION ISO2108_NORMALIZE_ISBN13
+AS 'flink_etl_udfs.udfs.standards.iso2108_normalize_isbn13'
+LANGUAGE PYTHON;
+
+CREATE TEMPORARY SYSTEM FUNCTION ISO3166_NORMALIZE_ALPHA3
+AS 'flink_etl_udfs.udfs.standards.iso3166_normalize_alpha3'
 LANGUAGE PYTHON;
 
 SELECT
-    profile_url,
-    ENRICH_EXTRACT_PROFILE_URL(profile_url) AS profile_source_json
-FROM profile_source;
+    ISO2108_NORMALIZE_ISBN13('0-306-40615-2') AS isbn13,
+    ISO3166_NORMALIZE_ALPHA3('VN') AS country_alpha3;
 ```
 
-Endpoint mặc định có thể override trên TaskManager/Python worker:
+See [`examples/sql_gateway.sql`](examples/sql_gateway.sql).
 
-```bash
-export FLINK_ETL_PROFILE_EXTRACT_ENDPOINT='http://profile-service:31263/api/scrap-command/v1/Scrap/ExtractSource'
-export FLINK_ETL_PROFILE_EXTRACT_TIMEOUT_SECONDS='10'
-```
+## Vietnam-specific functions
 
-## Ví dụ internet / security
+Country-specific logic remains under `vn_*` only when the semantics genuinely differ from a generic/international standard:
 
 ```sql
 SELECT
-    net_normalize_domain(domain),
-    net_canonicalize_url(source_url),
-    security_normalize_cve(cve_id),
-    security_normalize_hex_hash(file_hash),
-    cti_normalize_attack_technique_id(technique_id)
-FROM security_source;
+    VN_NORMALIZE_MOBILE_PHONE(phone) AS phone_vn,
+    VN_NORMALIZE_CITIZEN_ID(citizen_id) AS citizen_id,
+    VN_NORMALIZE_TAX_ID(tax_id) AS tax_id
+FROM source_table;
 ```
 
-## Install
+The mobile normalizer includes the closed 2018 migration from legacy 11-digit Vietnamese mobile prefixes to current 10-digit prefixes.
+
+## Generic functions retained
+
+The cleanup keeps reusable transforms such as address/name normalization, JSON canonicalization/flattening, email/IP normalization, masking/fingerprinting, URL/domain cleanup, stable record IDs and controlled profile enrichment.
+
+Low-value public wrappers that are easy to express with built-in SQL or were excessively narrow were removed, including raw trim/whitespace/NFC wrappers, `digits_only`, generic range/probability wrappers, ASN/DNS-record/MIME wrappers, Git hash wrappers, OSINT username cleanup and latitude/longitude range wrappers.
+
+## Dependencies
+
+`pycountry==24.6.1` provides versioned ISO 3166 reference data while retaining Python 3.9 compatibility. PyFlink remains supplied by the Flink 2.2.1 runtime and is not installed from worker `requirements.txt`.
 
 Development:
 
@@ -141,34 +117,13 @@ python -m pip install -e . --no-deps
 pytest
 ```
 
-Custom Python environment có PyFlink 2.2.1:
-
-```bash
-python -m pip install -r requirements-flink.txt
-python -m pip install -r requirements.txt
-python -m pip install . --no-deps
-```
-
-## Deploy
-
-```bash
-python -m build
-
-./bin/flink run \
-  --python your_job.py \
-  --pyFiles dist/flink_etl_udfs-0.6.1-py3-none-any.whl \
-  --pyRequirements requirements.txt
-```
-
 ## Engineering rules
 
-- Preserve `NULL` theo mặc định.
-- Network/database/API trong scalar UDF phải có timeout rõ ràng, `deterministic=False`, và chỉ dùng cho lookup/enrichment có latency/capacity đã kiểm soát. Với tải lớn, ưu tiên Async I/O/lookup service bên ngoài job SQL.
-- Dùng Decimal semantics cho tiền, thuế và phí.
-- Search/blocking key không phải canonical identity.
-- Chỉ tạo country/domain UDF khi semantics thực sự khác generic layer.
-- Danh mục thay đổi theo thời gian phải dùng reference data, không hard-code vào UDF; ngoại lệ là migration rule lịch sử đã đóng và có nguồn chuẩn như đổi đầu số di động năm 2018.
-- File/schema/protocol nặng như DICOM files, FHIR profiles, ACORD XML, NetCDF/GRIB, FITS/WCS, VCF/BCF/BAM, GTFS feed validation... phải dùng parser/validator chuyên dụng trước hoặc song song với Flink SQL.
+- Prefer named standards over domain labels when a function implements a specific standard.
+- Do not claim full standard compliance when a function performs only syntax/checksum normalization.
+- Registry membership and mutable reference data must use maintained reference datasets.
+- Keep external REST enrichment nondeterministic and bounded by timeout/capacity.
+- Preserve raw values alongside normalized values when normalization may be lossy.
 
 ## License
 
