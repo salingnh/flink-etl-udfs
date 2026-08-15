@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from typing import Optional
+from urllib.parse import urlsplit
 
 from flink_etl_udfs.core.common import normalize_null_token_value
 
@@ -18,11 +19,18 @@ def _gs1_check_digit_valid(digits: str) -> bool:
     return check == expected
 
 
+def _strip_gs1_prefix(candidate: str, label: str, ai: str) -> str:
+    candidate = re.sub(rf"(?i)^{label}\s*[:#-]?\s*", "", candidate)
+    candidate = re.sub(rf"^\({ai}\)\s*", "", candidate)
+    return candidate
+
+
 def normalize_gtin_value(value: Optional[str]) -> Optional[str]:
-    """Normalize and validate GTIN-8/12/13/14 values using the GS1 check digit."""
+    """TRY_PARSE common GTIN labels/GS1 AI (01) and validate the GS1 check digit."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
+    candidate = _strip_gs1_prefix(candidate, "GTIN", "01")
     digits = re.sub(r"[\s-]+", "", candidate)
     if len(digits) not in {8, 12, 13, 14} or not digits.isdigit():
         return None
@@ -30,10 +38,11 @@ def normalize_gtin_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_sscc_value(value: Optional[str]) -> Optional[str]:
-    """Normalize and validate an 18-digit SSCC using the GS1 check digit."""
+    """TRY_PARSE common SSCC labels/GS1 AI (00) and validate the GS1 check digit."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
+    candidate = _strip_gs1_prefix(candidate, "SSCC", "00")
     digits = re.sub(r"[\s-]+", "", candidate)
     if len(digits) != 18 or not digits.isdigit():
         return None
@@ -41,10 +50,15 @@ def normalize_sscc_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_epcis_event_type_value(value: Optional[str]) -> Optional[str]:
-    """Normalize EPCIS event-type aliases to the canonical GS1 EPCIS class name."""
+    """Normalize EPCIS event-type aliases/IRIs to the canonical event class name."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
+    if "://" in candidate:
+        try:
+            candidate = urlsplit(candidate).path.rstrip("/").rsplit("/", 1)[-1]
+        except ValueError:
+            return None
     key = re.sub(r"[^a-z]", "", candidate.casefold())
     mapping = {
         "objectevent": "ObjectEvent",
