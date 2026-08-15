@@ -12,17 +12,30 @@ from flink_etl_udfs.core.common import normalize_null_token_value
 _PERCENT_ESCAPE_RE = re.compile(r"%[0-9A-Fa-f]{2}")
 _GENERIC_CODE_RE = re.compile(r"^[A-Z0-9._/-]+$")
 _ICAO_DOCUMENT_RE = re.compile(r"^[A-Z0-9<]{1,20}$")
-_UUID_TEXT_RE = re.compile(
-    r"^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-"
-    r"[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
-)
 _DID_RE = re.compile(r"^did:([A-Za-z0-9]+):(.+)$", re.IGNORECASE)
 _URN_RE = re.compile(r"^urn:([A-Za-z0-9][A-Za-z0-9-]{0,31}):(.+)$", re.IGNORECASE)
 _DOI_RE = re.compile(r"^10\.\d{4,9}/\S+$", re.IGNORECASE)
+_UNRESERVED = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~")
+
+
+def _strip_angle_brackets(value: str) -> str:
+    candidate = value.strip()
+    if candidate.startswith("<") and candidate.endswith(">"):
+        return candidate[1:-1].strip()
+    return candidate
+
+
+def _normalize_percent_encoding(value: str, *, decode_unreserved: bool) -> str:
+    def replace(match: re.Match[str]) -> str:
+        encoded = match.group(0).upper()
+        decoded = chr(int(encoded[1:], 16))
+        return decoded if decode_unreserved and decoded in _UNRESERVED else encoded
+
+    return _PERCENT_ESCAPE_RE.sub(replace, value)
 
 
 def _uppercase_percent_escapes(value: str) -> str:
-    return _PERCENT_ESCAPE_RE.sub(lambda match: match.group(0).upper(), value)
+    return _normalize_percent_encoding(value, decode_unreserved=False)
 
 
 def _encoded_component(value: Optional[str]) -> Optional[str]:
@@ -93,20 +106,26 @@ def build_iso23220_eid_id_value(
 
 
 def normalize_iso3166_alpha3_value(value: Optional[str]) -> Optional[str]:
-    """Normalize ISO 3166-1 alpha-2 or alpha-3 code to an assigned alpha-3 code."""
+    """TRY_PARSE ISO 3166 alpha-2/alpha-3/numeric/exact country names to alpha-3."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
-    candidate = candidate.upper()
 
     import pycountry
 
-    if len(candidate) == 2:
-        country = pycountry.countries.get(alpha_2=candidate)
-    elif len(candidate) == 3:
-        country = pycountry.countries.get(alpha_3=candidate)
+    country = None
+    upper = candidate.upper()
+    if re.fullmatch(r"[A-Za-z]{2}", candidate):
+        country = pycountry.countries.get(alpha_2=upper)
+    elif re.fullmatch(r"[A-Za-z]{3}", candidate):
+        country = pycountry.countries.get(alpha_3=upper)
+    elif re.fullmatch(r"\d{3}", candidate):
+        country = pycountry.countries.get(numeric=candidate)
     else:
-        return None
+        try:
+            country = pycountry.countries.lookup(candidate)
+        except LookupError:
+            country = None
     return str(country.alpha_3) if country is not None else None
 
 
@@ -123,9 +142,12 @@ def build_oidc_subject_key_value(issuer: Optional[str], subject_id: Optional[str
 
 
 def normalize_activitystreams_id_value(value: Optional[str]) -> Optional[str]:
-    """Trim and structurally validate an absolute ActivityStreams object IRI."""
+    """Normalize a common angle-bracket/bare ActivityStreams absolute IRI representation."""
     candidate = normalize_null_token_value(value)
-    if candidate is None or re.search(r"\s", candidate):
+    if candidate is None:
+        return None
+    candidate = _strip_angle_brackets(candidate)
+    if re.search(r"\s", candidate):
         return None
     parsed = urlsplit(candidate)
     if not parsed.scheme:
@@ -136,7 +158,10 @@ def normalize_activitystreams_id_value(value: Optional[str]) -> Optional[str]:
 def normalize_rfc3986_uri_value(value: Optional[str]) -> Optional[str]:
     """Normalize an absolute RFC 3986 URI conservatively."""
     candidate = normalize_null_token_value(value)
-    if candidate is None or re.search(r"\s", candidate):
+    if candidate is None:
+        return None
+    candidate = _strip_angle_brackets(candidate)
+    if re.search(r"\s", candidate):
         return None
     parsed = urlsplit(candidate)
     if not parsed.scheme:
@@ -152,8 +177,11 @@ def normalize_rfc3986_uri_value(value: Optional[str]) -> Optional[str]:
             return None
         if hostname is None:
             return None
+        try:
+            host = hostname.encode("idna").decode("ascii").lower()
+        except UnicodeError:
+            return None
         userinfo = netloc.rsplit("@", 1)[0] + "@" if "@" in netloc else ""
-        host = hostname.lower()
         if ":" in host and not host.startswith("["):
             host = f"[{host}]"
         netloc = userinfo + host + (f":{port}" if port is not None else "")
@@ -162,35 +190,45 @@ def normalize_rfc3986_uri_value(value: Optional[str]) -> Optional[str]:
         (
             scheme,
             netloc,
-            _uppercase_percent_escapes(parsed.path),
-            _uppercase_percent_escapes(parsed.query),
-            _uppercase_percent_escapes(parsed.fragment),
+            _normalize_percent_encoding(parsed.path, decode_unreserved=True),
+            _normalize_percent_encoding(parsed.query, decode_unreserved=True),
+            _normalize_percent_encoding(parsed.fragment, decode_unreserved=True),
         )
     )
 
 
 def normalize_iso26324_doi_value(value: Optional[str]) -> Optional[str]:
-    """Normalize an ISO 26324 DOI name without resolving it over the network."""
+    """TRY_PARSE common DOI labels/resolver URLs to a canonical DOI name."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
+    candidate = _strip_angle_brackets(candidate)
     lowered = candidate.casefold()
-    if lowered.startswith("doi:"):
-        candidate = candidate[4:].strip()
-    elif lowered.startswith("https://doi.org/"):
-        candidate = candidate[len("https://doi.org/") :]
-    elif lowered.startswith("http://doi.org/"):
-        candidate = candidate[len("http://doi.org/") :]
+    candidate = re.sub(r"(?i)^DOI\s*[:#]?\s*", "", candidate).strip()
+
+    try:
+        parsed = urlsplit(candidate)
+    except ValueError:
+        return None
+    if parsed.scheme in {"http", "https"} and parsed.hostname and parsed.hostname.casefold() in {
+        "doi.org",
+        "dx.doi.org",
+        "www.doi.org",
+    }:
+        candidate = parsed.path.lstrip("/")
+    elif lowered.startswith(("http://", "https://")):
+        return None
+
     candidate = candidate.strip().casefold()
     return candidate if _DOI_RE.fullmatch(candidate) else None
 
 
 def normalize_iso3297_issn_value(value: Optional[str]) -> Optional[str]:
-    """Normalize and checksum-validate an ISSN according to ISO 3297."""
+    """TRY_PARSE common ISSN/ISSN-L forms and checksum-validate according to ISO 3297."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
-    candidate = re.sub(r"(?i)^ISSN\s*", "", candidate)
+    candidate = re.sub(r"(?i)^ISSN(?:-L)?\s*[:#]?\s*", "", candidate)
     compact = re.sub(r"[\s-]+", "", candidate).upper()
     if not re.fullmatch(r"\d{7}[\dX]", compact):
         return None
@@ -215,10 +253,11 @@ def _isbn13_check_digit(body: str) -> str:
 
 
 def normalize_iso2108_isbn13_value(value: Optional[str]) -> Optional[str]:
-    """Normalize an ISBN-10 or ISBN-13 to checksum-valid canonical ISBN-13."""
+    """TRY_PARSE ISBN-10/ISBN-13/URN forms to checksum-valid canonical ISBN-13."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
+    candidate = re.sub(r"(?i)^urn:isbn:", "", candidate)
     candidate = re.sub(r"(?i)^ISBN(?:-1[03])?\s*:?[\s]*", "", candidate)
     compact = re.sub(r"[\s-]+", "", candidate).upper()
     if len(compact) == 10:
@@ -234,7 +273,10 @@ def normalize_iso2108_isbn13_value(value: Optional[str]) -> Optional[str]:
 def normalize_w3c_did_value(value: Optional[str]) -> Optional[str]:
     """Normalize a generic W3C DID without applying method-specific rewrite rules."""
     candidate = normalize_null_token_value(value)
-    if candidate is None or re.search(r"\s", candidate):
+    if candidate is None:
+        return None
+    candidate = _strip_angle_brackets(candidate)
+    if re.search(r"\s", candidate):
         return None
     match = _DID_RE.fullmatch(candidate)
     if not match:
@@ -246,9 +288,13 @@ def normalize_w3c_did_value(value: Optional[str]) -> Optional[str]:
 
 
 def normalize_rfc9562_uuid_value(value: Optional[str]) -> Optional[str]:
-    """Normalize an RFC 9562 UUID/GUID string to lowercase canonical text."""
+    """TRY_PARSE common UUID/GUID wrappers and emit lowercase canonical 8-4-4-4-12 text."""
     candidate = normalize_null_token_value(value)
-    if candidate is None or not _UUID_TEXT_RE.fullmatch(candidate):
+    if candidate is None:
+        return None
+    candidate = re.sub(r"(?i)^(?:urn:uuid:|uuid\s*[:#]?\s*)", "", candidate)
+    candidate = candidate.strip().strip("{}")
+    if not re.fullmatch(r"(?:[0-9A-Fa-f]{32}|[0-9A-Fa-f-]{36})", candidate):
         return None
     try:
         return str(uuid.UUID(candidate))
@@ -259,7 +305,10 @@ def normalize_rfc9562_uuid_value(value: Optional[str]) -> Optional[str]:
 def normalize_rfc8141_urn_value(value: Optional[str]) -> Optional[str]:
     """Normalize a generic RFC 8141 URN without namespace-specific equivalence rules."""
     candidate = normalize_null_token_value(value)
-    if candidate is None or re.search(r"\s", candidate):
+    if candidate is None:
+        return None
+    candidate = _strip_angle_brackets(candidate)
+    if re.search(r"\s", candidate):
         return None
     match = _URN_RE.fullmatch(candidate)
     if not match:
