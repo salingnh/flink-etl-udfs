@@ -7,7 +7,7 @@ from flink_etl_udfs.udfs._safe import try_udf
 
 normalize_email = try_udf(
     normalize_email_value,
-    input_types=["STRING"],
+    cast_types=["STRING"],
     result_type="STRING",
     deterministic=True,
 )
