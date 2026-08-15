@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from pyflink.table.udf import udf
-
 from flink_etl_udfs.core.security import classify_hash_type_value, normalize_hex_hash_value
+from flink_etl_udfs.udfs._safe import try_udf
 
 
 def _string_udf(function):
-    return udf(function, input_types=["STRING"], result_type="STRING", deterministic=True)
+    return try_udf(
+        function,
+        cast_types=["STRING"],
+        result_type="STRING",
+        deterministic=True,
+    )
 
 
 normalize_hex_hash = _string_udf(normalize_hex_hash_value)

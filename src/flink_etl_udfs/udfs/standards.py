@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pyflink.table.udf import udf
-
 from flink_etl_udfs.core import (
     common,
     finance,
@@ -30,36 +28,38 @@ from flink_etl_udfs.core.identity_standards import (
     normalize_rfc9562_uuid_value,
     normalize_w3c_did_value,
 )
+from flink_etl_udfs.udfs._safe import try_udf
 
 
 def _string_udf(function):
-    return udf(function, input_types=["STRING"], result_type="STRING", deterministic=True)
+    return try_udf(
+        function,
+        cast_types=["STRING"],
+        result_type="STRING",
+        deterministic=True,
+    )
 
 
-# ISO / IEC / ITU-T generic exchange standards.
 iso8601_normalize_date = _string_udf(common.normalize_date_value)
 iso8601_normalize_datetime_utc = _string_udf(common.normalize_iso_datetime_value)
 iso4217_normalize_currency_code = _string_udf(common.normalize_currency_code_value)
-itu_e164_normalize_phone = udf(
+itu_e164_normalize_phone = try_udf(
     common.normalize_e164_value,
-    input_types=["STRING", "STRING"],
+    cast_types=["STRING", "STRING"],
     result_type="STRING",
     deterministic=True,
 )
 
-# Finance and legal-entity standards.
 iso13616_normalize_iban = _string_udf(finance.normalize_iban_value)
 iso9362_normalize_bic = _string_udf(finance.normalize_bic_value)
 iso20022_normalize_message_type = _string_udf(finance.normalize_iso20022_message_type_value)
 iso17442_normalize_lei = _string_udf(finance.normalize_lei_value)
 
-# Healthcare standards.
 fhir_normalize_id = _string_udf(healthcare.normalize_fhir_id_value)
 fhir_normalize_reference = _string_udf(healthcare.normalize_fhir_reference_value)
 hl7v2_normalize_message_type = _string_udf(healthcare.normalize_hl7_message_type_value)
 dicom_normalize_uid = _string_udf(healthcare.normalize_dicom_uid_value)
 
-# Security / CTI standards.
 stix21_normalize_id = _string_udf(security_standards.normalize_stix_id_value)
 stix21_normalize_type = _string_udf(security_standards.normalize_stix_type_value)
 mitre_attack_normalize_technique_id = _string_udf(
@@ -67,45 +67,42 @@ mitre_attack_normalize_technique_id = _string_udf(
 )
 cve_normalize_id = _string_udf(security.normalize_cve_value)
 
-# Supply-chain standards.
 gs1_normalize_gtin = _string_udf(supply_chain.normalize_gtin_value)
 gs1_normalize_sscc = _string_udf(supply_chain.normalize_sscc_value)
 gs1_epcis_normalize_event_type = _string_udf(supply_chain.normalize_epcis_event_type_value)
 
-# Industrial / geospatial standards and registries.
 opcua_normalize_node_id = _string_udf(industrial.normalize_opcua_node_id_value)
 dlms_cosem_normalize_obis_code = _string_udf(industrial.normalize_obis_code_value)
 epsg_normalize_code = _string_udf(transport_geo.normalize_epsg_code_value)
 
-# Identity, document, publication, URI and identifier standards.
-icao9303_build_document_id = udf(
+icao9303_build_document_id = try_udf(
     build_icao9303_document_id_value,
-    input_types=["STRING", "STRING"],
+    cast_types=["STRING", "STRING"],
     result_type="STRING",
     deterministic=True,
 )
-iso18013_build_driving_licence_id = udf(
+iso18013_build_driving_licence_id = try_udf(
     build_iso18013_driving_licence_id_value,
-    input_types=["STRING", "STRING", "STRING"],
+    cast_types=["STRING", "STRING", "STRING"],
     result_type="STRING",
     deterministic=True,
 )
-iso18013_build_mdl_id = udf(
+iso18013_build_mdl_id = try_udf(
     build_iso18013_mdl_id_value,
-    input_types=["STRING", "STRING"],
+    cast_types=["STRING", "STRING"],
     result_type="STRING",
     deterministic=True,
 )
-iso23220_build_eid_id = udf(
+iso23220_build_eid_id = try_udf(
     build_iso23220_eid_id_value,
-    input_types=["STRING", "STRING", "STRING"],
+    cast_types=["STRING", "STRING", "STRING"],
     result_type="STRING",
     deterministic=True,
 )
 iso3166_normalize_alpha3 = _string_udf(normalize_iso3166_alpha3_value)
-oidc_build_subject_key = udf(
+oidc_build_subject_key = try_udf(
     build_oidc_subject_key_value,
-    input_types=["STRING", "STRING"],
+    cast_types=["STRING", "STRING"],
     result_type="STRING",
     deterministic=True,
 )

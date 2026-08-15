@@ -16,6 +16,7 @@ _FALLBACK_STDLIB = {
     "asyncio",
     "datetime",
     "decimal",
+    "functools",
     "hashlib",
     "ipaddress",
     "json",

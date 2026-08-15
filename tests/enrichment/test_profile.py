@@ -128,14 +128,12 @@ def test_extract_profile_url_sync_is_plain_function() -> None:
     assert not inspect.iscoroutinefunction(profile.extract_profile_url_sync)
 
 
-def test_enrichment_udf_wraps_direct_synchronous_profile_callable(monkeypatch) -> None:
+def test_enrichment_udf_wraps_sync_callable_without_fixed_input_type(monkeypatch) -> None:
     calls: dict[str, object] = {}
 
-    def fake_udf(function, input_types, result_type, deterministic):
+    def fake_udf(function, **kwargs):
         calls["function"] = function
-        calls["input_types"] = input_types
-        calls["result_type"] = result_type
-        calls["deterministic"] = deterministic
+        calls["kwargs"] = kwargs
         return {"wrapped": function}
 
     pyflink_module = types.ModuleType("pyflink")
@@ -148,18 +146,21 @@ def test_enrichment_udf_wraps_direct_synchronous_profile_callable(monkeypatch) -
     monkeypatch.setitem(sys.modules, "pyflink", pyflink_module)
     monkeypatch.setitem(sys.modules, "pyflink.table", table_module)
     monkeypatch.setitem(sys.modules, "pyflink.table.udf", udf_module)
+    sys.modules.pop("flink_etl_udfs.udfs._safe", None)
     sys.modules.pop("flink_etl_udfs.udfs.enrichment", None)
 
     try:
         module = importlib.import_module("flink_etl_udfs.udfs.enrichment")
 
-        assert module.extract_profile_url == {"wrapped": profile.extract_profile_url_sync}
-        assert calls == {
-            "function": profile.extract_profile_url_sync,
-            "input_types": ["STRING"],
+        wrapped = calls["function"]
+        assert module.extract_profile_url == {"wrapped": wrapped}
+        assert getattr(wrapped, "__wrapped__", None) is profile.extract_profile_url_sync
+        assert calls["kwargs"] == {
             "result_type": "STRING",
             "deterministic": False,
         }
-        assert not inspect.iscoroutinefunction(calls["function"])
+        assert "input_types" not in calls["kwargs"]
+        assert not inspect.iscoroutinefunction(wrapped)
     finally:
+        sys.modules.pop("flink_etl_udfs.udfs._safe", None)
         sys.modules.pop("flink_etl_udfs.udfs.enrichment", None)

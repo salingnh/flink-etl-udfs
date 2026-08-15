@@ -2,18 +2,22 @@
 
 from __future__ import annotations
 
-from pyflink.table.udf import udf
-
 from flink_etl_udfs.core.internet import (
     canonicalize_url_value,
     extract_url_host_value,
     normalize_domain_value,
     redact_url_secrets_value,
 )
+from flink_etl_udfs.udfs._safe import try_udf
 
 
 def _string_udf(function):
-    return udf(function, input_types=["STRING"], result_type="STRING", deterministic=True)
+    return try_udf(
+        function,
+        cast_types=["STRING"],
+        result_type="STRING",
+        deterministic=True,
+    )
 
 
 canonicalize_url = _string_udf(canonicalize_url_value)
