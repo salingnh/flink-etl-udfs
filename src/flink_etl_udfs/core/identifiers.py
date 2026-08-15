@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
+import re
 from typing import Optional
 
 
 def normalize_email_value(value: Optional[str]) -> Optional[str]:
-    """Trim an email and lowercase only its domain component.
+    """Normalize common email representations while preserving local-part case.
 
-    The local part is intentionally preserved because its case semantics can be
-    provider-specific. This function normalizes; it does not claim validation.
+    Supported source forms include a bare address, ``mailto:`` URI, and a single
+    display-name angle-bracket form. The domain is IDNA-normalized/lowercased. This
+    is conservative structural normalization, not full RFC mailbox validation.
     """
     if value is None:
         return None
@@ -18,11 +20,26 @@ def normalize_email_value(value: Optional[str]) -> Optional[str]:
     if not candidate:
         return None
 
-    local, separator, domain = candidate.rpartition("@")
-    if not separator or not local or not domain:
+    if candidate.casefold().startswith("mailto:"):
+        candidate = candidate[7:].split("?", 1)[0].strip()
+
+    angle = re.fullmatch(r"[^<>]*<\s*([^<>]+?)\s*>", candidate)
+    if angle:
+        candidate = angle.group(1).strip()
+
+    if any(ch.isspace() for ch in candidate) or candidate.count("@") != 1:
+        return None
+    local, domain = candidate.split("@", 1)
+    if not local or not domain:
         return None
 
-    return f"{local}@{domain.lower()}"
+    try:
+        normalized_domain = domain.rstrip(".").encode("idna").decode("ascii").lower()
+    except UnicodeError:
+        return None
+    if not normalized_domain or "." not in normalized_domain:
+        return None
+    return f"{local}@{normalized_domain}"
 
 
 def digits_only_value(value: Optional[str]) -> Optional[str]:
