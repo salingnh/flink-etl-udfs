@@ -18,9 +18,6 @@ def main() -> None:
     if not artifact.exists():
         raise SystemExit(f"artifact does not exist: {artifact}")
 
-    # PyFlink's Java gateway calls back into this Python client process when SQL
-    # resolves a LANGUAGE PYTHON function. SQL Client/Gateway prepares this client
-    # PYTHONPATH from python.files/--pyFiles; this smoke test models that explicitly.
     sys.path.insert(0, str(artifact))
 
     table_env = TableEnvironment.create(EnvironmentSettings.in_batch_mode())
@@ -41,14 +38,38 @@ def main() -> None:
         """
     )
 
+    # VARCHAR follows the original transform semantics.
     result = table_env.execute_sql(
         "SELECT VN_NORMALIZE_MOBILE_PHONE('0169 123 4567')"
     )
     with result.collect() as rows:
         row = next(rows)
-
     if row[0] != "0391234567":
-        raise AssertionError(f"unexpected Vietnam phone UDF result: {row[0]!r}")
+        raise AssertionError(f"unexpected VARCHAR phone result: {row[0]!r}")
+
+    # BIGINT is deliberately not pre-cast in SQL. The Python UDF receives it and
+    # internally TRY_CASTs it to STRING before running the same phone logic.
+    result = table_env.execute_sql(
+        "SELECT VN_NORMALIZE_MOBILE_PHONE(CAST(84912345678 AS BIGINT))"
+    )
+    with result.collect() as rows:
+        row = next(rows)
+    if row[0] != "0912345678":
+        raise AssertionError(f"unexpected BIGINT phone result: {row[0]!r}")
+
+    # Other SQL scalar types must also pass planner validation. Their internal
+    # STRING cast succeeds, but the phone parser rejects the resulting value -> NULL.
+    result = table_env.execute_sql(
+        """
+        SELECT
+            VN_NORMALIZE_MOBILE_PHONE(TRUE),
+            VN_NORMALIZE_MOBILE_PHONE(DATE '2026-08-15')
+        """
+    )
+    with result.collect() as rows:
+        row = next(rows)
+    if row[0] is not None or row[1] is not None:
+        raise AssertionError(f"invalid typed inputs must return NULL: {row!r}")
 
 
 if __name__ == "__main__":
