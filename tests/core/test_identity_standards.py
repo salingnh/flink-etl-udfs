@@ -6,9 +6,9 @@ from flink_etl_udfs.core.identity_standards import (
     build_oidc_subject_key_value,
     normalize_activitystreams_id_value,
     normalize_iso2108_isbn13_value,
+    normalize_iso26324_doi_value,
     normalize_iso3166_alpha3_value,
     normalize_iso3297_issn_value,
-    normalize_iso26324_doi_value,
     normalize_rfc3986_uri_value,
     normalize_rfc8141_urn_value,
     normalize_rfc9562_uuid_value,
@@ -56,7 +56,7 @@ def test_oidc_and_activitystreams_identifiers() -> None:
 def test_rfc_identifier_normalization() -> None:
     assert (
         normalize_rfc3986_uri_value("HTTP://Example.COM/a/%7euser?x=1#Top")
-        == "http://example.com/a/%7Euser?x=1#Top"
+        == "http://example.com/a/~user?x=1#Top"
     )
     assert (
         normalize_rfc9562_uuid_value("550E8400-E29B-41D4-A716-446655440000")
