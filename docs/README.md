@@ -2,6 +2,11 @@
 
 Thư mục này chứa research, deployment guide và catalog của public PyFlink SQL UDF.
 
+## Contract và triết lý transform
+
+- [ETL normalization philosophy](NORMALIZATION_PHILOSOPHY.md) — normalizer = TRY_CAST → deterministic TRY_PARSE → semantic validation → canonical output; invalid/ambiguous → NULL.
+- [Public UDF contract](PUBLIC_UDF_CONTRACT.md) — category, TRY_CAST boundary, error policy và sample-driven metadata contract.
+
 ## Research và kiến trúc
 
 - [Tổng quan ETL research](ETL_RESEARCH.md)
