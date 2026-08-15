@@ -2,9 +2,9 @@
 
 Curated PyFlink UDF library for deterministic ETL normalization and controlled enrichment.
 
-## Version 0.7.0 — standard-first public API
+## Version 0.7.1 — standard-first API + internal TRY_CAST
 
-Public SQL names now follow:
+Public SQL names follow:
 
 ```text
 <standard>_<operation>_<subject>
@@ -26,17 +26,64 @@ gs1_normalize_gtin
 
 When no single external standard owns the semantics, the name uses a precise generic namespace such as `etl_*`, `url_*`, `dns_*`, `ip_*`, `hash_*`, `osint_*` or `vn_*`.
 
-`0.7.0` is intentionally breaking: legacy SQL names and `registry.py` were removed instead of keeping aliases.
+`0.7.0` introduced the intentionally breaking standard-first surface: legacy SQL names and `registry.py` were removed instead of keeping aliases. `0.7.1` keeps that surface and adds operation-only categories plus internal TRY_CAST input handling.
 
 ## Public API
 
-The source of truth for SQL name, display name and Python entrypoint is:
+The source of truth for SQL name, display name, operation category, standard and Python entrypoint is:
 
 ```python
 from flink_etl_udfs.public_api import PUBLIC_FUNCTIONS
 ```
 
 See [`docs/FUNCTION_CATALOG.md`](docs/FUNCTION_CATALOG.md) for the complete **66-function** public surface.
+
+### Operation categories
+
+`category` describes what the transform does, never its business domain or standards body. Allowed categories are:
+
+```text
+conversion
+validation
+classification
+generation
+masking
+fingerprint
+extraction
+enrichment
+```
+
+Named standards such as ISO 2108, RFC 9562, W3C DID Core and STIX 2.1 stay in the separate `standard` metadata field.
+
+### Internal TRY_CAST contract
+
+Every public scalar UDF accepts arbitrary SQL scalar input types at the PyFlink boundary. Public wrappers deliberately do not declare fixed `input_types`; each argument is converted inside Python to the type expected by the transform before the existing logic runs.
+
+```text
+arbitrary SQL scalar
+      ↓
+Python runtime value
+      ↓
+internal TRY_CAST
+      ↓
+existing transform logic
+      ↓
+result / NULL
+```
+
+Failed input conversion or malformed row data returns SQL `NULL` rather than failing the Flink task. Infrastructure failures from external enrichment are not hidden as NULL.
+
+For example:
+
+```sql
+SELECT VN_NORMALIZE_MOBILE_PHONE(CAST(84912345678 AS BIGINT));
+-- 0912345678
+
+SELECT VN_NORMALIZE_MOBILE_PHONE(TRUE);
+-- NULL
+```
+
+The shared boundary is implemented in `flink_etl_udfs.udfs._safe`. See [`docs/PUBLIC_UDF_CONTRACT.md`](docs/PUBLIC_UDF_CONTRACT.md).
 
 ## New standards added from the identity/identifier catalog
 
@@ -120,6 +167,8 @@ pytest
 ## Engineering rules
 
 - Prefer named standards over domain labels when a function implements a specific standard.
+- Category describes the ETL operation, never the domain or standards body.
+- Every public scalar UDF must use the shared internal TRY_CAST boundary and must not declare fixed PyFlink `input_types`.
 - Do not claim full standard compliance when a function performs only syntax/checksum normalization.
 - Registry membership and mutable reference data must use maintained reference datasets.
 - Keep external REST enrichment nondeterministic and bounded by timeout/capacity.
