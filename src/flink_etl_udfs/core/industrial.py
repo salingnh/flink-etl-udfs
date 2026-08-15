@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import re
 import uuid
 from typing import Optional
@@ -43,7 +44,7 @@ def normalize_opcua_node_id_value(value: Optional[str]) -> Optional[str]:
     elif kind == "b":
         try:
             raw = base64.b64decode(identifier, validate=True)
-        except (ValueError, TypeError):
+        except (binascii.Error, ValueError, TypeError):
             return None
         identifier = base64.b64encode(raw).decode("ascii")
 
@@ -62,9 +63,9 @@ def normalize_obis_code_value(value: Optional[str]) -> Optional[str]:
 
     dotted = re.fullmatch(r"(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})", candidate)
     if dotted:
-        a, b, c, d, e, f = (int(part) for part in dotted.groups())
-        if all(0 <= part <= 255 for part in (a, b, c, d, e, f)):
-            return f"{a}-{b}:{c}.{d}.{e}*{f}"
+        da, db, dc, dd, de, df = (int(part) for part in dotted.groups())
+        if all(0 <= part <= 255 for part in (da, db, dc, dd, de, df)):
+            return f"{da}-{db}:{dc}.{dd}.{de}*{df}"
         return None
 
     match = re.fullmatch(
@@ -76,10 +77,12 @@ def normalize_obis_code_value(value: Optional[str]) -> Optional[str]:
     groups = [int(x) if x is not None else None for x in match.groups()]
     if any(x is not None and not 0 <= x <= 255 for x in groups):
         return None
-    a, b, c, d, e, f = groups
-    prefix = f"{a}-" if a is not None else ""
-    suffix = f"*{f}" if f is not None else ""
-    return f"{prefix}{b}:{c}.{d}.{e}{suffix}"
+    a_group, b_group, c_group, d_group, e_group, f_group = groups
+    if b_group is None or c_group is None or d_group is None or e_group is None:
+        return None
+    prefix = f"{a_group}-" if a_group is not None else ""
+    suffix = f"*{f_group}" if f_group is not None else ""
+    return f"{prefix}{b_group}:{c_group}.{d_group}.{e_group}{suffix}"
 
 
 __all__ = ["normalize_obis_code_value", "normalize_opcua_node_id_value"]
