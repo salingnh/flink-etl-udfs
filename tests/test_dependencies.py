@@ -14,6 +14,8 @@ SRC = ROOT / "src" / "flink_etl_udfs"
 _FALLBACK_STDLIB = {
     "ast",
     "asyncio",
+    "base64",
+    "binascii",
     "datetime",
     "decimal",
     "functools",
