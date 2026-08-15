@@ -6,6 +6,8 @@ import export_elastic_metadata as exporter
 
 from flink_etl_udfs.normalizer_contracts import NORMALIZER_CONTRACTS
 
+ARTIFACT_URI = "s3://fusion-center/transform-library/flink_etl_udfs.zip"
+
 STANDARD_DESCRIPTION_OVERRIDES = {
     "ISO 8601": (
         "ISO 8601 là tiêu chuẩn quốc tế cho biểu diễn ngày và thời gian. Trong các "
@@ -17,6 +19,8 @@ STANDARD_DESCRIPTION_OVERRIDES = {
 
 def apply_normalizer_contracts() -> None:
     """Use executable normalizer samples as the metadata descriptions/examples."""
+    exporter.ARTIFACT_URI = ARTIFACT_URI
+
     for func_key, contract in NORMALIZER_CONTRACTS.items():
         if func_key not in exporter.FUNCTION_DESCRIPTIONS or func_key not in exporter.EXAMPLES:
             raise RuntimeError(f"normalizer is not present in metadata catalog: {func_key}")
