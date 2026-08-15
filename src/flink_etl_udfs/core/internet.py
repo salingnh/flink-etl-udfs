@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import ipaddress
+import re
 from typing import Optional
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
@@ -39,18 +41,58 @@ _DNS_RECORD_TYPES = {
 }
 
 
-# Chuẩn hóa DNS name về lowercase IDNA ASCII để join domain ổn định.
-def normalize_domain_value(value: Optional[str]) -> Optional[str]:
-    """Normalize a DNS name using IDNA ASCII representation and lowercase form."""
-    if value is None:
-        return None
-    candidate = value.strip().rstrip(".")
+def _valid_ascii_host(host: str) -> bool:
+    if len(host) > 253:
+        return False
+    try:
+        ipaddress.ip_address(host)
+        return True
+    except ValueError:
+        pass
+    labels = host.split(".")
+    return all(
+        1 <= len(label) <= 63
+        and not label.startswith("-")
+        and not label.endswith("-")
+        and re.fullmatch(r"[a-z0-9-]+", label) is not None
+        for label in labels
+    )
+
+
+def _extract_domain_candidate(value: str) -> Optional[str]:
+    candidate = value.strip()
     if not candidate:
         return None
+
+    if "://" in candidate:
+        try:
+            return urlsplit(candidate).hostname
+        except ValueError:
+            return None
+
+    if candidate.casefold().startswith("mailto:"):
+        candidate = candidate[7:].split("?", 1)[0]
+    if "@" in candidate and candidate.count("@") == 1:
+        candidate = candidate.rsplit("@", 1)[1]
+
+    return candidate.strip().rstrip(".") or None
+
+
+# Chuẩn hóa DNS name về lowercase IDNA ASCII để join domain ổn định.
+def normalize_domain_value(value: Optional[str]) -> Optional[str]:
+    """Normalize bare domain, URL host or email domain to IDNA ASCII lowercase."""
+    if value is None:
+        return None
+    candidate = _extract_domain_candidate(value)
+    if candidate is None or any(ch.isspace() for ch in candidate):
+        return None
+    if candidate.startswith("[") and candidate.endswith("]"):
+        candidate = candidate[1:-1]
     try:
-        return candidate.encode("idna").decode("ascii").lower()
+        normalized = candidate.encode("idna").decode("ascii").lower()
     except UnicodeError:
         return None
+    return normalized if _valid_ascii_host(normalized) else None
 
 
 def _normalize_netloc(scheme: str, hostname: str, port: Optional[int]) -> str:
@@ -58,17 +100,37 @@ def _normalize_netloc(scheme: str, hostname: str, port: Optional[int]) -> str:
     if normalized_host is None:
         return ""
     default_port = (scheme == "http" and port == 80) or (scheme == "https" and port == 443)
-    return normalized_host if port is None or default_port else f"{normalized_host}:{port}"
+    host_for_url = (
+        f"[{normalized_host}]" if ":" in normalized_host and not normalized_host.startswith("[") else normalized_host
+    )
+    return host_for_url if port is None or default_port else f"{host_for_url}:{port}"
+
+
+def _infer_http_scheme(candidate: str) -> str:
+    if re.match(r"^[A-Za-z][A-Za-z0-9+.-]*://", candidate):
+        return candidate
+    if any(ch.isspace() for ch in candidate):
+        return candidate
+    authority = candidate.split("/", 1)[0]
+    host = authority.rsplit("@", 1)[-1].split(":", 1)[0].strip("[]")
+    if "." in host:
+        return "https://" + candidate
+    try:
+        ipaddress.ip_address(host)
+        return "https://" + candidate
+    except ValueError:
+        return candidate
 
 
 # Chuẩn hóa HTTP(S) URL, bỏ credentials, tracking params và fragment.
 def canonicalize_url_value(value: Optional[str]) -> Optional[str]:
-    """Canonicalize HTTP(S), remove credentials, tracking parameters, and fragments."""
+    """TRY_PARSE common HTTP(S) URL forms and emit a canonical URL."""
     if value is None:
         return None
     candidate = value.strip()
     if not candidate:
         return None
+    candidate = _infer_http_scheme(candidate)
     try:
         parts = urlsplit(candidate)
         scheme = parts.scheme.lower()
@@ -107,6 +169,7 @@ def redact_url_secrets_value(value: Optional[str]) -> Optional[str]:
     candidate = value.strip()
     if not candidate:
         return None
+    candidate = _infer_http_scheme(candidate)
     try:
         parts = urlsplit(candidate)
         scheme = parts.scheme.lower()

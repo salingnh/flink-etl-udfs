@@ -56,7 +56,7 @@ def test_oidc_and_activitystreams_identifiers() -> None:
 def test_rfc_identifier_normalization() -> None:
     assert (
         normalize_rfc3986_uri_value("HTTP://Example.COM/a/%7euser?x=1#Top")
-        == "http://example.com/a/%7Euser?x=1#Top"
+        == "http://example.com/a/~user?x=1#Top"
     )
     assert (
         normalize_rfc9562_uuid_value("550E8400-E29B-41D4-A716-446655440000")

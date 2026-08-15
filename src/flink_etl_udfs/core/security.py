@@ -6,17 +6,28 @@ import re
 from typing import Optional
 
 _HEX_RE = re.compile(r"^[0-9a-fA-F]+$")
-_CVE_RE = re.compile(r"^CVE[-_ ]?(\d{4})[-_ ]?(\d{4,})$", flags=re.IGNORECASE)
 _HASH_LENGTH_TYPES = {32: "md5", 40: "sha1", 64: "sha256", 128: "sha512"}
+_HASH_PREFIX_LENGTHS = {"md5": 32, "sha1": 40, "sha256": 64, "sha512": 128}
+
+
+def _normalize_hash_prefix(value: str) -> tuple[Optional[str], str]:
+    match = re.fullmatch(r"(?i)(md5|sha-?1|sha-?256|sha-?512)\s*[:=]\s*(.+)", value)
+    if not match:
+        return None, value
+    algorithm, payload = match.groups()
+    return algorithm.casefold().replace("-", ""), payload
 
 
 # Chuẩn hóa digest hex phổ biến về lowercase và chỉ nhận độ dài MD5/SHA-1/SHA-256/SHA-512.
 def normalize_hex_hash_value(value: Optional[str]) -> Optional[str]:
-    """Normalize a well-known hexadecimal digest while rejecting unknown lengths."""
+    """TRY_PARSE common prefixed/separated hexadecimal digest representations."""
     if value is None:
         return None
-    candidate = value.strip().lower()
+    algorithm, payload = _normalize_hash_prefix(value.strip())
+    candidate = re.sub(r"[\s:-]+", "", payload).lower()
     if len(candidate) not in _HASH_LENGTH_TYPES or not _HEX_RE.fullmatch(candidate):
+        return None
+    if algorithm is not None and _HASH_PREFIX_LENGTHS[algorithm] != len(candidate):
         return None
     return candidate
 
@@ -32,10 +43,12 @@ def classify_hash_type_value(value: Optional[str]) -> Optional[str]:
 
 # Chuẩn hóa CVE identifier về dạng CVE-YYYY-NNNN... để join và deduplicate ổn định.
 def normalize_cve_value(value: Optional[str]) -> Optional[str]:
-    """Normalize a CVE identifier to CVE-YYYY-NNNN... form."""
+    """TRY_PARSE common CVE separators/prefix forms to ``CVE-YYYY-NNNN...``."""
     if value is None:
         return None
-    match = _CVE_RE.fullmatch(value.strip())
+    candidate = value.strip()
+    candidate = re.sub(r"(?i)^CVE\s*[:#]?\s*", "", candidate)
+    match = re.fullmatch(r"(\d{4})\s*[-_: /]\s*(\d{4,})", candidate)
     if match is None:
         return None
     year, number = match.groups()

@@ -7,12 +7,23 @@ import json
 import math
 import re
 import unicodedata
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 from typing import Any, Optional
 
-_NULL_TOKENS = {"", "null", "none", "nil", "n/a", "na", "undefined", "[null]"}
-_CURRENCY_RE = re.compile(r"^[A-Z]{3}$")
+_NULL_TOKENS = {
+    "",
+    "null",
+    "none",
+    "nil",
+    "n/a",
+    "na",
+    "undefined",
+    "[null]",
+    "(null)",
+    "<null>",
+    "\\n",
+}
 _COUNTRY_CODE_RE = re.compile(r"^\+?[1-9]\d{0,2}$")
 _GENERIC_CODE_RE = re.compile(r"^[A-Z0-9._/-]+$")
 
@@ -28,46 +39,195 @@ def normalize_null_token_value(value: Optional[str]) -> Optional[str]:
     return candidate
 
 
-# Chuẩn hóa timestamp ISO 8601 có timezone về UTC để so sánh và join ổn định.
+def _build_date(year: int, month: int, day: int) -> Optional[date]:
+    try:
+        return date(year, month, day)
+    except ValueError:
+        return None
+
+
+def _try_parse_date_text(candidate: str) -> Optional[date]:
+    """Parse supported deterministic date representations without locale guessing."""
+    try:
+        return date.fromisoformat(candidate)
+    except ValueError:
+        pass
+
+    compact = re.fullmatch(r"(\d{4})(\d{2})(\d{2})", candidate)
+    if compact:
+        return _build_date(*(int(part) for part in compact.groups()))
+
+    ymd = re.fullmatch(r"(\d{4})[./-](\d{1,2})[./-](\d{1,2})", candidate)
+    if ymd:
+        return _build_date(*(int(part) for part in ymd.groups()))
+
+    trailing_year = re.fullmatch(r"(\d{1,2})[./-](\d{1,2})[./-](\d{4})", candidate)
+    if trailing_year:
+        first, second, year = (int(part) for part in trailing_year.groups())
+        if first > 12 and second <= 12:
+            return _build_date(year, second, first)
+        if second > 12 and first <= 12:
+            return _build_date(year, first, second)
+        # Both <= 12 means DMY and MDY are both plausible, so do not guess.
+        return None
+
+    normalized_words = re.sub(r"\s+", " ", candidate.strip())
+    for pattern in ("%d %b %Y", "%d %B %Y", "%b %d %Y", "%B %d %Y"):
+        try:
+            return datetime.strptime(normalized_words, pattern).date()
+        except ValueError:
+            continue
+    return None
+
+
+def _parse_timezone_token(token: str) -> Optional[timezone]:
+    if token.upper() == "Z":
+        return timezone.utc
+    match = re.fullmatch(r"([+-])(\d{2}):?(\d{2})", token)
+    if not match:
+        return None
+    sign, hours_text, minutes_text = match.groups()
+    hours = int(hours_text)
+    minutes = int(minutes_text)
+    if hours > 23 or minutes > 59:
+        return None
+    delta = timedelta(hours=hours, minutes=minutes)
+    if sign == "-":
+        delta = -delta
+    try:
+        return timezone(delta)
+    except ValueError:
+        return None
+
+
+def _try_parse_datetime_text(candidate: str) -> Optional[datetime]:
+    """Parse supported timezone-aware datetime forms without inferring a timezone."""
+    iso_candidate = candidate.replace("z", "Z")
+    try:
+        parsed = datetime.fromisoformat(iso_candidate.replace("Z", "+00:00"))
+    except ValueError:
+        parsed = None
+    if parsed is not None:
+        return parsed if parsed.tzinfo is not None else None
+
+    match = re.fullmatch(
+        r"(.+?)[ T](\d{1,2}):(\d{2})(?::(\d{2})(?:[.,](\d{1,6}))?)?\s*(Z|[+-]\d{2}:?\d{2})",
+        candidate,
+        flags=re.IGNORECASE,
+    )
+    if not match:
+        return None
+    date_text, hour_text, minute_text, second_text, fraction_text, zone_text = match.groups()
+    parsed_date = _try_parse_date_text(date_text.strip())
+    parsed_zone = _parse_timezone_token(zone_text)
+    if parsed_date is None or parsed_zone is None:
+        return None
+    hour = int(hour_text)
+    minute = int(minute_text)
+    second = int(second_text or "0")
+    microsecond = int((fraction_text or "").ljust(6, "0") or "0")
+    try:
+        return datetime(
+            parsed_date.year,
+            parsed_date.month,
+            parsed_date.day,
+            hour,
+            minute,
+            second,
+            microsecond,
+            tzinfo=parsed_zone,
+        )
+    except ValueError:
+        return None
+
+
+# Chuẩn hóa timestamp từ các representation có timezone về UTC để so sánh/join ổn định.
 def normalize_iso_datetime_value(value: Optional[str]) -> Optional[str]:
-    """Normalize an ISO-8601 timestamp to UTC with a ``Z`` suffix.
+    """TRY_PARSE supported timezone-aware timestamps and emit canonical UTC text.
 
     Naive timestamps are deliberately rejected because guessing a timezone in a
-    generic UDF creates silent time shifts.
+    generic UDF creates silent time shifts. Alternate deterministic date forms are
+    accepted when the date order can be resolved safely.
     """
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
-    try:
-        parsed = datetime.fromisoformat(candidate.replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    if parsed.tzinfo is None:
+    parsed = _try_parse_datetime_text(candidate)
+    if parsed is None:
         return None
     return parsed.astimezone(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 
-# Chuẩn hóa ngày theo dạng trao đổi dữ liệu ISO 8601 YYYY-MM-DD.
+# Chuẩn hóa ngày từ các representation xác định được an toàn sang ISO 8601 YYYY-MM-DD.
 def normalize_date_value(value: Optional[str]) -> Optional[str]:
-    """Normalize an ISO date to ``YYYY-MM-DD``."""
+    """TRY_PARSE supported date representations and emit canonical ``YYYY-MM-DD``.
+
+    The function accepts deterministic alternate forms such as ``15/08/2026`` or
+    ``20260815``. Ambiguous numeric forms such as ``01/02/2026`` return ``None``
+    rather than guessing between DMY and MDY.
+    """
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
-    try:
-        return date.fromisoformat(candidate).isoformat()
-    except ValueError:
+    parsed = _try_parse_date_text(candidate)
+    return parsed.isoformat() if parsed is not None else None
+
+
+def _grouped_integer_is_valid(value: str, separator: str) -> bool:
+    signless = value.lstrip("+-")
+    groups = signless.split(separator)
+    return bool(groups) and 1 <= len(groups[0]) <= 3 and all(
+        len(group) == 3 and group.isdigit() for group in groups[1:]
+    ) and groups[0].isdigit()
+
+
+def _normalize_decimal_candidate(candidate: str) -> Optional[str]:
+    compact = re.sub(r"[\s_]", "", candidate)
+    if not compact:
         return None
+    if not re.fullmatch(r"[+-]?[0-9.,]+", compact):
+        return None
+
+    if "," in compact and "." in compact:
+        decimal_separator = "," if compact.rfind(",") > compact.rfind(".") else "."
+        grouping_separator = "." if decimal_separator == "," else ","
+        integer_part, decimal_part = compact.rsplit(decimal_separator, 1)
+        if not decimal_part.isdigit() or not _grouped_integer_is_valid(integer_part, grouping_separator):
+            return None
+        compact = integer_part.replace(grouping_separator, "") + "." + decimal_part
+    elif "," in compact:
+        if compact.count(",") > 1:
+            if not _grouped_integer_is_valid(compact, ","):
+                return None
+            compact = compact.replace(",", "")
+        else:
+            integer_part, decimal_part = compact.split(",", 1)
+            signless_integer = integer_part.lstrip("+-")
+            if not signless_integer.isdigit() or not decimal_part.isdigit():
+                return None
+            # `1,234` could be 1234 or 1.234; refuse to guess.
+            if len(decimal_part) == 3 and 1 <= len(signless_integer) <= 3:
+                return None
+            compact = integer_part + "." + decimal_part
+    elif compact.count(".") > 1:
+        if not _grouped_integer_is_valid(compact, "."):
+            return None
+        compact = compact.replace(".", "")
+
+    return compact
 
 
 # Chuẩn hóa số thập phân bằng Decimal, tránh sai số binary floating-point.
 def normalize_decimal_value(value: Optional[str]) -> Optional[str]:
-    """Normalize a decimal number without introducing binary floating-point error."""
+    """TRY_PARSE deterministic decimal representations to canonical decimal text."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
-    candidate = candidate.replace("_", "").replace(" ", "")
+    normalized_candidate = _normalize_decimal_candidate(candidate)
+    if normalized_candidate is None:
+        return None
     try:
-        number = Decimal(candidate)
+        number = Decimal(normalized_candidate)
     except InvalidOperation:
         return None
     if not number.is_finite():
@@ -97,41 +257,55 @@ def normalize_percentage_value(value: Optional[str]) -> Optional[str]:
     return normalized
 
 
-# Chuẩn hóa hình thức mã tiền tệ 3 chữ cái theo cấu trúc ISO 4217.
+# Chuẩn hóa ISO 4217 alpha/numeric code về alpha-3 dựa trên reference data đóng gói.
 def normalize_currency_code_value(value: Optional[str]) -> Optional[str]:
-    """Normalize a three-letter ISO-4217-shaped currency code to uppercase.
-
-    Membership in the current ISO 4217 list should be checked against maintained
-    reference data rather than hard-coded into a scalar UDF.
-    """
+    """Normalize assigned ISO 4217 alpha-3 or numeric codes to alpha-3."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
-    candidate = candidate.upper()
-    return candidate if _CURRENCY_RE.fullmatch(candidate) else None
+    candidate = re.sub(r"(?i)^ISO\s*4217\s*[:=-]?\s*", "", candidate).strip()
+
+    import pycountry
+
+    currency = None
+    if re.fullmatch(r"[A-Za-z]{3}", candidate):
+        currency = pycountry.currencies.get(alpha_3=candidate.upper())
+    elif re.fullmatch(r"\d{3}", candidate):
+        currency = pycountry.currencies.get(numeric=candidate)
+    return str(currency.alpha_3) if currency is not None else None
+
+
+def _phone_text_is_supported(candidate: str) -> bool:
+    return re.fullmatch(r"[+0-9().\-\s]+", candidate) is not None
 
 
 # Chuẩn hóa số điện thoại về hình thức quốc tế E.164 khi đã biết mã quốc gia mặc định.
 def normalize_e164_value(value: Optional[str], default_country_code: Optional[str]) -> Optional[str]:
-    """Perform conservative E.164-shape normalization without carrier lookup.
+    """TRY_PARSE common phone formatting and emit conservative E.164-shaped text.
 
-    ``default_country_code`` is used only for national numbers that begin with a
-    single ``0``. Full country-specific validation belongs in a domain profile or
-    libphonenumber-backed enrichment layer.
+    ``default_country_code`` is used only for national numbers. The function does
+    not perform carrier/subscriber allocation lookup and rejects extensions or
+    alphabetic vanity-number interpretation.
     """
     candidate = normalize_null_token_value(value)
     if candidate is None:
+        return None
+    candidate = re.sub(r"(?i)^tel:\s*", "", candidate).strip()
+    if ";" in candidate or not _phone_text_is_supported(candidate):
         return None
     digits = "".join(ch for ch in candidate if ch.isascii() and ch.isdigit())
     if not digits:
         return None
 
-    if candidate.lstrip().startswith("+"):
+    if candidate.startswith("+"):
         international = digits
     elif digits.startswith("00"):
         international = digits[2:]
     elif default_country_code:
-        code = default_country_code.strip()
+        code = normalize_null_token_value(default_country_code)
+        if code is None:
+            return None
+        code = re.sub(r"\s+", "", code)
         if not _COUNTRY_CODE_RE.fullmatch(code):
             return None
         code_digits = code.lstrip("+")

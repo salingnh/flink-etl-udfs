@@ -71,7 +71,7 @@
   {
     "func_key": "email_normalize_address",
     "name": "Email – Chuẩn hóa địa chỉ email",
-    "description": "### Mô tả\nTrim email, giữ nguyên local-part và chuyển domain về chữ thường; giá trị không có đúng một dấu @ trả NULL.\n\n### Ví dụ\n- Input: `\" User.Name@EXAMPLE.COM \"` → Output: `\"User.Name@example.com\"`\n- Input: `\"not-an-email\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE bare email, mailto URI hoặc một display-name angle-bracket form; giữ local-part, IDNA/lowercase domain và trả NULL nếu cấu trúc không xác định an toàn.\n\n### Ví dụ\n- Input: `\" User.Name@EXAMPLE.COM \"` → Output: `\"User.Name@example.com\"`\n- Input: `\"mailto:User.Name@EXAMPLE.COM?subject=Hi\"` → Output: `\"User.Name@example.com\"`\n- Input: `\"Alice <User@BÜCHER.DE>\"` → Output: `\"User@xn--bcher-kva.de\"`\n- Input: `\"not-an-email\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -94,7 +94,7 @@
   {
     "func_key": "ip_normalize_address",
     "name": "IP – Chuẩn hóa địa chỉ IPv4/IPv6",
-    "description": "### Mô tả\nChuẩn hóa địa chỉ IPv4/IPv6 về biểu diễn canonical; địa chỉ không hợp lệ trả NULL.\n\n### Ví dụ\n- Input: `\"2001:0db8:0:0:0:0:0:1\"` → Output: `\"2001:db8::1\"`\n- Input: `\"999.999.1.1\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE IPv4/IPv6 text, gồm bracketed IPv6 và IPv6: prefix, rồi xuất canonical compressed address.\n\n### Ví dụ\n- Input: `\"2001:0db8:0:0:0:0:0:1\"` → Output: `\"2001:db8::1\"`\n- Input: `\"[2001:db8::1]\"` → Output: `\"2001:db8::1\"`\n- Input: `\"IPv6: 2001:db8::1\"` → Output: `\"2001:db8::1\"`\n- Input: `\"999.999.1.1\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -117,7 +117,7 @@
   {
     "func_key": "ip_normalize_cidr",
     "name": "CIDR – Chuẩn hóa mạng IPv4/IPv6",
-    "description": "### Mô tả\nChuẩn hóa mạng IPv4/IPv6 dạng CIDR và loại bỏ host bits khỏi địa chỉ mạng.\n\n### Ví dụ\n- Input: `\"192.168.1.14/24\"` → Output: `\"192.168.1.0/24\"`\n- Input: `\"192.168.1.1/99\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE CIDR có host bits, spacing quanh slash hoặc IPv4 address + netmask rồi xuất canonical network/prefix.\n\n### Ví dụ\n- Input: `\"192.168.1.14/24\"` → Output: `\"192.168.1.0/24\"`\n- Input: `\"192.168.1.14 255.255.255.0\"` → Output: `\"192.168.1.0/24\"`\n- Input: `\"2001:db8::1 / 64\"` → Output: `\"2001:db8::/64\"`\n- Input: `\"192.168.1.1/99\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -140,7 +140,7 @@
   {
     "func_key": "etl_canonicalize_json",
     "name": "JSON – Canonical hóa payload",
-    "description": "### Mô tả\nParse JSON rồi xuất compact JSON với object keys được sắp xếp ổn định.\n\n### Ví dụ\n- Input: `\"{\\\"b\\\":2,\\\"a\\\":1}\"` → Output: `\"{\\\"a\\\":1,\\\"b\\\":2}\"`\n- Input: `\"{bad json}\"` → Output: `NULL`",
+    "description": "### Mô tả\nParse JSON hợp lệ và xuất compact JSON với object key được sort ổn định; không sửa JSON sai cú pháp bằng heuristic.\n\n### Ví dụ\n- Input: `\"{\\\"b\\\":2,\\\"a\\\":1}\"` → Output: `\"{\\\"a\\\":1,\\\"b\\\":2}\"`\n- Input: `\" { \\\"z\\\" : [2,1], \\\"a\\\" : true } \"` → Output: `\"{\\\"a\\\":true,\\\"z\\\":[2,1]}\"`\n- Input: `\"{bad json}\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -163,7 +163,7 @@
   {
     "func_key": "etl_flatten_json",
     "name": "JSON – Làm phẳng payload lồng nhau",
-    "description": "### Mô tả\nLàm phẳng JSON lồng nhau thành object có dotted/indexed paths để dễ mapping trường dữ liệu.\n\n### Ví dụ\n- Input: `\"{\\\"a\\\":{\\\"b\\\":1}}\"` → Output: `\"{\\\"a.b\\\":1}\"`\n- Input: `\"{\\\"a\\\":[1,2]}\"` → Output: `\"{\\\"a[0]\\\":1,\\\"a[1]\\\":2}\"`",
+    "description": "### Mô tả\nParse JSON lồng nhau và xuất canonical object dùng dotted/indexed paths; JSON sai cú pháp trả NULL.\n\n### Ví dụ\n- Input: `\"{\\\"a\\\":{\\\"b\\\":1}}\"` → Output: `\"{\\\"a.b\\\":1}\"`\n- Input: `\"{\\\"a\\\":[1,2]}\"` → Output: `\"{\\\"a[0]\\\":1,\\\"a[1]\\\":2}\"`\n- Input: `\"{bad json}\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -232,7 +232,7 @@
   {
     "func_key": "etl_normalize_address_text",
     "name": "Địa chỉ – Chuẩn hóa văn bản địa chỉ",
-    "description": "### Mô tả\nChuẩn hóa Unicode, khoảng trắng và spacing quanh dấu phẩy/chấm phẩy của địa chỉ text; không geocode hay suy diễn đơn vị hành chính.\n\n### Ví dụ\n- Input: `\"12 Nguyễn Trãi,   P. Bến Thành\"` → Output: `\"12 Nguyễn Trãi, P. Bến Thành\"`\n- Input: `\"  1 Main St ;  District 1 \"` → Output: `\"1 Main St; District 1\"`",
+    "description": "### Mô tả\nChuẩn hóa Unicode/whitespace của địa chỉ text và spacing quanh dấu phẩy, chấm phẩy; không suy diễn mã hành chính, postal code hay geocode.\n\n### Ví dụ\n- Input: `\"12 Nguyễn Trãi,   P. Bến Thành\"` → Output: `\"12 Nguyễn Trãi, P. Bến Thành\"`\n- Input: `\"  1 Main St ;  District 1 \"` → Output: `\"1 Main St; District 1\"`\n- Input: `\"null\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -255,7 +255,7 @@
   {
     "func_key": "etl_normalize_decimal",
     "name": "Decimal – Chuẩn hóa số thập phân",
-    "description": "### Mô tả\nChuẩn hóa số thập phân bằng Decimal, bỏ leading/trailing zero không cần thiết và tránh sai số binary floating-point.\n\n### Ví dụ\n- Input: `\"00123.4500\"` → Output: `\"123.45\"`\n- Input: `\"NaN\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE số thập phân từ representation dấu chấm/dấu phẩy có thể xác định deterministic, loại grouping separator và xuất decimal text canonical; representation mơ hồ như 1,234 trả NULL thay vì đoán.\n\n### Ví dụ\n- Input: `\"00123.4500\"` → Output: `\"123.45\"`\n- Input: `\"1.234,50\"` → Output: `\"1234.5\"`\n- Input: `\"1,234.50\"` → Output: `\"1234.5\"`\n- Input: `\"1,234\"` → Output: `NULL`\n- Input: `\"NaN\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -278,7 +278,7 @@
   {
     "func_key": "etl_normalize_identifier_code",
     "name": "Identifier – Chuẩn hóa mã nghiệp vụ",
-    "description": "### Mô tả\nChuẩn hóa mã nghiệp vụ thành dạng compact uppercase, bỏ whitespace và chỉ giữ syntax A-Z, số, dấu chấm, gạch dưới, slash và hyphen.\n\n### Ví dụ\n- Input: `\" hs- 2026 / 001 \"` → Output: `\"HS-2026/001\"`\n- Input: `\"abc@123\"` → Output: `NULL`",
+    "description": "### Mô tả\nChuẩn hóa business identifier generic bằng cách bỏ whitespace, uppercase và chỉ chấp nhận syntax A-Z, digit, dot, underscore, slash và hyphen.\n\n### Ví dụ\n- Input: `\" hs- 2026 / 001 \"` → Output: `\"HS-2026/001\"`\n- Input: `\"ab.cd_01\"` → Output: `\"AB.CD_01\"`\n- Input: `\"abc@123\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -301,7 +301,7 @@
   {
     "func_key": "etl_normalize_null_token",
     "name": "NULL – Chuẩn hóa textual null token",
-    "description": "### Mô tả\nTrim chuỗi và chuyển các textual null token phổ biến như null, none, n/a hoặc chuỗi rỗng thành NULL.\n\n### Ví dụ\n- Input: `\" null \"` → Output: `NULL`\n- Input: `\"  Alice  \"` → Output: `\"Alice\"`",
+    "description": "### Mô tả\nTrim input và quy các textual null marker phổ biến về NULL; giá trị text thực được giữ lại sau khi trim.\n\n### Ví dụ\n- Input: `\" null \"` → Output: `NULL`\n- Input: `\"(NULL)\"` → Output: `NULL`\n- Input: `\"\\\\N\"` → Output: `NULL`\n- Input: `\"  Alice  \"` → Output: `\"Alice\"`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -324,7 +324,7 @@
   {
     "func_key": "etl_normalize_person_name",
     "name": "Tên người – Chuẩn hóa Unicode và khoảng trắng",
-    "description": "### Mô tả\nChuẩn hóa tên người theo Unicode NFC và khoảng trắng nhưng giữ nguyên cách viết hoa/thường do nguồn cung cấp.\n\n### Ví dụ\n- Input: `\"  Nguyễn   Văn   An  \"` → Output: `\"Nguyễn Văn An\"`\n- Input: `\"  Alice   Smith \"` → Output: `\"Alice Smith\"`",
+    "description": "### Mô tả\nChuẩn hóa tên người theo Unicode NFC và collapse mọi whitespace về một space, đồng thời giữ nguyên letter case và không đoán thứ tự họ/tên.\n\n### Ví dụ\n- Input: `\"  Nguyễn   Văn   An  \"` → Output: `\"Nguyễn Văn An\"`\n- Input: `\"Alice\\n\\tSmith\"` → Output: `\"Alice Smith\"`\n- Input: `\" null \"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -370,7 +370,7 @@
   {
     "func_key": "url_canonicalize",
     "name": "URL – Canonical hóa HTTP(S) URL",
-    "description": "### Mô tả\nCanonical hóa HTTP(S) URL, chuẩn hóa host/scheme, loại userinfo, tracking parameters và fragment theo logic hiện tại.\n\n### Ví dụ\n- Input: `\"HTTPS://user:pass@Example.COM:443/a?utm_source=x&b=2&a=1#section\"` → Output: `\"https://example.com/a?a=1&b=2\"`\n- Input: `\"not a url\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE HTTP(S) URL có hoặc không có scheme khi authority xác định được an toàn, chuẩn hóa host/scheme, bỏ userinfo, tracking params và fragment, sort query để tạo URL canonical.\n\n### Ví dụ\n- Input: `\"HTTPS://user:pass@Example.COM:443/a?utm_source=x&b=2&a=1#section\"` → Output: `\"https://example.com/a?a=1&b=2\"`\n- Input: `\"www.Example.com/path?b=2&utm_source=x\"` → Output: `\"https://www.example.com/path?b=2\"`\n- Input: `\"example.com\"` → Output: `\"https://example.com/\"`\n- Input: `\"not a url\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -416,7 +416,7 @@
   {
     "func_key": "dns_normalize_domain",
     "name": "DNS – Chuẩn hóa domain name",
-    "description": "### Mô tả\nChuẩn hóa domain về lowercase IDNA/ASCII, bỏ trailing dot và chuẩn hóa tên miền quốc tế.\n\n### Ví dụ\n- Input: `\"BÜCHER.DE.\"` → Output: `\"xn--bcher-kva.de\"`\n- Input: `\"Example.COM.\"` → Output: `\"example.com\"`",
+    "description": "### Mô tả\nTRY_PARSE bare DNS name, URL host hoặc email domain rồi xuất lowercase IDNA/ASCII host canonical; domain syntax không hợp lệ trả NULL.\n\n### Ví dụ\n- Input: `\"BÜCHER.DE.\"` → Output: `\"xn--bcher-kva.de\"`\n- Input: `\"https://WWW.Example.COM/path\"` → Output: `\"www.example.com\"`\n- Input: `\"User@Example.COM\"` → Output: `\"example.com\"`\n- Input: `\"-bad.example\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -462,7 +462,7 @@
   {
     "func_key": "git_normalize_repository_url",
     "name": "Git – Chuẩn hóa repository URL",
-    "description": "### Mô tả\nChuẩn hóa repository URL, loại suffix .git và tracking/query không cần thiết.\n\n### Ví dụ\n- Input: `\"https://github.com/salingnh/flink-etl-udfs.git?utm_source=test\"` → Output: `\"https://github.com/salingnh/flink-etl-udfs\"`\n- Input: `\"not-a-repository-url\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE HTTP(S), SSH, git:// và SCP-like Git remote, chuẩn hóa host và bỏ trailing .git/query để trả repository URL ổn định trong cùng transport representation.\n\n### Ví dụ\n- Input: `\"https://github.com/salingnh/flink-etl-udfs.git?utm_source=test\"` → Output: `\"https://github.com/salingnh/flink-etl-udfs\"`\n- Input: `\"git@github.com:salingnh/flink-etl-udfs.git\"` → Output: `\"ssh://git@github.com/salingnh/flink-etl-udfs\"`\n- Input: `\"ssh://git@GitHub.com/salingnh/flink-etl-udfs.git\"` → Output: `\"ssh://git@github.com/salingnh/flink-etl-udfs\"`\n- Input: `\"not-a-repository-url\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -577,7 +577,7 @@
   {
     "func_key": "vn_normalize_citizen_id",
     "name": "Việt Nam – Chuẩn hóa CMND/CCCD",
-    "description": "### Mô tả\nChuẩn hóa CMND/CCCD Việt Nam về chuỗi chỉ gồm 9 hoặc 12 chữ số, giữ leading zero.\n\n### Ví dụ\n- Input: `\"034 190 006 609\"` → Output: `\"034190006609\"`\n- Input: `\"12345\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE CMND/CCCD từ label và separator phổ biến, giữ leading zero và chỉ xuất 9 hoặc 12 digit; text lẫn ký tự không được hỗ trợ trả NULL.\n\n### Ví dụ\n- Input: `\"CCCD: 034.190.006.609\"` → Output: `\"034190006609\"`\n- Input: `\"CMND 123-456-789\"` → Output: `\"123456789\"`\n- Input: `\"abc034190006609\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -600,7 +600,7 @@
   {
     "func_key": "vn_normalize_mobile_phone",
     "name": "Việt Nam – Chuẩn hóa số di động và đầu số 11→10",
-    "description": "### Mô tả\nChuẩn hóa số di động Việt Nam về dạng quốc gia 10 chữ số và chuyển các đầu số di động 11→10 theo đợt chuyển đổi năm 2018.\n\n### Ví dụ\n- Input: `\"0169 123 4567\"` → Output: `\"0391234567\"`\n- Input: `\"+84 912 345 678\"` → Output: `\"0912345678\"`",
+    "description": "### Mô tả\nTRY_PARSE số di động Việt Nam từ national/international/tel: representation, bỏ separator và chuyển đầu số 11→10 theo migration map 2018; text/extension không hợp lệ trả NULL.\n\n### Ví dụ\n- Input: `\"0169 123 4567\"` → Output: `\"0391234567\"`\n- Input: `\"+84 912 345 678\"` → Output: `\"0912345678\"`\n- Input: `\"tel:+84 (912) 345-678\"` → Output: `\"0912345678\"`\n- Input: `\"0912FLOWERS\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -623,7 +623,7 @@
   {
     "func_key": "vn_normalize_tax_id",
     "name": "Việt Nam – Chuẩn hóa mã số thuế",
-    "description": "### Mô tả\nChuẩn hóa mã số thuế Việt Nam về dạng 10 chữ số hoặc 10-3 chữ số.\n\n### Ví dụ\n- Input: `\"0101234567001\"` → Output: `\"0101234567-001\"`\n- Input: `\"0101234567\"` → Output: `\"0101234567\"`",
+    "description": "### Mô tả\nTRY_PARSE mã số thuế Việt Nam từ label và separator phổ biến rồi xuất canonical 10 digits hoặc 10digits-3digits; không xác minh taxpayer registry.\n\n### Ví dụ\n- Input: `\"MST: 0101234567 001\"` → Output: `\"0101234567-001\"`\n- Input: `\"010.123.4567\"` → Output: `\"0101234567\"`\n- Input: `\"tax=0101234567\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -646,7 +646,7 @@
   {
     "func_key": "hash_normalize_hex",
     "name": "Hash – Chuẩn hóa digest hex",
-    "description": "### Mô tả\nChuẩn hóa digest hex về lowercase và chỉ chấp nhận độ dài hash phổ biến được hỗ trợ.\n\n### Ví dụ\n- Input: `\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"` → Output: `\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"`\n- Input: `\"abc123\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE digest hex có algorithm prefix hoặc separator phổ biến, lowercase output và kiểm tra prefix có khớp độ dài MD5/SHA-1/SHA-256/SHA-512 hay không.\n\n### Ví dụ\n- Input: `\"SHA-256: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"` → Output: `\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"`\n- Input: `\"MD5: d41d8cd98f00b204e9800998ecf8427e\"` → Output: `\"d41d8cd98f00b204e9800998ecf8427e\"`\n- Input: `\"MD5: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"` → Output: `NULL`\n- Input: `\"abc123\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": null,
@@ -692,7 +692,7 @@
   {
     "func_key": "iso8601_normalize_date",
     "name": "ISO 8601 – Chuẩn hóa ngày",
-    "description": "### Mô tả\nChuẩn hóa ngày hợp lệ về dạng YYYY-MM-DD.\n\n### Chuẩn\nISO 8601 là tiêu chuẩn quốc tế quy định cách biểu diễn ngày và thời gian để trao đổi dữ liệu nhất quán.\n\n### Ví dụ\n- Input: `\"2026-08-15\"` → Output: `\"2026-08-15\"`\n- Input: `\"15/08/2026\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE các representation ngày phổ biến có thể xác định an toàn và xuất một giá trị canonical YYYY-MM-DD; input không hợp lệ hoặc mơ hồ giữa nhiều date order trả NULL.\n\n### Chuẩn\nISO 8601 là tiêu chuẩn quốc tế cho biểu diễn ngày và thời gian. Trong các normalizer của thư viện, ISO 8601 xác định canonical output; input có thể ở representation khác nếu TRY_PARSE được deterministic và không mơ hồ.\n\n### Ví dụ\n- Input: `\"2026-08-15\"` → Output: `\"2026-08-15\"`\n- Input: `\"15/08/2026\"` → Output: `\"2026-08-15\"`\n- Input: `\"20260815\"` → Output: `\"2026-08-15\"`\n- Input: `\"01/02/2026\"` → Output: `NULL`\n- Input: `\"31/02/2026\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "ISO 8601",
@@ -715,7 +715,7 @@
   {
     "func_key": "iso8601_normalize_datetime_utc",
     "name": "ISO 8601 – Chuẩn hóa timestamp về UTC",
-    "description": "### Mô tả\nChuẩn hóa timestamp có timezone về UTC với hậu tố Z; timestamp không có timezone bị từ chối.\n\n### Chuẩn\nISO 8601 là tiêu chuẩn quốc tế quy định cách biểu diễn ngày và thời gian để trao đổi dữ liệu nhất quán.\n\n### Ví dụ\n- Input: `\"2026-08-07T09:00:00+07:00\"` → Output: `\"2026-08-07T02:00:00.000000Z\"`\n- Input: `\"2026-08-07T09:00:00\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE các timestamp có timezone từ representation xác định được an toàn rồi canonicalize về UTC với hậu tố Z; không tự đoán timezone và không đoán date order mơ hồ.\n\n### Chuẩn\nISO 8601 là tiêu chuẩn quốc tế cho biểu diễn ngày và thời gian. Trong các normalizer của thư viện, ISO 8601 xác định canonical output; input có thể ở representation khác nếu TRY_PARSE được deterministic và không mơ hồ.\n\n### Ví dụ\n- Input: `\"2026-08-15T09:00:00+07:00\"` → Output: `\"2026-08-15T02:00:00.000000Z\"`\n- Input: `\"15/08/2026 09:00:00+07:00\"` → Output: `\"2026-08-15T02:00:00.000000Z\"`\n- Input: `\"2026/08/15 09:00 +0700\"` → Output: `\"2026-08-15T02:00:00.000000Z\"`\n- Input: `\"01/02/2026 09:00:00+07:00\"` → Output: `NULL`\n- Input: `\"2026-08-15 09:00:00\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "ISO 8601",
@@ -738,7 +738,7 @@
   {
     "func_key": "iso4217_normalize_currency_code",
     "name": "ISO 4217 – Chuẩn hóa mã tiền tệ",
-    "description": "### Mô tả\nChuẩn hóa mã tiền tệ 3 chữ cái về uppercase; hàm kiểm tra hình thức mã, không xác nhận membership trong bảng mã hiện hành.\n\n### Chuẩn\nISO 4217 quy định mã tiền tệ, trong đó alpha code thường là mã ba chữ cái như USD, EUR hoặc VND.\n\n### Ví dụ\n- Input: `\"usd\"` → Output: `\"USD\"`\n- Input: `\"US\"` → Output: `NULL`",
+    "description": "### Mô tả\nChuẩn hóa mã tiền tệ ISO 4217 alpha-3 hoặc numeric được gán trong reference data sang alpha-3 canonical; không đoán currency name hoặc symbol mơ hồ.\n\n### Chuẩn\nISO 4217 quy định mã tiền tệ, trong đó alpha code thường là mã ba chữ cái như USD, EUR hoặc VND.\n\n### Ví dụ\n- Input: `\"vnd\"` → Output: `\"VND\"`\n- Input: `\"704\"` → Output: `\"VND\"`\n- Input: `\"ISO 4217: usd\"` → Output: `\"USD\"`\n- Input: `\"ZZZ\"` → Output: `NULL`\n- Input: `\"dollar\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "ISO 4217",
@@ -761,7 +761,7 @@
   {
     "func_key": "itu_e164_normalize_phone",
     "name": "ITU-T E.164 – Chuẩn hóa số điện thoại quốc tế",
-    "description": "### Mô tả\nChuẩn hóa số điện thoại về dạng quốc tế bắt đầu bằng + khi đã có country calling code hoặc default country code phù hợp.\n\n### Chuẩn\nITU-T E.164 quy định kế hoạch đánh số viễn thông công cộng quốc tế và giới hạn số quốc tế tối đa 15 chữ số.\n\n### Ví dụ\n- Input: `(\"0912 345 678\", \"+84\")` → Output: `\"+84912345678\"`\n- Input: `(\"123\", \"+84\")` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE số điện thoại từ separator phổ biến, prefix +/00/tel: và default country calling code rồi xuất dạng quốc tế +<digits>; extension, vanity text hoặc giá trị không xác định an toàn trả NULL.\n\n### Chuẩn\nITU-T E.164 quy định kế hoạch đánh số viễn thông công cộng quốc tế và giới hạn số quốc tế tối đa 15 chữ số.\n\n### Ví dụ\n- Input: `(\"0912 345 678\", \"+84\")` → Output: `\"+84912345678\"`\n- Input: `(\"tel:+84 (912) 345-678\", NULL)` → Output: `\"+84912345678\"`\n- Input: `(\"0084 912 345 678\", NULL)` → Output: `\"+84912345678\"`\n- Input: `(\"0912FLOWERS\", \"+84\")` → Output: `NULL`\n- Input: `(\"+84 912 345 678;ext=123\", NULL)` → Output: `NULL`",
     "params": "source_field,default_country_code",
     "category": "conversion",
     "standard": "ITU-T E.164",
@@ -784,7 +784,7 @@
   {
     "func_key": "iso13616_normalize_iban",
     "name": "ISO 13616 – Chuẩn hóa và kiểm tra IBAN",
-    "description": "### Mô tả\nChuẩn hóa IBAN bằng cách bỏ separator, uppercase và kiểm tra checksum trước khi trả kết quả.\n\n### Chuẩn\nISO 13616 quy định IBAN, định danh tài khoản ngân hàng quốc tế có cấu trúc và checksum dùng để phát hiện lỗi nhập liệu.\n\n### Ví dụ\n- Input: `\"GB82 WEST 1234 5698 7654 32\"` → Output: `\"GB82WEST12345698765432\"`\n- Input: `\"GB00INVALID\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE IBAN label và separator phổ biến, uppercase/compact output rồi kiểm tra mod-97 trước khi trả canonical IBAN.\n\n### Chuẩn\nISO 13616 quy định IBAN, định danh tài khoản ngân hàng quốc tế có cấu trúc và checksum dùng để phát hiện lỗi nhập liệu.\n\n### Ví dụ\n- Input: `\"GB82 WEST 1234 5698 7654 32\"` → Output: `\"GB82WEST12345698765432\"`\n- Input: `\"IBAN: GB82-WEST-1234-5698-7654-32\"` → Output: `\"GB82WEST12345698765432\"`\n- Input: `\"GB82WEST12345698765433\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "ISO 13616",
@@ -807,7 +807,7 @@
   {
     "func_key": "iso9362_normalize_bic",
     "name": "ISO 9362 – Chuẩn hóa BIC/SWIFT",
-    "description": "### Mô tả\nChuẩn hóa BIC/SWIFT bằng cách bỏ khoảng trắng, uppercase và kiểm tra cấu trúc 8 hoặc 11 ký tự.\n\n### Chuẩn\nISO 9362 quy định BIC, mã định danh tổ chức kinh doanh được dùng rộng rãi trong hệ thống tài chính/SWIFT.\n\n### Ví dụ\n- Input: `\"deut de ff\"` → Output: `\"DEUTDEFF\"`\n- Input: `\"ABC\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE BIC/SWIFT label và separator phổ biến, uppercase output và kiểm tra cấu trúc 8 hoặc 11 ký tự.\n\n### Chuẩn\nISO 9362 quy định BIC, mã định danh tổ chức kinh doanh được dùng rộng rãi trong hệ thống tài chính/SWIFT.\n\n### Ví dụ\n- Input: `\"deut de ff\"` → Output: `\"DEUTDEFF\"`\n- Input: `\"SWIFT: deut-de-ff\"` → Output: `\"DEUTDEFF\"`\n- Input: `\"DEUT DE FF 500\"` → Output: `\"DEUTDEFF500\"`\n- Input: `\"BAD\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "ISO 9362",
@@ -830,7 +830,7 @@
   {
     "func_key": "iso20022_normalize_message_type",
     "name": "ISO 20022 – Chuẩn hóa message identifier",
-    "description": "### Mô tả\nChuẩn hóa ISO 20022 message identifier về lowercase theo syntax message family/version.\n\n### Chuẩn\nISO 20022 là chuẩn mô hình và thông điệp tài chính dùng để trao đổi dữ liệu có cấu trúc giữa các hệ thống tài chính.\n\n### Ví dụ\n- Input: `\"PACS.008.001.08\"` → Output: `\"pacs.008.001.08\"`\n- Input: `\"invalid\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE ISO 20022 message identifier từ dotted, underscore/hyphen hoặc XSD namespace URN và xuất lowercase dotted canonical identifier.\n\n### Chuẩn\nISO 20022 là chuẩn mô hình và thông điệp tài chính dùng để trao đổi dữ liệu có cấu trúc giữa các hệ thống tài chính.\n\n### Ví dụ\n- Input: `\"PACS.008.001.08\"` → Output: `\"pacs.008.001.08\"`\n- Input: `\"pacs_008_001_08\"` → Output: `\"pacs.008.001.08\"`\n- Input: `\"urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08\"` → Output: `\"pacs.008.001.08\"`\n- Input: `\"pacs.8.1.8\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "ISO 20022",
@@ -853,7 +853,7 @@
   {
     "func_key": "iso17442_normalize_lei",
     "name": "ISO 17442 – Chuẩn hóa và kiểm tra LEI",
-    "description": "### Mô tả\nChuẩn hóa LEI về uppercase và kiểm tra checksum trước khi trả kết quả.\n\n### Chuẩn\nISO 17442 quy định Legal Entity Identifier (LEI), mã 20 ký tự dùng để nhận diện pháp nhân tham gia giao dịch tài chính.\n\n### Ví dụ\n- Input: `\"5493001KJTIIGC8Y1R12\"` → Output: `\"5493001KJTIIGC8Y1R12\"`\n- Input: `\"5493001KJTIIGC8Y1R13\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE LEI label/separator phổ biến, uppercase/compact output và kiểm tra mod-97 trước khi trả canonical 20-character LEI.\n\n### Chuẩn\nISO 17442 quy định Legal Entity Identifier (LEI), mã 20 ký tự dùng để nhận diện pháp nhân tham gia giao dịch tài chính.\n\n### Ví dụ\n- Input: `\"5493001KJTIIGC8Y1R12\"` → Output: `\"5493001KJTIIGC8Y1R12\"`\n- Input: `\"LEI: 5493-001K-JTII-GC8Y-1R12\"` → Output: `\"5493001KJTIIGC8Y1R12\"`\n- Input: `\"5493001KJTIIGC8Y1R13\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "ISO 17442",
@@ -876,7 +876,7 @@
   {
     "func_key": "fhir_normalize_id",
     "name": "HL7 FHIR – Chuẩn hóa Resource ID",
-    "description": "### Mô tả\nKiểm tra và giữ FHIR Resource id đáp ứng giới hạn ký tự/độ dài của FHIR.\n\n### Chuẩn\nHL7 FHIR là chuẩn trao đổi dữ liệu y tế theo Resource, định nghĩa cả quy tắc cho Resource id và Reference.\n\n### Ví dụ\n- Input: `\"patient-001\"` → Output: `\"patient-001\"`\n- Input: `\"patient/001\"` → Output: `NULL`",
+    "description": "### Mô tả\nChuẩn hóa bare FHIR Resource id hoặc contained-reference #id về id token và kiểm tra character/length constraints của FHIR.\n\n### Chuẩn\nHL7 FHIR là chuẩn trao đổi dữ liệu y tế theo Resource, định nghĩa cả quy tắc cho Resource id và Reference.\n\n### Ví dụ\n- Input: `\"patient-001\"` → Output: `\"patient-001\"`\n- Input: `\"#contained-1\"` → Output: `\"contained-1\"`\n- Input: `\"Patient/123\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "HL7 FHIR",
@@ -899,7 +899,7 @@
   {
     "func_key": "fhir_normalize_reference",
     "name": "HL7 FHIR – Chuẩn hóa Reference",
-    "description": "### Mô tả\nChuẩn hóa FHIR relative/local Reference như Patient/123 hoặc #contained-id.\n\n### Chuẩn\nHL7 FHIR là chuẩn trao đổi dữ liệu y tế theo Resource, định nghĩa cả quy tắc cho Resource id và Reference.\n\n### Ví dụ\n- Input: `\"Patient/patient-001\"` → Output: `\"Patient/patient-001\"`\n- Input: `\"patient/patient-001\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE FHIR relative/local Reference và urn:uuid representation, canonicalize separator/UUID nhưng không làm mất base URL của absolute cross-server reference.\n\n### Chuẩn\nHL7 FHIR là chuẩn trao đổi dữ liệu y tế theo Resource, định nghĩa cả quy tắc cho Resource id và Reference.\n\n### Ví dụ\n- Input: `\"Patient / patient-001\"` → Output: `\"Patient/patient-001\"`\n- Input: `\"#contained-1\"` → Output: `\"#contained-1\"`\n- Input: `\"urn:uuid:{550E8400-E29B-41D4-A716-446655440000}\"` → Output: `\"urn:uuid:550e8400-e29b-41d4-a716-446655440000\"`\n- Input: `\"patient-001\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "HL7 FHIR",
@@ -922,7 +922,7 @@
   {
     "func_key": "hl7v2_normalize_message_type",
     "name": "HL7 v2 – Chuẩn hóa message type",
-    "description": "### Mô tả\nChuẩn hóa HL7 v2 message type về uppercase dạng TYPE^TRIGGER, hỗ trợ thay separator ~ bằng ^.\n\n### Chuẩn\nHL7 v2 là họ chuẩn message-based rất phổ biến trong tích hợp hệ thống y tế và định nghĩa message type/trigger event.\n\n### Ví dụ\n- Input: `\"adt^a01\"` → Output: `\"ADT^A01\"`\n- Input: `\"ADT-A01\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE common HL7 v2 message type separators về TYPE^TRIGGER hoặc TYPE^TRIGGER^STRUCTURE canonical uppercase form.\n\n### Chuẩn\nHL7 v2 là họ chuẩn message-based rất phổ biến trong tích hợp hệ thống y tế và định nghĩa message type/trigger event.\n\n### Ví dụ\n- Input: `\"adt^a01\"` → Output: `\"ADT^A01\"`\n- Input: `\"ADT-A01\"` → Output: `\"ADT^A01\"`\n- Input: `\"ADT_A01\"` → Output: `\"ADT^A01\"`\n- Input: `\"ADT^A01^ADT_A01\"` → Output: `\"ADT^A01^ADT_A01\"`\n- Input: `\"ADT\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "HL7 v2",
@@ -945,7 +945,7 @@
   {
     "func_key": "dicom_normalize_uid",
     "name": "DICOM – Chuẩn hóa UID",
-    "description": "### Mô tả\nKiểm tra DICOM UID/OID dạng numeric dot notation và giới hạn tối đa 64 ký tự.\n\n### Chuẩn\nDICOM là chuẩn quốc tế cho dữ liệu và truyền thông hình ảnh y khoa, trong đó UID được dùng để định danh đối tượng DICOM.\n\n### Ví dụ\n- Input: `\"1.2.840.10008.1.2.1\"` → Output: `\"1.2.840.10008.1.2.1\"`\n- Input: `\"1..2\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE DICOM UID/OID từ bare, OID: hoặc urn:oid: representation, normalize spacing quanh dot và kiểm tra numeric UID syntax/64-character limit.\n\n### Chuẩn\nDICOM là chuẩn quốc tế cho dữ liệu và truyền thông hình ảnh y khoa, trong đó UID được dùng để định danh đối tượng DICOM.\n\n### Ví dụ\n- Input: `\"1.2.840.10008.1.2.1\"` → Output: `\"1.2.840.10008.1.2.1\"`\n- Input: `\"urn:oid:1.2.840.10008.1.2.1\"` → Output: `\"1.2.840.10008.1.2.1\"`\n- Input: `\"OID: 1 . 2 . 840 . 10008 . 1 . 2 . 1\"` → Output: `\"1.2.840.10008.1.2.1\"`\n- Input: `\"1.02.3\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "DICOM",
@@ -968,7 +968,7 @@
   {
     "func_key": "stix21_normalize_id",
     "name": "STIX 2.1 – Chuẩn hóa object ID",
-    "description": "### Mô tả\nChuẩn hóa STIX object identifier dạng object-type--UUID và canonical hóa UUID.\n\n### Chuẩn\nSTIX 2.1 là chuẩn OASIS để biểu diễn cyber threat intelligence dưới dạng các object và relationship có identifier chuẩn hóa.\n\n### Ví dụ\n- Input: `\"indicator--550e8400-e29b-41d4-a716-446655440000\"` → Output: `\"indicator--550e8400-e29b-41d4-a716-446655440000\"`\n- Input: `\"Indicator--not-a-uuid\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE STIX object identifier, canonicalize object type separator/case và UUID wrapper/case rồi xuất type--uuid canonical form.\n\n### Chuẩn\nSTIX 2.1 là chuẩn OASIS để biểu diễn cyber threat intelligence dưới dạng các object và relationship có identifier chuẩn hóa.\n\n### Ví dụ\n- Input: `\"indicator--550E8400-E29B-41D4-A716-446655440000\"` → Output: `\"indicator--550e8400-e29b-41d4-a716-446655440000\"`\n- Input: `\"MALWARE--{550E8400-E29B-41D4-A716-446655440000}\"` → Output: `\"malware--550e8400-e29b-41d4-a716-446655440000\"`\n- Input: `\"indicator-550e8400-e29b-41d4-a716-446655440000\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "STIX 2.1",
@@ -991,7 +991,7 @@
   {
     "func_key": "stix21_normalize_type",
     "name": "STIX 2.1 – Chuẩn hóa object type",
-    "description": "### Mô tả\nChuẩn hóa STIX object type về lowercase hyphenated syntax.\n\n### Chuẩn\nSTIX 2.1 là chuẩn OASIS để biểu diễn cyber threat intelligence dưới dạng các object và relationship có identifier chuẩn hóa.\n\n### Ví dụ\n- Input: `\" Threat-Actor \"` → Output: `\"threat-actor\"`\n- Input: `\"Threat Actor\"` → Output: `NULL`",
+    "description": "### Mô tả\nChuẩn hóa STIX object type từ whitespace/underscore/hyphen aliases về lowercase hyphenated token.\n\n### Chuẩn\nSTIX 2.1 là chuẩn OASIS để biểu diễn cyber threat intelligence dưới dạng các object và relationship có identifier chuẩn hóa.\n\n### Ví dụ\n- Input: `\"Threat_Actor\"` → Output: `\"threat-actor\"`\n- Input: `\"threat actor\"` → Output: `\"threat-actor\"`\n- Input: `\"MALWARE\"` → Output: `\"malware\"`\n- Input: `\"123-malware\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "STIX 2.1",
@@ -1014,7 +1014,7 @@
   {
     "func_key": "mitre_attack_normalize_technique_id",
     "name": "MITRE ATT&CK – Chuẩn hóa technique ID",
-    "description": "### Mô tả\nChuẩn hóa MITRE ATT&CK technique/sub-technique ID về uppercase canonical form.\n\n### Chuẩn\nMITRE ATT&CK là knowledge base/taxonomy mô tả tactics, techniques và procedures của đối tượng tấn công; technique ID như T1059 hoặc T1059.001 được dùng làm khóa tham chiếu.\n\n### Ví dụ\n- Input: `\"t1059.001\"` → Output: `\"T1059.001\"`\n- Input: `\"TA0002\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE ATT&CK technique/sub-technique ID từ case/prefix/separator aliases và xuất canonical Tdddd hoặc Tdddd.ddd.\n\n### Chuẩn\nMITRE ATT&CK là knowledge base/taxonomy mô tả tactics, techniques và procedures của đối tượng tấn công; technique ID như T1059 hoặc T1059.001 được dùng làm khóa tham chiếu.\n\n### Ví dụ\n- Input: `\"t1059.001\"` → Output: `\"T1059.001\"`\n- Input: `\"T1059-001\"` → Output: `\"T1059.001\"`\n- Input: `\"ATT&CK: T1059_001\"` → Output: `\"T1059.001\"`\n- Input: `\"T159.001\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "MITRE ATT&CK",
@@ -1037,7 +1037,7 @@
   {
     "func_key": "cve_normalize_id",
     "name": "CVE – Chuẩn hóa vulnerability ID",
-    "description": "### Mô tả\nChuẩn hóa CVE identifier về dạng CVE-YYYY-NNNN... và loại giá trị sai cấu trúc.\n\n### Chuẩn\nCVE là hệ thống định danh công khai cho các lỗ hổng bảo mật đã được gán mã CVE duy nhất.\n\n### Ví dụ\n- Input: `\"cve 2024 12345\"` → Output: `\"CVE-2024-12345\"`\n- Input: `\"CVE-24-1\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE CVE prefix và separator aliases rồi xuất canonical CVE-YYYY-NNNN...; không tra trạng thái CVE registry.\n\n### Chuẩn\nCVE là hệ thống định danh công khai cho các lỗ hổng bảo mật đã được gán mã CVE duy nhất.\n\n### Ví dụ\n- Input: `\"cve 2024 12345\"` → Output: `\"CVE-2024-12345\"`\n- Input: `\"CVE:2024:12345\"` → Output: `\"CVE-2024-12345\"`\n- Input: `\"2024-12345\"` → Output: `\"CVE-2024-12345\"`\n- Input: `\"CVE-24-1\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "CVE",
@@ -1060,7 +1060,7 @@
   {
     "func_key": "gs1_normalize_gtin",
     "name": "GS1 – Chuẩn hóa và kiểm tra GTIN",
-    "description": "### Mô tả\nChuẩn hóa GTIN và kiểm tra GS1 check digit trước khi trả kết quả.\n\n### Chuẩn\nGS1 là hệ thống tiêu chuẩn nhận dạng chuỗi cung ứng toàn cầu, bao gồm GTIN cho trade item và SSCC cho logistics unit.\n\n### Ví dụ\n- Input: `\"4006381333931\"` → Output: `\"4006381333931\"`\n- Input: `\"4006381333932\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE GTIN label, GS1 AI (01) và separator phổ biến, compact digits rồi kiểm tra GS1 check digit.\n\n### Chuẩn\nGS1 là hệ thống tiêu chuẩn nhận dạng chuỗi cung ứng toàn cầu, bao gồm GTIN cho trade item và SSCC cho logistics unit.\n\n### Ví dụ\n- Input: `\"4006381333931\"` → Output: `\"4006381333931\"`\n- Input: `\"GTIN: 4006-3813-3393-1\"` → Output: `\"4006381333931\"`\n- Input: `\"(01)04006381333931\"` → Output: `\"04006381333931\"`\n- Input: `\"4006381333932\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "GS1",
@@ -1083,7 +1083,7 @@
   {
     "func_key": "gs1_normalize_sscc",
     "name": "GS1 – Chuẩn hóa và kiểm tra SSCC",
-    "description": "### Mô tả\nChuẩn hóa SSCC 18 chữ số và kiểm tra GS1 check digit.\n\n### Chuẩn\nGS1 là hệ thống tiêu chuẩn nhận dạng chuỗi cung ứng toàn cầu, bao gồm GTIN cho trade item và SSCC cho logistics unit.\n\n### Ví dụ\n- Input: `\"123456789012345675\"` → Output: `\"123456789012345675\"`\n- Input: `\"123\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE SSCC label, GS1 AI (00) và separator phổ biến, compact 18 digits rồi kiểm tra GS1 check digit.\n\n### Chuẩn\nGS1 là hệ thống tiêu chuẩn nhận dạng chuỗi cung ứng toàn cầu, bao gồm GTIN cho trade item và SSCC cho logistics unit.\n\n### Ví dụ\n- Input: `\"123456789012345675\"` → Output: `\"123456789012345675\"`\n- Input: `\"SSCC: 1234-5678-9012-3456-75\"` → Output: `\"123456789012345675\"`\n- Input: `\"(00)123456789012345675\"` → Output: `\"123456789012345675\"`\n- Input: `\"123456789012345670\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "GS1",
@@ -1106,7 +1106,7 @@
   {
     "func_key": "gs1_epcis_normalize_event_type",
     "name": "GS1 EPCIS – Chuẩn hóa event type",
-    "description": "### Mô tả\nChuẩn hóa tên EPCIS event type về canonical event class được hỗ trợ.\n\n### Chuẩn\nGS1 EPCIS là chuẩn chia sẻ visibility event trong chuỗi cung ứng, mô tả các event như ObjectEvent hoặc AggregationEvent.\n\n### Ví dụ\n- Input: `\"object_event\"` → Output: `\"ObjectEvent\"`\n- Input: `\"unknown_event\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE EPCIS event class từ snake/kebab/space alias hoặc event-class IRI path và xuất canonical GS1 EPCIS class name.\n\n### Chuẩn\nGS1 EPCIS là chuẩn chia sẻ visibility event trong chuỗi cung ứng, mô tả các event như ObjectEvent hoặc AggregationEvent.\n\n### Ví dụ\n- Input: `\"object_event\"` → Output: `\"ObjectEvent\"`\n- Input: `\"aggregation-event\"` → Output: `\"AggregationEvent\"`\n- Input: `\"https://ref.gs1.org/epcis/TransformationEvent\"` → Output: `\"TransformationEvent\"`\n- Input: `\"UnknownEvent\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "GS1 EPCIS",
@@ -1129,7 +1129,7 @@
   {
     "func_key": "opcua_normalize_node_id",
     "name": "OPC UA – Chuẩn hóa NodeId",
-    "description": "### Mô tả\nChuẩn hóa và kiểm tra OPC UA NodeId theo các identifier form được implementation hỗ trợ.\n\n### Chuẩn\nOPC UA là chuẩn giao tiếp/interoperability công nghiệp, dùng NodeId để định danh node trong address space.\n\n### Ví dụ\n- Input: `\"ns=2;s=Temperature\"` → Output: `\"ns=2;s=Temperature\"`\n- Input: `\"bad-node-id\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE OPC UA NodeId label/spacing, normalize namespace/index prefixes và canonicalize numeric/GUID/base64 identifier forms.\n\n### Chuẩn\nOPC UA là chuẩn giao tiếp/interoperability công nghiệp, dùng NodeId để định danh node trong address space.\n\n### Ví dụ\n- Input: `\"ns=2;s=Temperature\"` → Output: `\"ns=2;s=Temperature\"`\n- Input: `\"NodeId: ns = 2 ; i = 00084\"` → Output: `\"ns=2;i=84\"`\n- Input: `\"g={550E8400-E29B-41D4-A716-446655440000}\"` → Output: `\"g=550e8400-e29b-41d4-a716-446655440000\"`\n- Input: `\"ns=70000;i=1\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "OPC UA",
@@ -1152,7 +1152,7 @@
   {
     "func_key": "dlms_cosem_normalize_obis_code",
     "name": "DLMS/COSEM – Chuẩn hóa OBIS code",
-    "description": "### Mô tả\nChuẩn hóa và kiểm tra OBIS code dùng trong DLMS/COSEM metering identifiers.\n\n### Chuẩn\nDLMS/COSEM là bộ chuẩn trao đổi dữ liệu đo đếm năng lượng/utility; OBIS code định danh các đại lượng và đối tượng đo.\n\n### Ví dụ\n- Input: `\"1-0:1.8.0*255\"` → Output: `\"1-0:1.8.0*255\"`\n- Input: `\"invalid\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE OBIS label, canonical A-B:C.D.E*F text hoặc six-group dotted representation và xuất canonical textual OBIS form; chỉ kiểm tra structural 0..255 range.\n\n### Chuẩn\nDLMS/COSEM là bộ chuẩn trao đổi dữ liệu đo đếm năng lượng/utility; OBIS code định danh các đại lượng và đối tượng đo.\n\n### Ví dụ\n- Input: `\"1-0:1.8.0*255\"` → Output: `\"1-0:1.8.0*255\"`\n- Input: `\"OBIS: 1 - 0 : 1 . 8 . 0 * 255\"` → Output: `\"1-0:1.8.0*255\"`\n- Input: `\"1.0.1.8.0.255\"` → Output: `\"1-0:1.8.0*255\"`\n- Input: `\"1-0:1.8.0*999\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "DLMS/COSEM",
@@ -1175,7 +1175,7 @@
   {
     "func_key": "epsg_normalize_code",
     "name": "EPSG – Chuẩn hóa CRS code",
-    "description": "### Mô tả\nChuẩn hóa mã CRS về dạng EPSG:<code>; hàm chỉ kiểm tra syntax, không tra registry EPSG trực tuyến.\n\n### Chuẩn\nEPSG Geodetic Parameter Dataset là registry mã hóa coordinate reference systems và các tham số trắc địa, thường được tham chiếu bằng mã EPSG.\n\n### Ví dụ\n- Input: `\"epsg:4326\"` → Output: `\"EPSG:4326\"`\n- Input: `\"EPSG:ABC\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE EPSG numeric, EPSG: label, OGC CRS URN hoặc OGC definition URL và xuất canonical EPSG:<code>; không xác minh code tồn tại trong registry.\n\n### Chuẩn\nEPSG Geodetic Parameter Dataset là registry mã hóa coordinate reference systems và các tham số trắc địa, thường được tham chiếu bằng mã EPSG.\n\n### Ví dụ\n- Input: `\"epsg:4326\"` → Output: `\"EPSG:4326\"`\n- Input: `\"4326\"` → Output: `\"EPSG:4326\"`\n- Input: `\"urn:ogc:def:crs:EPSG::4326\"` → Output: `\"EPSG:4326\"`\n- Input: `\"http://www.opengis.net/def/crs/EPSG/0/4326\"` → Output: `\"EPSG:4326\"`\n- Input: `\"EPSG:0\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "EPSG",
@@ -1290,7 +1290,7 @@
   {
     "func_key": "iso3166_normalize_alpha3",
     "name": "ISO 3166-1 – Chuẩn hóa mã quốc gia Alpha-3",
-    "description": "### Mô tả\nTra cứu mã quốc gia ISO 3166-1 alpha-2/alpha-3 và trả mã alpha-3 được gán chính thức trong reference data đóng gói.\n\n### Chuẩn\nISO 3166-1 quy định mã quốc gia alpha-2, alpha-3 và numeric để biểu diễn quốc gia/lãnh thổ nhất quán.\n\n### Ví dụ\n- Input: `\"vn\"` → Output: `\"VNM\"`\n- Input: `\"ZZ\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE ISO 3166-1 alpha-2, alpha-3, numeric hoặc exact country name qua versioned reference data và xuất assigned alpha-3 canonical code.\n\n### Chuẩn\nISO 3166-1 quy định mã quốc gia alpha-2, alpha-3 và numeric để biểu diễn quốc gia/lãnh thổ nhất quán.\n\n### Ví dụ\n- Input: `\"vn\"` → Output: `\"VNM\"`\n- Input: `\"704\"` → Output: `\"VNM\"`\n- Input: `\"Viet Nam\"` → Output: `\"VNM\"`\n- Input: `\"USA\"` → Output: `\"USA\"`\n- Input: `\"ZZ\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "ISO 3166-1",
@@ -1336,7 +1336,7 @@
   {
     "func_key": "w3c_activitystreams_normalize_id",
     "name": "W3C ActivityStreams 2.0 – Chuẩn hóa Object ID/IRI",
-    "description": "### Mô tả\nTrim và kiểm tra ActivityStreams Object ID là một absolute IRI có scheme.\n\n### Chuẩn\nW3C ActivityStreams 2.0 là mô hình dữ liệu để mô tả social activities và objects, trong đó id thường là IRI định danh object.\n\n### Ví dụ\n- Input: `\" https://social.example/posts/123 \"` → Output: `\"https://social.example/posts/123\"`\n- Input: `\"/posts/123\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE bare hoặc angle-bracket absolute IRI dùng làm ActivityStreams Object id; giữ IRI semantics và từ chối relative identifier.\n\n### Chuẩn\nW3C ActivityStreams 2.0 là mô hình dữ liệu để mô tả social activities và objects, trong đó id thường là IRI định danh object.\n\n### Ví dụ\n- Input: `\" https://social.example/posts/123 \"` → Output: `\"https://social.example/posts/123\"`\n- Input: `\"<https://social.example/posts/123>\"` → Output: `\"https://social.example/posts/123\"`\n- Input: `\"/posts/123\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "W3C ActivityStreams 2.0",
@@ -1359,7 +1359,7 @@
   {
     "func_key": "rfc3986_normalize_uri",
     "name": "RFC 3986 – Chuẩn hóa URI",
-    "description": "### Mô tả\nCanonical hóa URI tuyệt đối một cách bảo thủ: lowercase scheme/host và uppercase percent-escape hex, không áp dụng equivalence theo từng scheme riêng.\n\n### Chuẩn\nRFC 3986 định nghĩa generic syntax của URI gồm scheme, authority, path, query và fragment.\n\n### Ví dụ\n- Input: `\"HTTP://Example.COM/a/%7euser?x=1#Top\"` → Output: `\"http://example.com/a/%7Euser?x=1#Top\"`\n- Input: `\"/relative/path\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE absolute URI, normalize scheme/IDNA host và percent-encoding của unreserved characters theo RFC 3986 mà không invent scheme-specific equivalence.\n\n### Chuẩn\nRFC 3986 định nghĩa generic syntax của URI gồm scheme, authority, path, query và fragment.\n\n### Ví dụ\n- Input: `\"HTTP://Example.COM/a/%7euser?x=1#Top\"` → Output: `\"http://example.com/a/~user?x=1#Top\"`\n- Input: `\"<https://BÜCHER.DE/%7Ealice>\"` → Output: `\"https://xn--bcher-kva.de/~alice\"`\n- Input: `\"/relative/path\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "RFC 3986",
@@ -1382,7 +1382,7 @@
   {
     "func_key": "iso26324_normalize_doi",
     "name": "ISO 26324 – Chuẩn hóa DOI",
-    "description": "### Mô tả\nLoại prefix doi:/doi.org, trim và lowercase DOI name rồi kiểm tra cấu trúc DOI cơ bản.\n\n### Chuẩn\nISO 26324 quy định Digital Object Identifier (DOI), một identifier bền vững cho đối tượng số và tài liệu học thuật.\n\n### Ví dụ\n- Input: `\"https://doi.org/10.1000/ABC123\"` → Output: `\"10.1000/abc123\"`\n- Input: `\"doi:abc\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE bare DOI, DOI label hoặc doi.org/dx.doi.org resolver URL rồi xuất lowercase DOI name canonical; không thực hiện network resolution/registry lookup.\n\n### Chuẩn\nISO 26324 quy định Digital Object Identifier (DOI), một identifier bền vững cho đối tượng số và tài liệu học thuật.\n\n### Ví dụ\n- Input: `\"https://doi.org/10.1000/ABC123\"` → Output: `\"10.1000/abc123\"`\n- Input: `\"DOI: 10.1000/ABC123\"` → Output: `\"10.1000/abc123\"`\n- Input: `\"https://dx.doi.org/10.1000/ABC123?source=x\"` → Output: `\"10.1000/abc123\"`\n- Input: `\"doi:abc\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "ISO 26324",
@@ -1405,7 +1405,7 @@
   {
     "func_key": "iso3297_normalize_issn",
     "name": "ISO 3297 – Chuẩn hóa và kiểm tra ISSN",
-    "description": "### Mô tả\nChuẩn hóa ISSN về dạng NNNN-NNNX và kiểm tra checksum ISO 3297.\n\n### Chuẩn\nISO 3297 quy định International Standard Serial Number (ISSN), mã 8 ký tự có check digit cho serial publications.\n\n### Ví dụ\n- Input: `\"ISSN 2049 3630\"` → Output: `\"2049-3630\"`\n- Input: `\"2049-3631\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE ISSN/ISSN-L label và separator aliases, kiểm tra ISO 3297 checksum rồi xuất canonical NNNN-NNNX.\n\n### Chuẩn\nISO 3297 quy định International Standard Serial Number (ISSN), mã 8 ký tự có check digit cho serial publications.\n\n### Ví dụ\n- Input: `\"ISSN 2049 3630\"` → Output: `\"2049-3630\"`\n- Input: `\"ISSN-L: 20493630\"` → Output: `\"2049-3630\"`\n- Input: `\"2049-3631\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "ISO 3297",
@@ -1428,7 +1428,7 @@
   {
     "func_key": "iso2108_normalize_isbn13",
     "name": "ISO 2108 – Chuẩn hóa ISBN về ISBN-13",
-    "description": "### Mô tả\nChuẩn hóa ISBN-10/ISBN-13 hợp lệ về ISBN-13 13 chữ số và kiểm tra/tính check digit.\n\n### Chuẩn\nISO 2108 quy định International Standard Book Number (ISBN), mã định danh cho sách/xuất bản phẩm đơn lẻ với check digit.\n\n### Ví dụ\n- Input: `\"0-306-40615-2\"` → Output: `\"9780306406157\"`\n- Input: `\"978-0-306-40615-7\"` → Output: `\"9780306406157\"`",
+    "description": "### Mô tả\nTRY_PARSE ISBN-10, ISBN-13, ISBN label hoặc urn:isbn representation, validate checksum và xuất canonical 13-digit ISBN-13.\n\n### Chuẩn\nISO 2108 quy định International Standard Book Number (ISBN), mã định danh cho sách/xuất bản phẩm đơn lẻ với check digit.\n\n### Ví dụ\n- Input: `\"0-306-40615-2\"` → Output: `\"9780306406157\"`\n- Input: `\"978-0-306-40615-7\"` → Output: `\"9780306406157\"`\n- Input: `\"urn:isbn:0-306-40615-2\"` → Output: `\"9780306406157\"`\n- Input: `\"9780306406158\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "ISO 2108",
@@ -1451,7 +1451,7 @@
   {
     "func_key": "w3c_did_normalize",
     "name": "W3C DID Core – Chuẩn hóa Decentralized Identifier",
-    "description": "### Mô tả\nChuẩn hóa generic DID bằng cách lowercase scheme/method nhưng không áp dụng rewrite rule riêng của từng DID method.\n\n### Chuẩn\nW3C DID Core định nghĩa Decentralized Identifier (DID) dạng did:<method>:<method-specific-id> và mô hình DID Document liên quan.\n\n### Ví dụ\n- Input: `\"DID:WEB:example.com:user:123\"` → Output: `\"did:web:example.com:user:123\"`\n- Input: `\"did:web:\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE bare hoặc angle-bracket generic DID, lowercase did scheme/method nhưng giữ method-specific identifier semantics; không áp dụng method-specific rewrite rules.\n\n### Chuẩn\nW3C DID Core định nghĩa Decentralized Identifier (DID) dạng did:<method>:<method-specific-id> và mô hình DID Document liên quan.\n\n### Ví dụ\n- Input: `\"DID:WEB:example.com:user:123\"` → Output: `\"did:web:example.com:user:123\"`\n- Input: `\"<did:WEB:example.com:user:123>\"` → Output: `\"did:web:example.com:user:123\"`\n- Input: `\"did:web:\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "W3C DID Core",
@@ -1474,7 +1474,7 @@
   {
     "func_key": "rfc9562_normalize_uuid",
     "name": "RFC 9562 – Chuẩn hóa UUID/GUID",
-    "description": "### Mô tả\nChuẩn hóa UUID/GUID textual form về lowercase canonical 8-4-4-4-12.\n\n### Chuẩn\nRFC 9562 quy định UUID, identifier 128-bit với textual representation canonical và các UUID version hiện hành.\n\n### Ví dụ\n- Input: `\"550E8400-E29B-41D4-A716-446655440000\"` → Output: `\"550e8400-e29b-41d4-a716-446655440000\"`\n- Input: `\"not-a-uuid\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE UUID/GUID canonical, compact 32-hex, braces, UUID: hoặc urn:uuid: representation rồi xuất lowercase canonical 8-4-4-4-12 text.\n\n### Chuẩn\nRFC 9562 quy định UUID, identifier 128-bit với textual representation canonical và các UUID version hiện hành.\n\n### Ví dụ\n- Input: `\"550E8400-E29B-41D4-A716-446655440000\"` → Output: `\"550e8400-e29b-41d4-a716-446655440000\"`\n- Input: `\"{550E8400-E29B-41D4-A716-446655440000}\"` → Output: `\"550e8400-e29b-41d4-a716-446655440000\"`\n- Input: `\"urn:uuid:550e8400e29b41d4a716446655440000\"` → Output: `\"550e8400-e29b-41d4-a716-446655440000\"`\n- Input: `\"not-a-uuid\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "RFC 9562",
@@ -1497,7 +1497,7 @@
   {
     "func_key": "rfc8141_normalize_urn",
     "name": "RFC 8141 – Chuẩn hóa URN",
-    "description": "### Mô tả\nChuẩn hóa generic URN bằng cách lowercase urn/NID và uppercase hexadecimal trong percent-escape, không áp dụng namespace-specific equivalence.\n\n### Chuẩn\nRFC 8141 định nghĩa cú pháp Uniform Resource Name (URN), một lớp URI dùng cho identifier theo namespace.\n\n### Ví dụ\n- Input: `\"URN:EXAMPLE:a123%2cz456\"` → Output: `\"urn:example:a123%2Cz456\"`\n- Input: `\"urn::abc\"` → Output: `NULL`",
+    "description": "### Mô tả\nTRY_PARSE bare hoặc angle-bracket generic URN, lowercase urn/NID và uppercase percent-escape hex; không áp dụng namespace-specific equivalence.\n\n### Chuẩn\nRFC 8141 định nghĩa cú pháp Uniform Resource Name (URN), một lớp URI dùng cho identifier theo namespace.\n\n### Ví dụ\n- Input: `\"URN:EXAMPLE:a123%2cz456\"` → Output: `\"urn:example:a123%2Cz456\"`\n- Input: `\"<urn:example:a123%2cz456>\"` → Output: `\"urn:example:a123%2Cz456\"`\n- Input: `\"urn::abc\"` → Output: `NULL`",
     "params": "source_field",
     "category": "conversion",
     "standard": "RFC 8141",

@@ -7,7 +7,19 @@ from typing import Optional
 
 from flink_etl_udfs.udfs._safe import try_udf
 
-_NULL_TOKENS = {"", "null", "none", "nil", "n/a", "na", "undefined", "[null]"}
+_NULL_TOKENS = {
+    "",
+    "null",
+    "none",
+    "nil",
+    "n/a",
+    "na",
+    "undefined",
+    "[null]",
+    "(null)",
+    "<null>",
+    "\\n",
+}
 _VN_CITIZEN_RE = re.compile(r"^(?:\d{9}|\d{12})$")
 _VN_TAX_RE = re.compile(r"^(\d{10})(?:-?(\d{3}))?$")
 _VN_MOBILE_RE = re.compile(r"^0[35789]\d{8}$")
@@ -45,11 +57,18 @@ def _clean(value: Optional[str]) -> Optional[str]:
     return None if candidate.casefold() in _NULL_TOKENS else candidate
 
 
+def _strip_known_prefix(value: str, prefixes: str) -> str:
+    return re.sub(rf"(?i)^(?:{prefixes})\s*[:#-]?\s*", "", value).strip()
+
+
 def _normalize_vn_citizen_id(value: Optional[str]) -> Optional[str]:
     candidate = _clean(value)
     if candidate is None:
         return None
-    digits = "".join(ch for ch in candidate if ch.isascii() and ch.isdigit())
+    candidate = _strip_known_prefix(candidate, r"CMND|CCCD|CĂN\s*CƯỚC|CAN\s*CUOC")
+    if re.fullmatch(r"[0-9.\-\s]+", candidate) is None:
+        return None
+    digits = re.sub(r"[.\-\s]+", "", candidate)
     return digits if _VN_CITIZEN_RE.fullmatch(digits) else None
 
 
@@ -63,6 +82,9 @@ def _classify_vn_identity_id(value: Optional[str]) -> Optional[str]:
 def _normalize_vn_mobile_phone(value: Optional[str]) -> Optional[str]:
     candidate = _clean(value)
     if candidate is None:
+        return None
+    candidate = re.sub(r"(?i)^tel:\s*", "", candidate).strip()
+    if re.fullmatch(r"[+0-9().\-\s]+", candidate) is None:
         return None
 
     digits = "".join(ch for ch in candidate if ch.isascii() and ch.isdigit())
@@ -79,12 +101,17 @@ def _normalize_vn_mobile_phone(value: Optional[str]) -> Optional[str]:
         return None
 
     if len(national) == 11:
-        for old_prefix, new_prefix in _VN_LEGACY_MOBILE_PREFIXES.items():
-            if national.startswith(old_prefix):
-                national = new_prefix + national[len(old_prefix) :]
-                break
-        else:
+        replacement = next(
+            (
+                new_prefix + national[len(old_prefix) :]
+                for old_prefix, new_prefix in _VN_LEGACY_MOBILE_PREFIXES.items()
+                if national.startswith(old_prefix)
+            ),
+            None,
+        )
+        if replacement is None:
             return None
+        national = replacement
 
     return national if _VN_MOBILE_RE.fullmatch(national) else None
 
@@ -93,7 +120,10 @@ def _normalize_vn_tax_id(value: Optional[str]) -> Optional[str]:
     candidate = _clean(value)
     if candidate is None:
         return None
-    compact = re.sub(r"\s+", "", candidate)
+    candidate = _strip_known_prefix(candidate, r"MST|MÃ\s*SỐ\s*THUẾ|MA\s*SO\s*THUE|TAX\s*ID")
+    if re.fullmatch(r"[0-9.\-\s]+", candidate) is None:
+        return None
+    compact = re.sub(r"[.\s]+", "", candidate)
     match = _VN_TAX_RE.fullmatch(compact)
     if not match:
         return None

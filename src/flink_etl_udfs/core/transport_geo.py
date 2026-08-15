@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from typing import Optional
+from urllib.parse import urlsplit
 
 from flink_etl_udfs.core.common import normalize_null_token_value
 
@@ -36,14 +37,35 @@ def normalize_longitude_value(value: Optional[str]) -> Optional[float]:
 
 # Chuẩn hóa mã CRS dạng số về EPSG:<code>; không xác minh code có tồn tại trong EPSG registry.
 def normalize_epsg_code_value(value: Optional[str]) -> Optional[str]:
-    """Normalize a numeric CRS identifier to ``EPSG:<code>`` form."""
+    """TRY_PARSE common EPSG code/URN/URL representations to ``EPSG:<code>``."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
-    match = re.fullmatch(r"(?i)(?:EPSG\s*:\s*)?(\d{3,6})", candidate)
-    if not match:
+
+    patterns = (
+        r"(?i)(?:EPSG\s*[:# ]\s*)?(\d{3,6})",
+        r"(?i)urn:ogc:def:crs:EPSG(?::[^:]*)?::?(\d{3,6})",
+    )
+    code_text = None
+    for pattern in patterns:
+        match = re.fullmatch(pattern, candidate)
+        if match:
+            code_text = match.group(1)
+            break
+
+    if code_text is None and "://" in candidate:
+        try:
+            parts = urlsplit(candidate)
+            path = parts.path.rstrip("/")
+            match = re.search(r"(?i)/crs/EPSG/(?:\d+|0)/(\d{3,6})$", path)
+            if match:
+                code_text = match.group(1)
+        except ValueError:
+            return None
+
+    if code_text is None:
         return None
-    code = int(match.group(1))
+    code = int(code_text)
     return f"EPSG:{code}" if code > 0 else None
 
 
