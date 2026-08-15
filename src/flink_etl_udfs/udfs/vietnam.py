@@ -111,13 +111,12 @@ def _classify_vn_tax_id_structure(value: Optional[str]) -> Optional[str]:
 def _string_udf(function):
     return try_udf(
         function,
-        input_types=["STRING"],
+        cast_types=["STRING"],
         result_type="STRING",
         deterministic=True,
     )
 
 
-# SQL-facing UDF objects stay at module top level so Flink can resolve them by FQDN.
 normalize_vn_citizen_id = _string_udf(_normalize_vn_citizen_id)
 classify_vn_identity_id = _string_udf(_classify_vn_identity_id)
 normalize_vn_mobile_phone = _string_udf(_normalize_vn_mobile_phone)
