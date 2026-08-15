@@ -9,7 +9,7 @@ from flink_etl_udfs.udfs._safe import try_udf
 def _string_udf(function):
     return try_udf(
         function,
-        input_types=["STRING"],
+        cast_types=["STRING"],
         result_type="STRING",
         deterministic=True,
     )
@@ -26,13 +26,13 @@ normalize_person_name = _string_udf(common.normalize_person_name_value)
 
 is_valid_json = try_udf(
     common.is_valid_json_value,
-    input_types=["STRING"],
+    cast_types=["STRING"],
     result_type="BOOLEAN",
     deterministic=True,
 )
 stable_record_id = try_udf(
     common.stable_record_id_value,
-    input_types=["STRING", "STRING"],
+    cast_types=["STRING", "STRING"],
     result_type="STRING",
     deterministic=True,
 )
