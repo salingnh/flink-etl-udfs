@@ -13,7 +13,6 @@ _VN_MOBILE_RE = re.compile(r"^0[35789]\d{8}$")
 
 # Mapping đợt chuyển đổi mã mạng di động Việt Nam 11 số -> 10 số năm 2018.
 _VN_LEGACY_MOBILE_PREFIXES = {
-    # Viettel
     "0162": "032",
     "0163": "033",
     "0164": "034",
@@ -22,33 +21,36 @@ _VN_LEGACY_MOBILE_PREFIXES = {
     "0167": "037",
     "0168": "038",
     "0169": "039",
-    # VinaPhone
     "0123": "083",
     "0124": "084",
     "0125": "085",
     "0127": "081",
     "0129": "082",
-    # MobiFone
     "0120": "070",
     "0121": "079",
     "0122": "077",
     "0126": "076",
     "0128": "078",
-    # Vietnamobile
     "0186": "056",
     "0188": "058",
-    # Gmobile / Gtel
     "0199": "059",
 }
 
 
+def _strip_known_prefix(value: str, prefixes: str) -> str:
+    return re.sub(rf"(?i)^(?:{prefixes})\s*[:#-]?\s*", "", value).strip()
+
+
 # Chuẩn hóa CMND/CCCD Việt Nam theo cấu trúc 9 hoặc 12 chữ số, giữ số 0 ở đầu.
 def normalize_vn_citizen_id_value(value: Optional[str]) -> Optional[str]:
-    """Normalize Vietnamese CMND/CCCD shape while preserving leading zeroes."""
+    """TRY_PARSE common CMND/CCCD labels/separators while preserving leading zeroes."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
-    digits = "".join(ch for ch in candidate if ch.isascii() and ch.isdigit())
+    candidate = _strip_known_prefix(candidate, r"CMND|CCCD|CĂN\s*CƯỚC|CAN\s*CUOC")
+    if re.fullmatch(r"[0-9.\-\s]+", candidate) is None:
+        return None
+    digits = re.sub(r"[.\-\s]+", "", candidate)
     return digits if _VN_CITIZEN_RE.fullmatch(digits) else None
 
 
@@ -63,16 +65,12 @@ def classify_vn_identity_id_value(value: Optional[str]) -> Optional[str]:
 
 # Chuẩn hóa số di động Việt Nam, gồm cả mapping đầu số 11 số cũ sang 10 số hiện hành.
 def normalize_vn_mobile_phone_value(value: Optional[str]) -> Optional[str]:
-    """Normalize a Vietnamese mobile number to national 10-digit ``0xxxxxxxxx`` form.
-
-    Accepted input can use national ``0...`` form or international ``84``/``+84``/``0084``
-    form. Historical 11-digit mobile prefixes are converted using the official 2018
-    network-code migration map. The function performs structural normalization only;
-    it does not verify subscriber allocation, carrier ownership after mobile-number
-    portability, or whether the number is currently active.
-    """
+    """Normalize a Vietnamese mobile number to national 10-digit ``0xxxxxxxxx`` form."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
+        return None
+    candidate = re.sub(r"(?i)^tel:\s*", "", candidate).strip()
+    if re.fullmatch(r"[+0-9().\-\s]+", candidate) is None:
         return None
 
     digits = "".join(ch for ch in candidate if ch.isascii() and ch.isdigit())
@@ -106,15 +104,14 @@ def normalize_vn_mobile_phone_value(value: Optional[str]) -> Optional[str]:
 
 # Chuẩn hóa mã số thuế Việt Nam về dạng 10 số hoặc 10 số-3 số mở rộng.
 def normalize_vn_tax_id_value(value: Optional[str]) -> Optional[str]:
-    """Normalize Vietnamese tax identifiers to ``10digits`` or ``10digits-3digits``.
-
-    The function validates structural format only. Registry validity and taxpayer
-    status must be checked against an authoritative tax reference source.
-    """
+    """TRY_PARSE common MST labels/separators to ``10digits`` or ``10digits-3digits``."""
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
-    compact = re.sub(r"\s+", "", candidate)
+    candidate = _strip_known_prefix(candidate, r"MST|MÃ\s*SỐ\s*THUẾ|MA\s*SO\s*THUE|TAX\s*ID")
+    if re.fullmatch(r"[0-9.\-\s]+", candidate) is None:
+        return None
+    compact = re.sub(r"[.\s]+", "", candidate)
     match = _VN_TAX_RE.fullmatch(compact)
     if not match:
         return None
