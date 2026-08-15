@@ -6,23 +6,59 @@ import re
 from typing import Optional
 from urllib.parse import urlsplit, urlunsplit
 
-from flink_etl_udfs.core.internet import canonicalize_url_value
+from flink_etl_udfs.core.internet import canonicalize_url_value, normalize_domain_value
 
 _GIT_OBJECT_RE = re.compile(r"^[0-9a-fA-F]+$")
+_SCP_REMOTE_RE = re.compile(r"^(?:(?P<user>[^@/:\s]+)@)?(?P<host>[^:/\s]+):(?P<path>[^\s]+)$")
 
 
-# Chuẩn hóa HTTP(S) repository URL và bỏ suffix .git.
+def _strip_git_suffix(path: str) -> str:
+    normalized = path.rstrip("/")
+    if normalized.casefold().endswith(".git"):
+        normalized = normalized[:-4]
+    return normalized or "/"
+
+
+# Chuẩn hóa repository URL và các Git remote representation phổ biến.
 def normalize_repository_url_value(value: Optional[str]) -> Optional[str]:
-    """Normalize an HTTP(S) repository URL and remove a trailing .git suffix."""
-    canonical = canonicalize_url_value(value)
+    """TRY_PARSE HTTP(S), SSH, git:// and SCP-like Git remote representations."""
+    if value is None:
+        return None
+    candidate = value.strip()
+    if not candidate or any(ch.isspace() for ch in candidate):
+        return None
+
+    scp_match = _SCP_REMOTE_RE.fullmatch(candidate) if "://" not in candidate else None
+    if scp_match:
+        user = scp_match.group("user") or "git"
+        host = normalize_domain_value(scp_match.group("host"))
+        path = _strip_git_suffix("/" + scp_match.group("path").lstrip("/"))
+        if host is None or path == "/":
+            return None
+        return urlunsplit(("ssh", f"{user}@{host}", path, "", ""))
+
+    if candidate.casefold().startswith(("ssh://", "git://")):
+        try:
+            parts = urlsplit(candidate)
+            if not parts.hostname:
+                return None
+            host = normalize_domain_value(parts.hostname)
+            if host is None:
+                return None
+            userinfo = f"{parts.username}@" if parts.username else ""
+            port = f":{parts.port}" if parts.port is not None else ""
+            path = _strip_git_suffix(parts.path)
+            if path == "/":
+                return None
+            return urlunsplit((parts.scheme.lower(), f"{userinfo}{host}{port}", path, "", ""))
+        except ValueError:
+            return None
+
+    canonical = canonicalize_url_value(candidate)
     if canonical is None:
         return None
     parts = urlsplit(canonical)
-    path = parts.path.rstrip("/")
-    if path.endswith(".git"):
-        path = path[:-4]
-    if not path:
-        path = "/"
+    path = _strip_git_suffix(parts.path)
     return urlunsplit((parts.scheme, parts.netloc, path, "", ""))
 
 
