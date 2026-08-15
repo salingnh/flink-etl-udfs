@@ -63,7 +63,6 @@ from flink_etl_udfs.core.vietnam import (
 )
 from flink_etl_udfs.normalizer_contracts import NORMALIZER_CONTRACTS
 
-
 NORMALIZER_IMPLEMENTATIONS = {
     "email_normalize_address": normalize_email_value,
     "ip_normalize_address": normalize_ip_value,
