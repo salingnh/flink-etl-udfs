@@ -56,7 +56,14 @@ def normalize_hl7_message_type_value(value: Optional[str]) -> Optional[str]:
     if candidate is None:
         return None
     candidate = candidate.upper().strip()
-    parts = [part for part in re.split(r"[\s~^_/-]+", candidate) if part]
+
+    if "^" not in candidate and re.fullmatch(r"[A-Z0-9]{3}_[A-Z0-9]{3}", candidate):
+        candidate = candidate.replace("_", "^", 1)
+    candidate = re.sub(r"\s*[~/-]\s*", "^", candidate)
+    candidate = re.sub(r"\s+", "^", candidate)
+    candidate = re.sub(r"\^+", "^", candidate).strip("^")
+
+    parts = candidate.split("^")
     if len(parts) not in {2, 3}:
         return None
     if not re.fullmatch(r"[A-Z0-9]{3}", parts[0]) or not re.fullmatch(r"[A-Z0-9]{3}", parts[1]):
