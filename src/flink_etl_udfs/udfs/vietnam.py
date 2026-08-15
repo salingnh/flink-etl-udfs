@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Optional
 
-from pyflink.table.udf import udf
+from flink_etl_udfs.udfs._safe import try_udf
 
 _NULL_TOKENS = {"", "null", "none", "nil", "n/a", "na", "undefined", "[null]"}
 _VN_CITIZEN_RE = re.compile(r"^(?:\d{9}|\d{12})$")
@@ -109,7 +109,7 @@ def _classify_vn_tax_id_structure(value: Optional[str]) -> Optional[str]:
 
 
 def _string_udf(function):
-    return udf(
+    return try_udf(
         function,
         input_types=["STRING"],
         result_type="STRING",
