@@ -28,6 +28,47 @@ def normalize_null_token_value(value: Optional[str]) -> Optional[str]:
     return candidate
 
 
+def _build_date(year: int, month: int, day: int) -> Optional[date]:
+    try:
+        return date(year, month, day)
+    except ValueError:
+        return None
+
+
+def _try_parse_date_text(candidate: str) -> Optional[date]:
+    """Parse supported deterministic date representations without locale guessing."""
+    try:
+        return date.fromisoformat(candidate)
+    except ValueError:
+        pass
+
+    compact = re.fullmatch(r"(\d{4})(\d{2})(\d{2})", candidate)
+    if compact:
+        return _build_date(*(int(part) for part in compact.groups()))
+
+    ymd = re.fullmatch(r"(\d{4})[./-](\d{1,2})[./-](\d{1,2})", candidate)
+    if ymd:
+        return _build_date(*(int(part) for part in ymd.groups()))
+
+    trailing_year = re.fullmatch(r"(\d{1,2})[./-](\d{1,2})[./-](\d{4})", candidate)
+    if trailing_year:
+        first, second, year = (int(part) for part in trailing_year.groups())
+        if first > 12 and second <= 12:
+            return _build_date(year, second, first)
+        if second > 12 and first <= 12:
+            return _build_date(year, first, second)
+        # Both <= 12 means DMY and MDY are both plausible, so do not guess.
+        return None
+
+    normalized_words = re.sub(r"\s+", " ", candidate.strip())
+    for pattern in ("%d %b %Y", "%d %B %Y", "%b %d %Y", "%B %d %Y"):
+        try:
+            return datetime.strptime(normalized_words, pattern).date()
+        except ValueError:
+            continue
+    return None
+
+
 # Chuẩn hóa timestamp ISO 8601 có timezone về UTC để so sánh và join ổn định.
 def normalize_iso_datetime_value(value: Optional[str]) -> Optional[str]:
     """Normalize an ISO-8601 timestamp to UTC with a ``Z`` suffix.
@@ -47,16 +88,19 @@ def normalize_iso_datetime_value(value: Optional[str]) -> Optional[str]:
     return parsed.astimezone(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 
-# Chuẩn hóa ngày theo dạng trao đổi dữ liệu ISO 8601 YYYY-MM-DD.
+# Chuẩn hóa ngày từ các representation xác định được an toàn sang ISO 8601 YYYY-MM-DD.
 def normalize_date_value(value: Optional[str]) -> Optional[str]:
-    """Normalize an ISO date to ``YYYY-MM-DD``."""
+    """TRY_PARSE supported date representations and emit canonical ``YYYY-MM-DD``.
+
+    The function accepts deterministic alternate forms such as ``15/08/2026`` or
+    ``20260815``. Ambiguous numeric forms such as ``01/02/2026`` return ``None``
+    rather than guessing between DMY and MDY.
+    """
     candidate = normalize_null_token_value(value)
     if candidate is None:
         return None
-    try:
-        return date.fromisoformat(candidate).isoformat()
-    except ValueError:
-        return None
+    parsed = _try_parse_date_text(candidate)
+    return parsed.isoformat() if parsed is not None else None
 
 
 # Chuẩn hóa số thập phân bằng Decimal, tránh sai số binary floating-point.
