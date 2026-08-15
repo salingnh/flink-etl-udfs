@@ -1,0 +1,2202 @@
+[
+  {
+    "func_key": "mask_email",
+    "name": "Che email",
+    "description": "### Mô tả\nChe email\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "masking",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "MASK_EMAIL({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "MASK_EMAIL",
+      "entrypoint": "flink_etl_udfs.udfs.privacy.mask_email",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "mask_text",
+    "name": "Che chuỗi dữ liệu",
+    "description": "### Mô tả\nChe chuỗi dữ liệu\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "masking",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "MASK_TEXT({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "MASK_TEXT",
+      "entrypoint": "flink_etl_udfs.udfs.privacy.mask_text",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "sha256_fingerprint",
+    "name": "SHA-256 – Tạo fingerprint dữ liệu",
+    "description": "### Mô tả\nSHA-256 – Tạo fingerprint dữ liệu\n\n- **Standard:** SHA-256\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "fingerprint",
+    "standard": "SHA-256",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "SHA256_FINGERPRINT({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "SHA256_FINGERPRINT",
+      "entrypoint": "flink_etl_udfs.udfs.privacy.sha256_fingerprint",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "email_normalize_address",
+    "name": "Email – Chuẩn hóa địa chỉ email",
+    "description": "### Mô tả\nEmail – Chuẩn hóa địa chỉ email\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "EMAIL_NORMALIZE_ADDRESS({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "EMAIL_NORMALIZE_ADDRESS",
+      "entrypoint": "flink_etl_udfs.udfs.identifiers.normalize_email",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "ip_normalize_address",
+    "name": "IP – Chuẩn hóa địa chỉ IPv4/IPv6",
+    "description": "### Mô tả\nIP – Chuẩn hóa địa chỉ IPv4/IPv6\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "IP_NORMALIZE_ADDRESS({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "IP_NORMALIZE_ADDRESS",
+      "entrypoint": "flink_etl_udfs.udfs.network.normalize_ip",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "ip_normalize_cidr",
+    "name": "CIDR – Chuẩn hóa mạng IPv4/IPv6",
+    "description": "### Mô tả\nCIDR – Chuẩn hóa mạng IPv4/IPv6\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "IP_NORMALIZE_CIDR({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "IP_NORMALIZE_CIDR",
+      "entrypoint": "flink_etl_udfs.udfs.network.normalize_cidr",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "etl_canonicalize_json",
+    "name": "JSON – Canonical hóa payload",
+    "description": "### Mô tả\nJSON – Canonical hóa payload\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ETL_CANONICALIZE_JSON({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ETL_CANONICALIZE_JSON",
+      "entrypoint": "flink_etl_udfs.udfs.generic.canonicalize_json",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "etl_flatten_json",
+    "name": "JSON – Làm phẳng payload lồng nhau",
+    "description": "### Mô tả\nJSON – Làm phẳng payload lồng nhau\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ETL_FLATTEN_JSON({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ETL_FLATTEN_JSON",
+      "entrypoint": "flink_etl_udfs.udfs.generic.flatten_json",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "etl_is_valid_json",
+    "name": "JSON – Kiểm tra payload hợp lệ",
+    "description": "### Mô tả\nJSON – Kiểm tra payload hợp lệ\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** BOOLEAN\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "validation",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "BOOLEAN",
+    "pattern": "ETL_IS_VALID_JSON({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ETL_IS_VALID_JSON",
+      "entrypoint": "flink_etl_udfs.udfs.generic.is_valid_json",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "BOOLEAN",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "etl_latin_name_search_key",
+    "name": "Tên Latin – Tạo khóa tìm kiếm không dấu",
+    "description": "### Mô tả\nTên Latin – Tạo khóa tìm kiếm không dấu\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "generation",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ETL_LATIN_NAME_SEARCH_KEY({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ETL_LATIN_NAME_SEARCH_KEY",
+      "entrypoint": "flink_etl_udfs.udfs.generic.latin_name_search_key",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "etl_normalize_address_text",
+    "name": "Địa chỉ – Chuẩn hóa văn bản địa chỉ",
+    "description": "### Mô tả\nĐịa chỉ – Chuẩn hóa văn bản địa chỉ\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ETL_NORMALIZE_ADDRESS_TEXT({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ETL_NORMALIZE_ADDRESS_TEXT",
+      "entrypoint": "flink_etl_udfs.udfs.generic.normalize_address_text",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "etl_normalize_decimal",
+    "name": "Decimal – Chuẩn hóa số thập phân",
+    "description": "### Mô tả\nDecimal – Chuẩn hóa số thập phân\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ETL_NORMALIZE_DECIMAL({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ETL_NORMALIZE_DECIMAL",
+      "entrypoint": "flink_etl_udfs.udfs.generic.normalize_decimal",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "etl_normalize_identifier_code",
+    "name": "Identifier – Chuẩn hóa mã nghiệp vụ",
+    "description": "### Mô tả\nIdentifier – Chuẩn hóa mã nghiệp vụ\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ETL_NORMALIZE_IDENTIFIER_CODE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ETL_NORMALIZE_IDENTIFIER_CODE",
+      "entrypoint": "flink_etl_udfs.udfs.generic.normalize_identifier_code",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "etl_normalize_null_token",
+    "name": "NULL – Chuẩn hóa textual null token",
+    "description": "### Mô tả\nNULL – Chuẩn hóa textual null token\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ETL_NORMALIZE_NULL_TOKEN({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ETL_NORMALIZE_NULL_TOKEN",
+      "entrypoint": "flink_etl_udfs.udfs.generic.normalize_null_token",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "etl_normalize_person_name",
+    "name": "Tên người – Chuẩn hóa Unicode và khoảng trắng",
+    "description": "### Mô tả\nTên người – Chuẩn hóa Unicode và khoảng trắng\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ETL_NORMALIZE_PERSON_NAME({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ETL_NORMALIZE_PERSON_NAME",
+      "entrypoint": "flink_etl_udfs.udfs.generic.normalize_person_name",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "etl_stable_record_id",
+    "name": "Record ID – Tạo khóa deterministic theo nguồn",
+    "description": "### Mô tả\nRecord ID – Tạo khóa deterministic theo nguồn\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_system,natural_key",
+    "category": "generation",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ETL_STABLE_RECORD_ID({{source_system}}, {{natural_key}})",
+    "config": "[{\"param_key\":\"source_system\",\"label\":\"Source system\",\"description\":\"Input parameter `source_system`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"},{\"param_key\":\"natural_key\",\"label\":\"Natural key\",\"description\":\"Input parameter `natural_key`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":false,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ETL_STABLE_RECORD_ID",
+      "entrypoint": "flink_etl_udfs.udfs.generic.stable_record_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY",
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING",
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "url_canonicalize",
+    "name": "URL – Canonical hóa HTTP(S) URL",
+    "description": "### Mô tả\nURL – Canonical hóa HTTP(S) URL\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "URL_CANONICALIZE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "URL_CANONICALIZE",
+      "entrypoint": "flink_etl_udfs.udfs.internet.canonicalize_url",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "url_extract_host",
+    "name": "URL – Trích xuất hostname",
+    "description": "### Mô tả\nURL – Trích xuất hostname\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "extraction",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "URL_EXTRACT_HOST({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "URL_EXTRACT_HOST",
+      "entrypoint": "flink_etl_udfs.udfs.internet.extract_url_host",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "dns_normalize_domain",
+    "name": "DNS – Chuẩn hóa domain name",
+    "description": "### Mô tả\nDNS – Chuẩn hóa domain name\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "DNS_NORMALIZE_DOMAIN({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "DNS_NORMALIZE_DOMAIN",
+      "entrypoint": "flink_etl_udfs.udfs.internet.normalize_domain",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "url_redact_secrets",
+    "name": "URL – Che credentials và query secrets",
+    "description": "### Mô tả\nURL – Che credentials và query secrets\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "masking",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "URL_REDACT_SECRETS({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "URL_REDACT_SECRETS",
+      "entrypoint": "flink_etl_udfs.udfs.internet.redact_url_secrets",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "git_normalize_repository_url",
+    "name": "Git – Chuẩn hóa repository URL",
+    "description": "### Mô tả\nGit – Chuẩn hóa repository URL\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "GIT_NORMALIZE_REPOSITORY_URL({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "GIT_NORMALIZE_REPOSITORY_URL",
+      "entrypoint": "flink_etl_udfs.udfs.code.normalize_repository_url",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "osint_build_observation_id",
+    "name": "OSINT – Tạo observation ID deterministic",
+    "description": "### Mô tả\nOSINT – Tạo observation ID deterministic\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_url,entity_key,observed_at",
+    "category": "generation",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "OSINT_BUILD_OBSERVATION_ID({{source_url}}, {{entity_key}}, {{observed_at}})",
+    "config": "[{\"param_key\":\"source_url\",\"label\":\"Source URL\",\"description\":\"Input parameter `source_url`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"},{\"param_key\":\"entity_key\",\"label\":\"Entity key\",\"description\":\"Input parameter `entity_key`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":false,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"},{\"param_key\":\"observed_at\",\"label\":\"Observed at\",\"description\":\"Input parameter `observed_at`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":false,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "OSINT_BUILD_OBSERVATION_ID",
+      "entrypoint": "flink_etl_udfs.udfs.osint.build_observation_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY",
+        "ANY",
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING",
+        "STRING",
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "enrich_extract_profile_url",
+    "name": "Enrichment – Trích metadata URL profile",
+    "description": "### Mô tả\nEnrichment – Trích metadata URL profile\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.\n- **Runtime:** nondeterministic enrichment; lỗi hạ tầng/network vẫn được raise.",
+    "params": "source_field",
+    "category": "enrichment",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ENRICH_EXTRACT_PROFILE_URL({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ENRICH_EXTRACT_PROFILE_URL",
+      "entrypoint": "flink_etl_udfs.udfs.enrichment.extract_profile_url",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": false
+    }
+  },
+  {
+    "func_key": "vn_classify_identity_id",
+    "name": "Việt Nam – Phân loại CMND/CCCD theo cấu trúc",
+    "description": "### Mô tả\nViệt Nam – Phân loại CMND/CCCD theo cấu trúc\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "classification",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "VN_CLASSIFY_IDENTITY_ID({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "VN_CLASSIFY_IDENTITY_ID",
+      "entrypoint": "flink_etl_udfs.udfs.vietnam.classify_vn_identity_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "vn_classify_tax_id_structure",
+    "name": "Việt Nam – Phân loại cấu trúc mã số thuế",
+    "description": "### Mô tả\nViệt Nam – Phân loại cấu trúc mã số thuế\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "classification",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "VN_CLASSIFY_TAX_ID_STRUCTURE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "VN_CLASSIFY_TAX_ID_STRUCTURE",
+      "entrypoint": "flink_etl_udfs.udfs.vietnam.classify_vn_tax_id_structure",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "vn_normalize_citizen_id",
+    "name": "Việt Nam – Chuẩn hóa CMND/CCCD",
+    "description": "### Mô tả\nViệt Nam – Chuẩn hóa CMND/CCCD\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "VN_NORMALIZE_CITIZEN_ID({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "VN_NORMALIZE_CITIZEN_ID",
+      "entrypoint": "flink_etl_udfs.udfs.vietnam.normalize_vn_citizen_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "vn_normalize_mobile_phone",
+    "name": "Việt Nam – Chuẩn hóa số di động và đầu số 11→10",
+    "description": "### Mô tả\nViệt Nam – Chuẩn hóa số di động và đầu số 11→10\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "VN_NORMALIZE_MOBILE_PHONE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "VN_NORMALIZE_MOBILE_PHONE",
+      "entrypoint": "flink_etl_udfs.udfs.vietnam.normalize_vn_mobile_phone",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "vn_normalize_tax_id",
+    "name": "Việt Nam – Chuẩn hóa mã số thuế",
+    "description": "### Mô tả\nViệt Nam – Chuẩn hóa mã số thuế\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "VN_NORMALIZE_TAX_ID({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "VN_NORMALIZE_TAX_ID",
+      "entrypoint": "flink_etl_udfs.udfs.vietnam.normalize_vn_tax_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "hash_normalize_hex",
+    "name": "Hash – Chuẩn hóa digest hex",
+    "description": "### Mô tả\nHash – Chuẩn hóa digest hex\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "HASH_NORMALIZE_HEX({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "HASH_NORMALIZE_HEX",
+      "entrypoint": "flink_etl_udfs.udfs.hashes.normalize_hex_hash",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "hash_classify_type",
+    "name": "Hash – Phân loại MD5/SHA-1/SHA-256/SHA-512 theo digest",
+    "description": "### Mô tả\nHash – Phân loại MD5/SHA-1/SHA-256/SHA-512 theo digest\n\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "classification",
+    "standard": null,
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "HASH_CLASSIFY_TYPE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "HASH_CLASSIFY_TYPE",
+      "entrypoint": "flink_etl_udfs.udfs.hashes.classify_hash_type",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso8601_normalize_date",
+    "name": "ISO 8601 – Chuẩn hóa ngày",
+    "description": "### Mô tả\nISO 8601 – Chuẩn hóa ngày\n\n- **Standard:** ISO 8601\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "ISO 8601",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO8601_NORMALIZE_DATE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO8601_NORMALIZE_DATE",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso8601_normalize_date",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso8601_normalize_datetime_utc",
+    "name": "ISO 8601 – Chuẩn hóa timestamp về UTC",
+    "description": "### Mô tả\nISO 8601 – Chuẩn hóa timestamp về UTC\n\n- **Standard:** ISO 8601\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "ISO 8601",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO8601_NORMALIZE_DATETIME_UTC({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO8601_NORMALIZE_DATETIME_UTC",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso8601_normalize_datetime_utc",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso4217_normalize_currency_code",
+    "name": "ISO 4217 – Chuẩn hóa mã tiền tệ",
+    "description": "### Mô tả\nISO 4217 – Chuẩn hóa mã tiền tệ\n\n- **Standard:** ISO 4217\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "ISO 4217",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO4217_NORMALIZE_CURRENCY_CODE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO4217_NORMALIZE_CURRENCY_CODE",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso4217_normalize_currency_code",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "itu_e164_normalize_phone",
+    "name": "ITU-T E.164 – Chuẩn hóa số điện thoại quốc tế",
+    "description": "### Mô tả\nITU-T E.164 – Chuẩn hóa số điện thoại quốc tế\n\n- **Standard:** ITU-T E.164\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field,default_country_code",
+    "category": "conversion",
+    "standard": "ITU-T E.164",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ITU_E164_NORMALIZE_PHONE({{source_field}}, {{default_country_code}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"},{\"param_key\":\"default_country_code\",\"label\":\"Default country code\",\"description\":\"Input parameter `default_country_code`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Text\",\"is_primary\":false,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ITU_E164_NORMALIZE_PHONE",
+      "entrypoint": "flink_etl_udfs.udfs.standards.itu_e164_normalize_phone",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY",
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING",
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso13616_normalize_iban",
+    "name": "ISO 13616 – Chuẩn hóa và kiểm tra IBAN",
+    "description": "### Mô tả\nISO 13616 – Chuẩn hóa và kiểm tra IBAN\n\n- **Standard:** ISO 13616\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "ISO 13616",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO13616_NORMALIZE_IBAN({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO13616_NORMALIZE_IBAN",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso13616_normalize_iban",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso9362_normalize_bic",
+    "name": "ISO 9362 – Chuẩn hóa BIC/SWIFT",
+    "description": "### Mô tả\nISO 9362 – Chuẩn hóa BIC/SWIFT\n\n- **Standard:** ISO 9362\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "ISO 9362",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO9362_NORMALIZE_BIC({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO9362_NORMALIZE_BIC",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso9362_normalize_bic",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso20022_normalize_message_type",
+    "name": "ISO 20022 – Chuẩn hóa message identifier",
+    "description": "### Mô tả\nISO 20022 – Chuẩn hóa message identifier\n\n- **Standard:** ISO 20022\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "ISO 20022",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO20022_NORMALIZE_MESSAGE_TYPE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO20022_NORMALIZE_MESSAGE_TYPE",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso20022_normalize_message_type",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso17442_normalize_lei",
+    "name": "ISO 17442 – Chuẩn hóa và kiểm tra LEI",
+    "description": "### Mô tả\nISO 17442 – Chuẩn hóa và kiểm tra LEI\n\n- **Standard:** ISO 17442\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "ISO 17442",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO17442_NORMALIZE_LEI({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO17442_NORMALIZE_LEI",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso17442_normalize_lei",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "fhir_normalize_id",
+    "name": "HL7 FHIR – Chuẩn hóa Resource ID",
+    "description": "### Mô tả\nHL7 FHIR – Chuẩn hóa Resource ID\n\n- **Standard:** HL7 FHIR\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "HL7 FHIR",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "FHIR_NORMALIZE_ID({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "FHIR_NORMALIZE_ID",
+      "entrypoint": "flink_etl_udfs.udfs.standards.fhir_normalize_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "fhir_normalize_reference",
+    "name": "HL7 FHIR – Chuẩn hóa Reference",
+    "description": "### Mô tả\nHL7 FHIR – Chuẩn hóa Reference\n\n- **Standard:** HL7 FHIR\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "HL7 FHIR",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "FHIR_NORMALIZE_REFERENCE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "FHIR_NORMALIZE_REFERENCE",
+      "entrypoint": "flink_etl_udfs.udfs.standards.fhir_normalize_reference",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "hl7v2_normalize_message_type",
+    "name": "HL7 v2 – Chuẩn hóa message type",
+    "description": "### Mô tả\nHL7 v2 – Chuẩn hóa message type\n\n- **Standard:** HL7 v2\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "HL7 v2",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "HL7V2_NORMALIZE_MESSAGE_TYPE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "HL7V2_NORMALIZE_MESSAGE_TYPE",
+      "entrypoint": "flink_etl_udfs.udfs.standards.hl7v2_normalize_message_type",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "dicom_normalize_uid",
+    "name": "DICOM – Chuẩn hóa UID",
+    "description": "### Mô tả\nDICOM – Chuẩn hóa UID\n\n- **Standard:** DICOM\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "DICOM",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "DICOM_NORMALIZE_UID({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "DICOM_NORMALIZE_UID",
+      "entrypoint": "flink_etl_udfs.udfs.standards.dicom_normalize_uid",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "stix21_normalize_id",
+    "name": "STIX 2.1 – Chuẩn hóa object ID",
+    "description": "### Mô tả\nSTIX 2.1 – Chuẩn hóa object ID\n\n- **Standard:** STIX 2.1\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "STIX 2.1",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "STIX21_NORMALIZE_ID({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "STIX21_NORMALIZE_ID",
+      "entrypoint": "flink_etl_udfs.udfs.standards.stix21_normalize_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "stix21_normalize_type",
+    "name": "STIX 2.1 – Chuẩn hóa object type",
+    "description": "### Mô tả\nSTIX 2.1 – Chuẩn hóa object type\n\n- **Standard:** STIX 2.1\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "STIX 2.1",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "STIX21_NORMALIZE_TYPE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "STIX21_NORMALIZE_TYPE",
+      "entrypoint": "flink_etl_udfs.udfs.standards.stix21_normalize_type",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "mitre_attack_normalize_technique_id",
+    "name": "MITRE ATT&CK – Chuẩn hóa technique ID",
+    "description": "### Mô tả\nMITRE ATT&CK – Chuẩn hóa technique ID\n\n- **Standard:** MITRE ATT&CK\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "MITRE ATT&CK",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "MITRE_ATTACK_NORMALIZE_TECHNIQUE_ID({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "MITRE_ATTACK_NORMALIZE_TECHNIQUE_ID",
+      "entrypoint": "flink_etl_udfs.udfs.standards.mitre_attack_normalize_technique_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "cve_normalize_id",
+    "name": "CVE – Chuẩn hóa vulnerability ID",
+    "description": "### Mô tả\nCVE – Chuẩn hóa vulnerability ID\n\n- **Standard:** CVE\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "CVE",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "CVE_NORMALIZE_ID({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "CVE_NORMALIZE_ID",
+      "entrypoint": "flink_etl_udfs.udfs.standards.cve_normalize_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "gs1_normalize_gtin",
+    "name": "GS1 – Chuẩn hóa và kiểm tra GTIN",
+    "description": "### Mô tả\nGS1 – Chuẩn hóa và kiểm tra GTIN\n\n- **Standard:** GS1\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "GS1",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "GS1_NORMALIZE_GTIN({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "GS1_NORMALIZE_GTIN",
+      "entrypoint": "flink_etl_udfs.udfs.standards.gs1_normalize_gtin",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "gs1_normalize_sscc",
+    "name": "GS1 – Chuẩn hóa và kiểm tra SSCC",
+    "description": "### Mô tả\nGS1 – Chuẩn hóa và kiểm tra SSCC\n\n- **Standard:** GS1\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "GS1",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "GS1_NORMALIZE_SSCC({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "GS1_NORMALIZE_SSCC",
+      "entrypoint": "flink_etl_udfs.udfs.standards.gs1_normalize_sscc",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "gs1_epcis_normalize_event_type",
+    "name": "GS1 EPCIS – Chuẩn hóa event type",
+    "description": "### Mô tả\nGS1 EPCIS – Chuẩn hóa event type\n\n- **Standard:** GS1 EPCIS\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "GS1 EPCIS",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "GS1_EPCIS_NORMALIZE_EVENT_TYPE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "GS1_EPCIS_NORMALIZE_EVENT_TYPE",
+      "entrypoint": "flink_etl_udfs.udfs.standards.gs1_epcis_normalize_event_type",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "opcua_normalize_node_id",
+    "name": "OPC UA – Chuẩn hóa NodeId",
+    "description": "### Mô tả\nOPC UA – Chuẩn hóa NodeId\n\n- **Standard:** OPC UA\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "OPC UA",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "OPCUA_NORMALIZE_NODE_ID({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "OPCUA_NORMALIZE_NODE_ID",
+      "entrypoint": "flink_etl_udfs.udfs.standards.opcua_normalize_node_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "dlms_cosem_normalize_obis_code",
+    "name": "DLMS/COSEM – Chuẩn hóa OBIS code",
+    "description": "### Mô tả\nDLMS/COSEM – Chuẩn hóa OBIS code\n\n- **Standard:** DLMS/COSEM\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "DLMS/COSEM",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "DLMS_COSEM_NORMALIZE_OBIS_CODE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "DLMS_COSEM_NORMALIZE_OBIS_CODE",
+      "entrypoint": "flink_etl_udfs.udfs.standards.dlms_cosem_normalize_obis_code",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "epsg_normalize_code",
+    "name": "EPSG – Chuẩn hóa CRS code",
+    "description": "### Mô tả\nEPSG – Chuẩn hóa CRS code\n\n- **Standard:** EPSG\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "EPSG",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "EPSG_NORMALIZE_CODE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "EPSG_NORMALIZE_CODE",
+      "entrypoint": "flink_etl_udfs.udfs.standards.epsg_normalize_code",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "icao9303_build_document_id",
+    "name": "ICAO Doc 9303 – Tạo khóa giấy tờ đi lại",
+    "description": "### Mô tả\nICAO Doc 9303 – Tạo khóa giấy tờ đi lại\n\n- **Standard:** ICAO Doc 9303\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "issuer_country,document_number",
+    "category": "generation",
+    "standard": "ICAO Doc 9303",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ICAO9303_BUILD_DOCUMENT_ID({{issuer_country}}, {{document_number}})",
+    "config": "[{\"param_key\":\"issuer_country\",\"label\":\"Issuer country\",\"description\":\"Input parameter `issuer_country`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"},{\"param_key\":\"document_number\",\"label\":\"Document number\",\"description\":\"Input parameter `document_number`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":false,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ICAO9303_BUILD_DOCUMENT_ID",
+      "entrypoint": "flink_etl_udfs.udfs.standards.icao9303_build_document_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY",
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING",
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso18013_build_driving_licence_id",
+    "name": "ISO/IEC 18013-1 – Tạo khóa bằng lái xe",
+    "description": "### Mô tả\nISO/IEC 18013-1 – Tạo khóa bằng lái xe\n\n- **Standard:** ISO/IEC 18013-1\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "issuer_country,issuer,licence_number",
+    "category": "generation",
+    "standard": "ISO/IEC 18013-1",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO18013_BUILD_DRIVING_LICENCE_ID({{issuer_country}}, {{issuer}}, {{licence_number}})",
+    "config": "[{\"param_key\":\"issuer_country\",\"label\":\"Issuer country\",\"description\":\"Input parameter `issuer_country`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"},{\"param_key\":\"issuer\",\"label\":\"Issuer\",\"description\":\"Input parameter `issuer`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":false,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"},{\"param_key\":\"licence_number\",\"label\":\"Licence number\",\"description\":\"Input parameter `licence_number`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":false,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO18013_BUILD_DRIVING_LICENCE_ID",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso18013_build_driving_licence_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY",
+        "ANY",
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING",
+        "STRING",
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso18013_build_mdl_id",
+    "name": "ISO/IEC 18013-5 – Tạo khóa mDL",
+    "description": "### Mô tả\nISO/IEC 18013-5 – Tạo khóa mDL\n\n- **Standard:** ISO/IEC 18013-5\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "issuer,document_identifier",
+    "category": "generation",
+    "standard": "ISO/IEC 18013-5",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO18013_BUILD_MDL_ID({{issuer}}, {{document_identifier}})",
+    "config": "[{\"param_key\":\"issuer\",\"label\":\"Issuer\",\"description\":\"Input parameter `issuer`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"},{\"param_key\":\"document_identifier\",\"label\":\"Document identifier\",\"description\":\"Input parameter `document_identifier`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":false,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO18013_BUILD_MDL_ID",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso18013_build_mdl_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY",
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING",
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso23220_build_eid_id",
+    "name": "ISO/IEC 23220 – Tạo khóa mobile eID/mdoc",
+    "description": "### Mô tả\nISO/IEC 23220 – Tạo khóa mobile eID/mdoc\n\n- **Standard:** ISO/IEC 23220\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "issuer,namespace,document_id",
+    "category": "generation",
+    "standard": "ISO/IEC 23220",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO23220_BUILD_EID_ID({{issuer}}, {{namespace}}, {{document_id}})",
+    "config": "[{\"param_key\":\"issuer\",\"label\":\"Issuer\",\"description\":\"Input parameter `issuer`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"},{\"param_key\":\"namespace\",\"label\":\"Namespace\",\"description\":\"Input parameter `namespace`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":false,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"},{\"param_key\":\"document_id\",\"label\":\"Document ID\",\"description\":\"Input parameter `document_id`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":false,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO23220_BUILD_EID_ID",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso23220_build_eid_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY",
+        "ANY",
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING",
+        "STRING",
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso3166_normalize_alpha3",
+    "name": "ISO 3166-1 – Chuẩn hóa mã quốc gia Alpha-3",
+    "description": "### Mô tả\nISO 3166-1 – Chuẩn hóa mã quốc gia Alpha-3\n\n- **Standard:** ISO 3166-1\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "ISO 3166-1",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO3166_NORMALIZE_ALPHA3({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO3166_NORMALIZE_ALPHA3",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso3166_normalize_alpha3",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "oidc_build_subject_key",
+    "name": "OpenID Connect – Tạo khóa subject theo iss + sub",
+    "description": "### Mô tả\nOpenID Connect – Tạo khóa subject theo iss + sub\n\n- **Standard:** OpenID Connect\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "issuer,subject_id",
+    "category": "generation",
+    "standard": "OpenID Connect",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "OIDC_BUILD_SUBJECT_KEY({{issuer}}, {{subject_id}})",
+    "config": "[{\"param_key\":\"issuer\",\"label\":\"Issuer\",\"description\":\"Input parameter `issuer`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"},{\"param_key\":\"subject_id\",\"label\":\"Subject ID\",\"description\":\"Input parameter `subject_id`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":false,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "OIDC_BUILD_SUBJECT_KEY",
+      "entrypoint": "flink_etl_udfs.udfs.standards.oidc_build_subject_key",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY",
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING",
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "w3c_activitystreams_normalize_id",
+    "name": "W3C ActivityStreams 2.0 – Chuẩn hóa Object ID/IRI",
+    "description": "### Mô tả\nW3C ActivityStreams 2.0 – Chuẩn hóa Object ID/IRI\n\n- **Standard:** W3C ActivityStreams 2.0\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "W3C ActivityStreams 2.0",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "W3C_ACTIVITYSTREAMS_NORMALIZE_ID({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "W3C_ACTIVITYSTREAMS_NORMALIZE_ID",
+      "entrypoint": "flink_etl_udfs.udfs.standards.w3c_activitystreams_normalize_id",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "rfc3986_normalize_uri",
+    "name": "RFC 3986 – Chuẩn hóa URI",
+    "description": "### Mô tả\nRFC 3986 – Chuẩn hóa URI\n\n- **Standard:** RFC 3986\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "RFC 3986",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "RFC3986_NORMALIZE_URI({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "RFC3986_NORMALIZE_URI",
+      "entrypoint": "flink_etl_udfs.udfs.standards.rfc3986_normalize_uri",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso26324_normalize_doi",
+    "name": "ISO 26324 – Chuẩn hóa DOI",
+    "description": "### Mô tả\nISO 26324 – Chuẩn hóa DOI\n\n- **Standard:** ISO 26324\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "ISO 26324",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO26324_NORMALIZE_DOI({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO26324_NORMALIZE_DOI",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso26324_normalize_doi",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso3297_normalize_issn",
+    "name": "ISO 3297 – Chuẩn hóa và kiểm tra ISSN",
+    "description": "### Mô tả\nISO 3297 – Chuẩn hóa và kiểm tra ISSN\n\n- **Standard:** ISO 3297\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "ISO 3297",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO3297_NORMALIZE_ISSN({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO3297_NORMALIZE_ISSN",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso3297_normalize_issn",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "iso2108_normalize_isbn13",
+    "name": "ISO 2108 – Chuẩn hóa ISBN về ISBN-13",
+    "description": "### Mô tả\nISO 2108 – Chuẩn hóa ISBN về ISBN-13\n\n- **Standard:** ISO 2108\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "ISO 2108",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "ISO2108_NORMALIZE_ISBN13({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "ISO2108_NORMALIZE_ISBN13",
+      "entrypoint": "flink_etl_udfs.udfs.standards.iso2108_normalize_isbn13",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "w3c_did_normalize",
+    "name": "W3C DID Core – Chuẩn hóa Decentralized Identifier",
+    "description": "### Mô tả\nW3C DID Core – Chuẩn hóa Decentralized Identifier\n\n- **Standard:** W3C DID Core\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "W3C DID Core",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "W3C_DID_NORMALIZE({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "W3C_DID_NORMALIZE",
+      "entrypoint": "flink_etl_udfs.udfs.standards.w3c_did_normalize",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "rfc9562_normalize_uuid",
+    "name": "RFC 9562 – Chuẩn hóa UUID/GUID",
+    "description": "### Mô tả\nRFC 9562 – Chuẩn hóa UUID/GUID\n\n- **Standard:** RFC 9562\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "RFC 9562",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "RFC9562_NORMALIZE_UUID({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "RFC9562_NORMALIZE_UUID",
+      "entrypoint": "flink_etl_udfs.udfs.standards.rfc9562_normalize_uuid",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  },
+  {
+    "func_key": "rfc8141_normalize_urn",
+    "name": "RFC 8141 – Chuẩn hóa URN",
+    "description": "### Mô tả\nRFC 8141 – Chuẩn hóa URN\n\n- **Standard:** RFC 8141\n- **Input SQL type:** ANY scalar\n- **Internal cast:** STRING cho từng tham số public hiện tại\n- **Output:** STRING\n- **Error policy:** TRY_CAST — cast/parse/format không hợp lệ trả `NULL`.",
+    "params": "source_field",
+    "category": "conversion",
+    "standard": "RFC 8141",
+    "default_type": "ANY",
+    "output": "STRING",
+    "pattern": "RFC8141_NORMALIZE_URN({{source_field}})",
+    "config": "[{\"param_key\":\"source_field\",\"label\":\"Field\",\"description\":\"Input parameter `source_field`; accepts any SQL scalar and is internally TRY_CAST to STRING.\",\"type\":\"Field\",\"is_primary\":true,\"is_required\":true,\"sql_input_type\":\"ANY\",\"internal_cast_type\":\"STRING\"}]",
+    "sql_position": "all",
+    "allow_mapping": true,
+    "status": 1,
+    "type": "flink_sql",
+    "error_policy": "try_cast",
+    "library": "flink-etl-udfs",
+    "library_version": "0.7.1",
+    "implementation": {
+      "kind": "python_udf",
+      "function_name": "RFC8141_NORMALIZE_URN",
+      "entrypoint": "flink_etl_udfs.udfs.standards.rfc8141_normalize_urn",
+      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip",
+      "input_types": [
+        "ANY"
+      ],
+      "internal_cast_types": [
+        "STRING"
+      ],
+      "result_type": "STRING",
+      "deterministic": true
+    }
+  }
+]
