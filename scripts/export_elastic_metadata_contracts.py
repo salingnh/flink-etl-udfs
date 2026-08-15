@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import export_elastic_metadata as exporter
-from flink_etl_udfs.normalizer_contracts import NORMALIZER_CONTRACTS
 
+from flink_etl_udfs.normalizer_contracts import NORMALIZER_CONTRACTS
 
 STANDARD_DESCRIPTION_OVERRIDES = {
     "ISO 8601": (
