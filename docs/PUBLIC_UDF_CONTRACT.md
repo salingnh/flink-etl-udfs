@@ -21,6 +21,28 @@ Allowed values:
 Named standards stay in the independent `standard` metadata field, for example
 `ISO 2108`, `RFC 9562`, `W3C DID Core`, or `STIX 2.1`.
 
+## Normalization semantics
+
+Public normalizers follow the project-wide [ETL normalization philosophy](NORMALIZATION_PHILOSOPHY.md):
+
+```text
+arbitrary input
+    -> internal TRY_CAST
+    -> deterministic TRY_PARSE of supported representations
+    -> semantic validation
+    -> canonical output
+    -> NULL when invalid, unsupported, or ambiguous
+```
+
+`normalize_*` therefore means **canonicalize supported source representations**, not
+"accept only values that are already in the canonical lexical form". A named standard
+usually defines the canonical output/semantic target. It does not require source data
+to already be written exactly in that standard's preferred representation.
+
+Normalizers must not guess ambiguous values. When multiple interpretations are
+plausible and there is no explicit parameter that resolves the ambiguity, return
+`NULL`.
+
 ## Internal TRY_CAST input policy
 
 Every public scalar UDF accepts arbitrary SQL scalar input types at the PyFlink
@@ -35,7 +57,7 @@ Python runtime value
         ↓
 internal TRY_CAST to the transform's expected input type
         ↓
-existing normalization / extraction / validation logic
+normalization / extraction / validation logic
         ↓
 result
 ```
@@ -54,15 +76,22 @@ DATE 2026-08-15        -> '2026-08-15'
 BYTES b'abc'            -> 'abc' when valid UTF-8
 ```
 
-After conversion, the original transform semantics are unchanged. For example,
-`VN_NORMALIZE_MOBILE_PHONE(BIGINT '84912345678')` first becomes the internal string
-`'84912345678'`, then the existing Vietnam phone normalizer returns `0912345678`.
-A BOOLEAN or DATE can be converted to STRING but is not a valid mobile number, so
-the final result is `NULL`.
+After conversion, transform-specific TRY_PARSE/canonicalization semantics are applied.
+For example, a date normalizer can accept the internal string `15/08/2026` and emit
+`2026-08-15` when that representation is unambiguous. An invalid date such as
+`31/02/2026` returns `NULL`.
 
-The shared implementation lives in `flink_etl_udfs.udfs._safe` and currently
+The shared input-cast implementation lives in `flink_etl_udfs.udfs._safe` and currently
 supports internal targets `STRING`, `BOOLEAN`, `BIGINT`, `DOUBLE`, `DECIMAL`, `DATE`,
 and `TIMESTAMP`.
+
+## Sample-driven metadata contract
+
+Every public normalizer must maintain executable input→output sample cases. The exact
+same cases are used by unit tests and by the Elasticsearch metadata exporter. A code
+change that adds a supported representation must therefore update the executable sample
+contract first; generated metadata descriptions inherit the tested examples instead of
+maintaining a second prose-only copy.
 
 ## Error boundary
 
