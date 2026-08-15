@@ -9,7 +9,7 @@ from flink_etl_udfs.udfs._safe import try_udf
 def _string_udf(function):
     return try_udf(
         function,
-        input_types=["STRING"],
+        cast_types=["STRING"],
         result_type="STRING",
         deterministic=True,
     )
