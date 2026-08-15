@@ -3,10 +3,14 @@ name: export-elastic-metadata
 on:
   push:
     branches:
+      - main
       - metadata/elastic-v0.7.1
+      - feat/normalizer-try-parse-philosophy
     paths:
       - scripts/export_elastic_metadata.py
+      - scripts/export_elastic_metadata_contracts.py
       - src/flink_etl_udfs/public_api.py
+      - src/flink_etl_udfs/normalizer_contracts.py
       - .github/workflows/export-elastic-metadata.yml
 
 permissions:
@@ -18,12 +22,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: metadata/elastic-v0.7.1
+          ref: ${{ github.ref_name }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - name: Generate metadata
-        run: PYTHONPATH=src python scripts/export_elastic_metadata.py
+        run: PYTHONPATH=src python scripts/export_elastic_metadata_contracts.py
       - name: Commit generated metadata
         run: |
           git config user.name github-actions[bot]
@@ -32,5 +36,5 @@ jobs:
           git add metadata/flink_transform_functions_elastic_v0.7.1.bulk.ndjson
           if ! git diff --cached --quiet; then
             git commit -m 'chore: generate Elasticsearch metadata v0.7.1'
-            git push origin HEAD:metadata/elastic-v0.7.1
+            git push origin HEAD:${GITHUB_REF_NAME}
           fi
