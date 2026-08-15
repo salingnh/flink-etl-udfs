@@ -19,7 +19,7 @@
       "kind": "python_udf",
       "function_name": "MASK_EMAIL",
       "entrypoint": "flink_etl_udfs.udfs.privacy.mask_email",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -42,7 +42,7 @@
       "kind": "python_udf",
       "function_name": "MASK_TEXT",
       "entrypoint": "flink_etl_udfs.udfs.privacy.mask_text",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -65,7 +65,7 @@
       "kind": "python_udf",
       "function_name": "SHA256_FINGERPRINT",
       "entrypoint": "flink_etl_udfs.udfs.privacy.sha256_fingerprint",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -88,7 +88,7 @@
       "kind": "python_udf",
       "function_name": "EMAIL_NORMALIZE_ADDRESS",
       "entrypoint": "flink_etl_udfs.udfs.identifiers.normalize_email",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -111,7 +111,7 @@
       "kind": "python_udf",
       "function_name": "IP_NORMALIZE_ADDRESS",
       "entrypoint": "flink_etl_udfs.udfs.network.normalize_ip",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -134,7 +134,7 @@
       "kind": "python_udf",
       "function_name": "IP_NORMALIZE_CIDR",
       "entrypoint": "flink_etl_udfs.udfs.network.normalize_cidr",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -157,7 +157,7 @@
       "kind": "python_udf",
       "function_name": "ETL_CANONICALIZE_JSON",
       "entrypoint": "flink_etl_udfs.udfs.generic.canonicalize_json",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -180,7 +180,7 @@
       "kind": "python_udf",
       "function_name": "ETL_FLATTEN_JSON",
       "entrypoint": "flink_etl_udfs.udfs.generic.flatten_json",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -203,7 +203,7 @@
       "kind": "python_udf",
       "function_name": "ETL_IS_VALID_JSON",
       "entrypoint": "flink_etl_udfs.udfs.generic.is_valid_json",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -226,7 +226,7 @@
       "kind": "python_udf",
       "function_name": "ETL_LATIN_NAME_SEARCH_KEY",
       "entrypoint": "flink_etl_udfs.udfs.generic.latin_name_search_key",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -249,7 +249,7 @@
       "kind": "python_udf",
       "function_name": "ETL_NORMALIZE_ADDRESS_TEXT",
       "entrypoint": "flink_etl_udfs.udfs.generic.normalize_address_text",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -272,7 +272,7 @@
       "kind": "python_udf",
       "function_name": "ETL_NORMALIZE_DECIMAL",
       "entrypoint": "flink_etl_udfs.udfs.generic.normalize_decimal",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -295,7 +295,7 @@
       "kind": "python_udf",
       "function_name": "ETL_NORMALIZE_IDENTIFIER_CODE",
       "entrypoint": "flink_etl_udfs.udfs.generic.normalize_identifier_code",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -318,7 +318,7 @@
       "kind": "python_udf",
       "function_name": "ETL_NORMALIZE_NULL_TOKEN",
       "entrypoint": "flink_etl_udfs.udfs.generic.normalize_null_token",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -341,7 +341,7 @@
       "kind": "python_udf",
       "function_name": "ETL_NORMALIZE_PERSON_NAME",
       "entrypoint": "flink_etl_udfs.udfs.generic.normalize_person_name",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -364,7 +364,7 @@
       "kind": "python_udf",
       "function_name": "ETL_STABLE_RECORD_ID",
       "entrypoint": "flink_etl_udfs.udfs.generic.stable_record_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -387,7 +387,7 @@
       "kind": "python_udf",
       "function_name": "URL_CANONICALIZE",
       "entrypoint": "flink_etl_udfs.udfs.internet.canonicalize_url",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -410,7 +410,7 @@
       "kind": "python_udf",
       "function_name": "URL_EXTRACT_HOST",
       "entrypoint": "flink_etl_udfs.udfs.internet.extract_url_host",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -433,7 +433,7 @@
       "kind": "python_udf",
       "function_name": "DNS_NORMALIZE_DOMAIN",
       "entrypoint": "flink_etl_udfs.udfs.internet.normalize_domain",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -456,7 +456,7 @@
       "kind": "python_udf",
       "function_name": "URL_REDACT_SECRETS",
       "entrypoint": "flink_etl_udfs.udfs.internet.redact_url_secrets",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -479,7 +479,7 @@
       "kind": "python_udf",
       "function_name": "GIT_NORMALIZE_REPOSITORY_URL",
       "entrypoint": "flink_etl_udfs.udfs.code.normalize_repository_url",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -502,7 +502,7 @@
       "kind": "python_udf",
       "function_name": "OSINT_BUILD_OBSERVATION_ID",
       "entrypoint": "flink_etl_udfs.udfs.osint.build_observation_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -525,7 +525,7 @@
       "kind": "python_udf",
       "function_name": "ENRICH_EXTRACT_PROFILE_URL",
       "entrypoint": "flink_etl_udfs.udfs.enrichment.extract_profile_url",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -548,7 +548,7 @@
       "kind": "python_udf",
       "function_name": "VN_CLASSIFY_IDENTITY_ID",
       "entrypoint": "flink_etl_udfs.udfs.vietnam.classify_vn_identity_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -571,7 +571,7 @@
       "kind": "python_udf",
       "function_name": "VN_CLASSIFY_TAX_ID_STRUCTURE",
       "entrypoint": "flink_etl_udfs.udfs.vietnam.classify_vn_tax_id_structure",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -594,7 +594,7 @@
       "kind": "python_udf",
       "function_name": "VN_NORMALIZE_CITIZEN_ID",
       "entrypoint": "flink_etl_udfs.udfs.vietnam.normalize_vn_citizen_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -617,7 +617,7 @@
       "kind": "python_udf",
       "function_name": "VN_NORMALIZE_MOBILE_PHONE",
       "entrypoint": "flink_etl_udfs.udfs.vietnam.normalize_vn_mobile_phone",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -640,7 +640,7 @@
       "kind": "python_udf",
       "function_name": "VN_NORMALIZE_TAX_ID",
       "entrypoint": "flink_etl_udfs.udfs.vietnam.normalize_vn_tax_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -663,7 +663,7 @@
       "kind": "python_udf",
       "function_name": "HASH_NORMALIZE_HEX",
       "entrypoint": "flink_etl_udfs.udfs.hashes.normalize_hex_hash",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -686,7 +686,7 @@
       "kind": "python_udf",
       "function_name": "HASH_CLASSIFY_TYPE",
       "entrypoint": "flink_etl_udfs.udfs.hashes.classify_hash_type",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -709,7 +709,7 @@
       "kind": "python_udf",
       "function_name": "ISO8601_NORMALIZE_DATE",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso8601_normalize_date",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -732,7 +732,7 @@
       "kind": "python_udf",
       "function_name": "ISO8601_NORMALIZE_DATETIME_UTC",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso8601_normalize_datetime_utc",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -755,7 +755,7 @@
       "kind": "python_udf",
       "function_name": "ISO4217_NORMALIZE_CURRENCY_CODE",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso4217_normalize_currency_code",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -778,7 +778,7 @@
       "kind": "python_udf",
       "function_name": "ITU_E164_NORMALIZE_PHONE",
       "entrypoint": "flink_etl_udfs.udfs.standards.itu_e164_normalize_phone",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -801,7 +801,7 @@
       "kind": "python_udf",
       "function_name": "ISO13616_NORMALIZE_IBAN",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso13616_normalize_iban",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -824,7 +824,7 @@
       "kind": "python_udf",
       "function_name": "ISO9362_NORMALIZE_BIC",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso9362_normalize_bic",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -847,7 +847,7 @@
       "kind": "python_udf",
       "function_name": "ISO20022_NORMALIZE_MESSAGE_TYPE",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso20022_normalize_message_type",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -870,7 +870,7 @@
       "kind": "python_udf",
       "function_name": "ISO17442_NORMALIZE_LEI",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso17442_normalize_lei",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -893,7 +893,7 @@
       "kind": "python_udf",
       "function_name": "FHIR_NORMALIZE_ID",
       "entrypoint": "flink_etl_udfs.udfs.standards.fhir_normalize_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -916,7 +916,7 @@
       "kind": "python_udf",
       "function_name": "FHIR_NORMALIZE_REFERENCE",
       "entrypoint": "flink_etl_udfs.udfs.standards.fhir_normalize_reference",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -939,7 +939,7 @@
       "kind": "python_udf",
       "function_name": "HL7V2_NORMALIZE_MESSAGE_TYPE",
       "entrypoint": "flink_etl_udfs.udfs.standards.hl7v2_normalize_message_type",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -962,7 +962,7 @@
       "kind": "python_udf",
       "function_name": "DICOM_NORMALIZE_UID",
       "entrypoint": "flink_etl_udfs.udfs.standards.dicom_normalize_uid",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -985,7 +985,7 @@
       "kind": "python_udf",
       "function_name": "STIX21_NORMALIZE_ID",
       "entrypoint": "flink_etl_udfs.udfs.standards.stix21_normalize_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1008,7 +1008,7 @@
       "kind": "python_udf",
       "function_name": "STIX21_NORMALIZE_TYPE",
       "entrypoint": "flink_etl_udfs.udfs.standards.stix21_normalize_type",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1031,7 +1031,7 @@
       "kind": "python_udf",
       "function_name": "MITRE_ATTACK_NORMALIZE_TECHNIQUE_ID",
       "entrypoint": "flink_etl_udfs.udfs.standards.mitre_attack_normalize_technique_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1054,7 +1054,7 @@
       "kind": "python_udf",
       "function_name": "CVE_NORMALIZE_ID",
       "entrypoint": "flink_etl_udfs.udfs.standards.cve_normalize_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1077,7 +1077,7 @@
       "kind": "python_udf",
       "function_name": "GS1_NORMALIZE_GTIN",
       "entrypoint": "flink_etl_udfs.udfs.standards.gs1_normalize_gtin",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1100,7 +1100,7 @@
       "kind": "python_udf",
       "function_name": "GS1_NORMALIZE_SSCC",
       "entrypoint": "flink_etl_udfs.udfs.standards.gs1_normalize_sscc",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1123,7 +1123,7 @@
       "kind": "python_udf",
       "function_name": "GS1_EPCIS_NORMALIZE_EVENT_TYPE",
       "entrypoint": "flink_etl_udfs.udfs.standards.gs1_epcis_normalize_event_type",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1146,7 +1146,7 @@
       "kind": "python_udf",
       "function_name": "OPCUA_NORMALIZE_NODE_ID",
       "entrypoint": "flink_etl_udfs.udfs.standards.opcua_normalize_node_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1169,7 +1169,7 @@
       "kind": "python_udf",
       "function_name": "DLMS_COSEM_NORMALIZE_OBIS_CODE",
       "entrypoint": "flink_etl_udfs.udfs.standards.dlms_cosem_normalize_obis_code",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1192,7 +1192,7 @@
       "kind": "python_udf",
       "function_name": "EPSG_NORMALIZE_CODE",
       "entrypoint": "flink_etl_udfs.udfs.standards.epsg_normalize_code",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1215,7 +1215,7 @@
       "kind": "python_udf",
       "function_name": "ICAO9303_BUILD_DOCUMENT_ID",
       "entrypoint": "flink_etl_udfs.udfs.standards.icao9303_build_document_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1238,7 +1238,7 @@
       "kind": "python_udf",
       "function_name": "ISO18013_BUILD_DRIVING_LICENCE_ID",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso18013_build_driving_licence_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1261,7 +1261,7 @@
       "kind": "python_udf",
       "function_name": "ISO18013_BUILD_MDL_ID",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso18013_build_mdl_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1284,7 +1284,7 @@
       "kind": "python_udf",
       "function_name": "ISO23220_BUILD_EID_ID",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso23220_build_eid_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1307,7 +1307,7 @@
       "kind": "python_udf",
       "function_name": "ISO3166_NORMALIZE_ALPHA3",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso3166_normalize_alpha3",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1330,7 +1330,7 @@
       "kind": "python_udf",
       "function_name": "OIDC_BUILD_SUBJECT_KEY",
       "entrypoint": "flink_etl_udfs.udfs.standards.oidc_build_subject_key",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1353,7 +1353,7 @@
       "kind": "python_udf",
       "function_name": "W3C_ACTIVITYSTREAMS_NORMALIZE_ID",
       "entrypoint": "flink_etl_udfs.udfs.standards.w3c_activitystreams_normalize_id",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1376,7 +1376,7 @@
       "kind": "python_udf",
       "function_name": "RFC3986_NORMALIZE_URI",
       "entrypoint": "flink_etl_udfs.udfs.standards.rfc3986_normalize_uri",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1399,7 +1399,7 @@
       "kind": "python_udf",
       "function_name": "ISO26324_NORMALIZE_DOI",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso26324_normalize_doi",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1422,7 +1422,7 @@
       "kind": "python_udf",
       "function_name": "ISO3297_NORMALIZE_ISSN",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso3297_normalize_issn",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1445,7 +1445,7 @@
       "kind": "python_udf",
       "function_name": "ISO2108_NORMALIZE_ISBN13",
       "entrypoint": "flink_etl_udfs.udfs.standards.iso2108_normalize_isbn13",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1468,7 +1468,7 @@
       "kind": "python_udf",
       "function_name": "W3C_DID_NORMALIZE",
       "entrypoint": "flink_etl_udfs.udfs.standards.w3c_did_normalize",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1491,7 +1491,7 @@
       "kind": "python_udf",
       "function_name": "RFC9562_NORMALIZE_UUID",
       "entrypoint": "flink_etl_udfs.udfs.standards.rfc9562_normalize_uuid",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   },
   {
@@ -1514,7 +1514,7 @@
       "kind": "python_udf",
       "function_name": "RFC8141_NORMALIZE_URN",
       "entrypoint": "flink_etl_udfs.udfs.standards.rfc8141_normalize_urn",
-      "artifact_uri": "s3://fusion_center/transform-library/flink_etl_udfs.zip"
+      "artifact_uri": "s3://fusion-center/transform-library/flink_etl_udfs.zip"
     }
   }
 ]
